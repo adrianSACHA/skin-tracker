@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { getSignedUrl, uploadBodyMapImage } from '../lib/uploadPhoto'
+import {
+  getSignedUrl,
+  removeStorageFile,
+  uploadBodyMapImage,
+} from '../lib/uploadPhoto'
 import { statusMeta } from '../lib/status'
 import { usePerson } from '../context/PersonContext'
 
@@ -10,6 +14,8 @@ const VIEWS = [
   { key: 'back', label: 'Tył' },
   { key: 'left', label: 'Bok lewy' },
   { key: 'right', label: 'Bok prawy' },
+  { key: 'legs_front', label: 'Nogi — przód' },
+  { key: 'legs_back', label: 'Nogi — tył' },
 ]
 
 export default function BodyMap() {
@@ -30,6 +36,7 @@ export default function BodyMap() {
 
   const [refUrl, setRefUrl] = useState(null)
   const [uploadingRef, setUploadingRef] = useState(false)
+  const [deletingRef, setDeletingRef] = useState(false)
   const fileInputRef = useRef(null)
 
   const load = async () => {
@@ -156,6 +163,42 @@ export default function BodyMap() {
     }
   }
 
+  const handleRefDelete = async () => {
+    if (!currentMap?.image_url) return
+    const confirmed = window.confirm(
+      'Usunąć zdjęcie tła dla tego widoku? Piny znamion zostaną zachowane.'
+    )
+    if (!confirmed) return
+
+    setDeletingRef(true)
+    setError(null)
+
+    const path = currentMap.image_url
+
+    try {
+      // Zerujemy tylko obraz tła - rekord widoku i przypisania znamion zostają.
+      const { error: updateError } = await supabase
+        .from('body_maps')
+        .update({ image_url: null })
+        .eq('id', currentMap.id)
+      if (updateError) throw updateError
+
+      // Best-effort: usuń plik z prywatnego bucketu.
+      try {
+        await removeStorageFile(path)
+      } catch {
+        /* plik mógł już nie istnieć - ignorujemy */
+      }
+
+      setRefUrl(null)
+      await load()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDeletingRef(false)
+    }
+  }
+
   if (loading) {
     return (
       <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -209,6 +252,16 @@ export default function BodyMap() {
                 ? 'Zmień zdjęcie tła'
                 : 'Dodaj zdjęcie tła'}
           </button>
+          {currentMap?.image_url ? (
+            <button
+              type="button"
+              onClick={handleRefDelete}
+              disabled={deletingRef}
+              className="min-h-[44px] rounded-lg border border-red-200 bg-white px-4 font-medium text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-200 disabled:opacity-60 dark:border-red-900 dark:bg-slate-900 dark:text-red-300 dark:hover:bg-red-950/40"
+            >
+              {deletingRef ? 'Usuwanie…' : 'Usuń zdjęcie tła'}
+            </button>
+          ) : null}
           <input
             ref={fileInputRef}
             type="file"
@@ -270,8 +323,8 @@ export default function BodyMap() {
             Brak zdjęcia referencyjnego dla widoku „{currentViewLabel}”.
           </p>
           <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
-            Dodaj zdjęcie całej okolicy ciała (przód/tył/bok), a następnie
-            rozmieszczaj na nim znamiona.
+            Dodaj zdjęcie danej okolicy ciała (przód/tył/bok/nogi), a
+            następnie rozmieszczaj na nim znamiona.
           </p>
         </div>
       ) : (

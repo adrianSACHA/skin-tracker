@@ -20,17 +20,27 @@ create table if not exists public.monitored_persons (
 create index if not exists monitored_persons_owner_idx
   on public.monitored_persons (owner_user_id);
 
--- body_maps: zdjęcie referencyjne całego ciała dla danego widoku.
+-- body_maps: zdjęcie referencyjne dla danego widoku (przód/tył/boki/nogi).
 create table if not exists public.body_maps (
   id          uuid primary key default gen_random_uuid(),
   person_id   uuid not null references public.monitored_persons (id) on delete cascade,
-  view_name   text not null check (view_name in ('front', 'back', 'left', 'right')),
+  view_name   text not null,
   image_url   text, -- ścieżka w Storage (nie publiczny URL)
   created_at  timestamptz not null default now(),
   unique (person_id, view_name)
 );
 create index if not exists body_maps_person_idx
   on public.body_maps (person_id);
+
+-- Dozwolone widoki mapy ciała (idempotentnie - aktualizuje też istniejące instalacje).
+alter table public.body_maps drop constraint if exists body_maps_view_name_check;
+alter table public.body_maps add constraint body_maps_view_name_check
+  check (
+    view_name in (
+      'front', 'back', 'left', 'right',
+      'legs_front', 'legs_back'
+    )
+  );
 
 -- lesions: znamiona - pozycja w % względem zdjęcia (0-100).
 create table if not exists public.lesions (

@@ -141,7 +141,7 @@ values
 ```
 auth.users (moje konto)
   └── monitored_persons (owner_user_id)         „Ja" / „Syn"
-        └── body_maps (person_id)               zdjęcie referencyjne przód/tył/bok
+        └── body_maps (person_id)               zdjęcie referencyjne (przód/tył/boki/nogi)
         └── lesions (person_id, body_map_id)    znamię: label, pos_x, pos_y, status
               └── lesion_photos (lesion_id)     zdjęcia + rozmiar + ABCDE
 ```
