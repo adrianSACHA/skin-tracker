@@ -1,0 +1,27 @@
+# Zależności
+node_modules/
+
+# Build
+dist/
+dist-ssr/
+
+# Zmienne środowiskowe (NIGDY nie commituj kluczy)
+.env
+.env.local
+.env.*.local
+
+# Logi
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Edytory / system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Dane lokalne / cache
+*.local
+.cache/
