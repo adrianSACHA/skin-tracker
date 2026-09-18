@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import {
+  TransformComponent,
+  TransformWrapper,
+  useTransformEffect,
+} from 'react-zoom-pan-pinch'
 import { supabase } from '../lib/supabase'
 import {
   getSignedUrl,
@@ -17,6 +22,15 @@ const VIEWS = [
   { key: 'legs_front', label: 'Nogi — przód' },
   { key: 'legs_back', label: 'Nogi — tył' },
 ]
+
+// Subskrybuje zmiany transformu (zoom). Render-prop nie odświeża się sam,
+// a potrzebujemy aktualnej skali do przeciwskali pinów i wskaźnika %.
+function ZoomScaleWatcher({ onChange }) {
+  useTransformEffect((ref) => {
+    onChange(ref.state.scale)
+  })
+  return null
+}
 
 export default function BodyMap() {
   const { personId } = useParams()
@@ -41,6 +55,8 @@ export default function BodyMap() {
   const [addViewKey, setAddViewKey] = useState('')
   const fileInputRef = useRef(null)
   const addInputRef = useRef(null)
+  const pointerRef = useRef(null) // start wciśnięcia - rozróżnia klik od przesuwania
+  const [scale, setScale] = useState(1) // aktualna skala zoomu tła
 
   const load = async () => {
     setLoading(true)
@@ -120,14 +136,25 @@ export default function BodyMap() {
     }
   }, [currentMap?.image_url])
 
+  // Zapamiętaj start wciśnięcia, żeby odróżnić klik od przesuwania zdjęcia.
+  const handlePointerDown = (e) => {
+    pointerRef.current = { x: e.clientX, y: e.clientY }
+  }
+
   const handleImageClick = (e) => {
     if (!addMode || !currentMap) return
+    const start = pointerRef.current
+    if (start && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 6) {
+      return // to było przesuwanie (pan), nie klik
+    }
+    // Współrzędne liczone względem prostokąta obrazu - odporne na zoom/pan,
+    // bo transformacja jest jednorodna (skala + przesunięcie).
     const rect = e.currentTarget.getBoundingClientRect()
     const x = ((e.clientX - rect.left) / rect.width) * 100
     const y = ((e.clientY - rect.top) / rect.height) * 100
     setPending({
-      pos_x: Number(x.toFixed(2)),
-      pos_y: Number(y.toFixed(2)),
+      pos_x: Number(Math.min(100, Math.max(0, x)).toFixed(2)),
+      pos_y: Number(Math.min(100, Math.max(0, y)).toFixed(2)),
       label: '',
     })
   }
@@ -417,41 +444,117 @@ export default function BodyMap() {
           )}
         </div>
       ) : (
-        <div className="relative inline-block w-full select-none">
-          <img
-            src={refUrl}
-            alt={`Zdjęcie referencyjne — ${currentViewLabel}`}
-            onClick={handleImageClick}
-            className={[
-              'block w-full rounded-xl border border-slate-200 bg-black/5 dark:border-slate-800 dark:bg-black/40',
-              addMode ? 'cursor-crosshair' : 'cursor-default',
-            ].join(' ')}
-            draggable="false"
-          />
-
-          {mapLesions.map((lesion) => {
-            const meta = statusMeta(lesion.status)
+        <TransformWrapper
+          minScale={1}
+          maxScale={6}
+          centerOnInit
+          doubleClick={{ disabled: true }}
+          wheel={{ step: 0.15 }}
+        >
+          {(utils) => {
+            const inv = 1 / scale // przeciwskala, żeby piny nie rosły przy zoomie
             return (
-              <button
-                key={lesion.id}
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  navigate(`/person/${personId}/lesion/${lesion.id}`)
-                }}
-                title={lesion.label}
-                aria-label={`${lesion.label} — ${meta.label}`}
-                className="absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-white transition-transform hover:scale-125 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-400 dark:ring-slate-900"
-                style={{
-                  left: `${lesion.pos_x}%`,
-                  top: `${lesion.pos_y}%`,
-                  backgroundColor: meta.dot,
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
-                }}
-              />
+              <>
+                <ZoomScaleWatcher onChange={setScale} />
+                <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
+                  <span className="text-slate-500 dark:text-slate-400">
+                    Przybliż (kółko / pinch) i przesuń, aby precyzyjnie trafić
+                    {addMode ? ' — tryb dodawania aktywny' : ''}.
+                  </span>
+                  <div className="ml-auto flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => utils.zoomOut()}
+                      aria-label="Oddal"
+                      className="h-9 w-9 rounded-lg border border-slate-300 bg-white text-lg font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                    >
+                      −
+                    </button>
+                    <span className="w-12 text-center text-xs text-slate-500 dark:text-slate-400">
+                      {Math.round(scale * 100)}%
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => utils.zoomIn()}
+                      aria-label="Przybliż"
+                      className="h-9 w-9 rounded-lg border border-slate-300 bg-white text-lg font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                    >
+                      +
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => utils.resetTransform()}
+                      className="ml-1 min-h-[36px] rounded-lg border border-slate-300 bg-white px-3 text-xs font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                    >
+                      Dopasuj
+                    </button>
+                  </div>
+                </div>
+
+                <TransformComponent
+                  wrapperClass="rounded-xl border border-slate-200 bg-black/5 dark:border-slate-800 dark:bg-black/40"
+                  wrapperStyle={{
+                    width: '100%',
+                    height: 'auto',
+                    overflow: 'hidden',
+                  }}
+                  contentStyle={{ width: '100%' }}
+                >
+                  <div
+                    className="relative w-full select-none"
+                    onPointerDown={handlePointerDown}
+                    onClick={handleImageClick}
+                    style={addMode ? { cursor: 'crosshair' } : undefined}
+                  >
+                    <img
+                      src={refUrl}
+                      alt={`Zdjęcie referencyjne — ${currentViewLabel}`}
+                      className="block w-full"
+                      draggable="false"
+                    />
+
+                    {mapLesions.map((lesion) => {
+                      const meta = statusMeta(lesion.status)
+                      return (
+                        <button
+                          key={lesion.id}
+                          type="button"
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            navigate(`/person/${personId}/lesion/${lesion.id}`)
+                          }}
+                          title={lesion.label}
+                          aria-label={`${lesion.label} — ${meta.label}`}
+                          className="absolute h-5 w-5 rounded-full ring-2 ring-white hover:ring-teal-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-400 dark:ring-slate-900"
+                          style={{
+                            left: `${lesion.pos_x}%`,
+                            top: `${lesion.pos_y}%`,
+                            transform: `translate(-50%, -50%) scale(${inv})`,
+                            backgroundColor: meta.dot,
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
+                          }}
+                        />
+                      )
+                    })}
+
+                    {pending ? (
+                      <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute block h-4 w-4 rounded-full border-2 border-teal-600 bg-teal-400/60"
+                        style={{
+                          left: `${pending.pos_x}%`,
+                          top: `${pending.pos_y}%`,
+                          transform: `translate(-50%, -50%) scale(${inv})`,
+                        }}
+                      />
+                    ) : null}
+                  </div>
+                </TransformComponent>
+              </>
             )
-          })}
-        </div>
+          }}
+        </TransformWrapper>
       )}
 
       {/* Formularz nowego pinu */}
