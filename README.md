@@ -70,16 +70,18 @@ adresu.*
     └── components
         ├── AuthGate.jsx             # blokada aplikacji bez sesji
         ├── Login.jsx
+        ├── AppToaster.jsx           # toasty (sonner, motyw jasny/ciemny)
         ├── LoadingFallback.jsx
         ├── Layout.jsx               # nagłówek + nawigacja + stopka
         ├── ThemeToggle.jsx          # przełącznik trybu jasny/ciemny
         ├── PersonSelector.jsx       # wybór profilu
-        ├── BodyMap.jsx              # mapa ciała + piny
-        ├── LesionDetail.jsx         # szczegóły + porównanie + kalendarz
+        ├── BodyMap.jsx              # mapa ciała: zoom/pan + piny (dodaj/przesuń/edytuj)
+        ├── LesionDetail.jsx         # szczegóły + porównanie + kalendarz + "Zarządzanie"
         ├── LesionSegmenter.jsx      # pomiar z obrysu (MediaPipe, tylko geometria)
         ├── PhotoUploadForm.jsx      # upload + ABCDE + pomiar z obrysu
-        ├── LesionsList.jsx          # lista + przypomnienia
+        ├── LesionsList.jsx          # lista + kalendarz przypomnień
         ├── CalendarReminderButton.jsx
+        ├── ConfirmDialog.jsx        # modal potwierdzenia (akcje destrukcyjne)
         ├── SignedImage.jsx          # signed URL → <img>
         └── StatusBadge.jsx
 ```
