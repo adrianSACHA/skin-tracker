@@ -1,7 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { uploadLesionPhoto } from '../lib/uploadPhoto'
 import { todayYMD } from '../lib/date'
+
+// MediaPipe jest duży - ładujemy go leniwie, dopiero gdy otworzysz pomiar z obrysu.
+const LesionSegmenter = lazy(() => import('./LesionSegmenter'))
 
 // Formularz sesji zdjęciowej: kompresja przed wysłaniem (browser-image-compression),
 // opcjonalny rozmiar w mm + krótki formularz ABCDE wypełniany świadomie.
@@ -21,6 +24,7 @@ export default function PhotoUploadForm({
   const [colorDescription, setColorDescription] = useState('')
   const [evolutionNotes, setEvolutionNotes] = useState('')
   const [hasScaleReference, setHasScaleReference] = useState(false)
+  const [showSegmenter, setShowSegmenter] = useState(false)
 
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
@@ -192,6 +196,40 @@ export default function PhotoUploadForm({
           />
         </div>
       </div>
+
+      {/* Pomiar z obrysu (opcjonalny, MediaPipe - geometria, nie diagnoza) */}
+      {previewUrl ? (
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={() => setShowSegmenter((v) => !v)}
+            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          >
+            {showSegmenter
+              ? 'Zamknij pomiar z obrysu'
+              : 'Pomiar z obrysu (opcjonalnie)'}
+          </button>
+
+          {showSegmenter ? (
+            <Suspense
+              fallback={
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Wczytywanie modułu pomiaru…
+                </p>
+              }
+            >
+              <LesionSegmenter
+                imageUrl={previewUrl}
+                onApply={({ sizeMm }) => {
+                  setSizeMm(String(sizeMm))
+                  setShowSegmenter(false)
+                }}
+                onCancel={() => setShowSegmenter(false)}
+              />
+            </Suspense>
+          ) : null}
+        </div>
+      ) : null}
 
       {/* ABCDE */}
       <fieldset className="space-y-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">

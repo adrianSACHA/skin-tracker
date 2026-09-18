@@ -76,7 +76,8 @@ adresu.*
         ├── PersonSelector.jsx       # wybór profilu
         ├── BodyMap.jsx              # mapa ciała + piny
         ├── LesionDetail.jsx         # szczegóły + porównanie + kalendarz
-        ├── PhotoUploadForm.jsx      # upload + ABCDE
+        ├── LesionSegmenter.jsx      # pomiar z obrysu (MediaPipe, tylko geometria)
+        ├── PhotoUploadForm.jsx      # upload + ABCDE + pomiar z obrysu
         ├── LesionsList.jsx          # lista + przypomnienia
         ├── CalendarReminderButton.jsx
         ├── SignedImage.jsx          # signed URL → <img>
@@ -269,8 +270,18 @@ skalą referencyjną). Model nie ocenia charakteru zmiany; ABCDE pozostaje
 wypełniane ręcznie. Model i runtime ładowane z Google CDN — nie obciążają
 limitów Supabase i nie wymagają zmiany hostingu.
 
-> Faza 2 nie jest częścią tego etapu. Startujemy dopiero po potwierdzeniu, że
-> Faza 1 działa.
+> **Status: zaimplementowane** (`src/components/LesionSegmenter.jsx`, wpięte w
+> `PhotoUploadForm` jako opcjonalny krok). Model `interactive_segmenter_v2`
+> (magic touch, int8) + WASM z CDN jsdelivr, 100% w przeglądarce.
+> Ustalenia z testów na `@mediapipe/tasks-vision@1.0.1`:
+> - klik na znamię zamieniany jest na mały **stroke** (model nie przyjmuje
+>   stroku 1-punktowego — zwracał pustą maskę),
+> - **punkty negatywne** (`brushMode=2`) odwracają maskę w tym modelu, więc nie
+>   są wysyłane; „− usuń z obrysu" to **lokalna gumka** stosowana przed
+>   zliczeniem pikseli,
+> - kalibracja: 2 kliknięcia na średnicy monety + jej średnica w mm,
+> - wynik (pole mm² → równoważna średnica) trafia do `size_mm`; bez zmian
+>   schematu.
 
 ---
 
