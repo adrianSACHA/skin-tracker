@@ -23,7 +23,7 @@ export default function BodyMap() {
   const { setPerson } = usePerson()
   const navigate = useNavigate()
 
-  const [view, setView] = useState('front')
+  const [view, setView] = useState(null)
   const [person, setLocalPerson] = useState(null)
   const [bodyMaps, setBodyMaps] = useState([])
   const [lesions, setLesions] = useState([])
@@ -37,7 +37,10 @@ export default function BodyMap() {
   const [refUrl, setRefUrl] = useState(null)
   const [uploadingRef, setUploadingRef] = useState(false)
   const [deletingRef, setDeletingRef] = useState(false)
+  const [showAddView, setShowAddView] = useState(false)
+  const [addViewKey, setAddViewKey] = useState('')
   const fileInputRef = useRef(null)
+  const addInputRef = useRef(null)
 
   const load = async () => {
     setLoading(true)
@@ -68,17 +71,37 @@ export default function BodyMap() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [personId])
 
-  const currentMap = useMemo(
-    () => bodyMaps.find((m) => m.view_name === view) || null,
-    [bodyMaps, view]
+  const viewByKey = useMemo(
+    () => Object.fromEntries(bodyMaps.map((m) => [m.view_name, m])),
+    [bodyMaps]
   )
+
+  // Pkt 1: pokazujemy TYLKO widoki mające aktualnie zdjęcie tła.
+  const availableViews = useMemo(
+    () => VIEWS.filter((v) => viewByKey[v.key]?.image_url),
+    [viewByKey]
+  )
+
+  // Widoki bez zdjęcia tła - można je dodać przez "+ Dodaj widok".
+  const viewsToAdd = useMemo(
+    () => VIEWS.filter((v) => !viewByKey[v.key]?.image_url),
+    [viewByKey]
+  )
+
+  // Wybrany widok, o ile nadal istnieje; inaczej pierwszy dostępny.
+  const activeView = useMemo(() => {
+    if (view && availableViews.some((v) => v.key === view)) return view
+    return availableViews[0]?.key ?? null
+  }, [view, availableViews])
+
+  const currentMap = activeView ? viewByKey[activeView] || null : null
 
   const mapLesions = useMemo(
     () => lesions.filter((l) => l.body_map_id === (currentMap?.id ?? null)),
     [lesions, currentMap]
   )
 
-  // Rozwiąż signed URL zdjęcia referencyjnego dla wybranego widoku.
+  // Rozwiąż signed URL zdjęcia referencyjnego dla aktywnego widoku.
   useEffect(() => {
     let active = true
     if (currentMap?.image_url) {
@@ -134,32 +157,41 @@ export default function BodyMap() {
     load()
   }
 
-  const handleRefUpload = async (e) => {
+  const handleRefUpload = async (e, targetView) => {
     const file = e.target.files?.[0]
-    if (!file) return
+    if (!file || !targetView) return
     setUploadingRef(true)
     setError(null)
 
+    const existing = viewByKey[targetView] || null
+
     try {
-      const path = await uploadBodyMapImage({ file, personId, view })
-      if (currentMap) {
+      const path = await uploadBodyMapImage({
+        file,
+        personId,
+        view: targetView,
+      })
+      if (existing) {
         const { error: updateError } = await supabase
           .from('body_maps')
           .update({ image_url: path })
-          .eq('id', currentMap.id)
+          .eq('id', existing.id)
         if (updateError) throw updateError
       } else {
         const { error: insertError } = await supabase
           .from('body_maps')
-          .insert({ person_id: personId, view_name: view, image_url: path })
+          .insert({ person_id: personId, view_name: targetView, image_url: path })
         if (insertError) throw insertError
       }
+      setView(targetView)
+      setShowAddView(false)
       await load()
     } catch (err) {
       setError(err.message)
     } finally {
       setUploadingRef(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
+      if (addInputRef.current) addInputRef.current.value = ''
     }
   }
 
@@ -207,7 +239,7 @@ export default function BodyMap() {
     )
   }
 
-  const currentViewLabel = VIEWS.find((v) => v.key === view)?.label
+  const currentViewLabel = VIEWS.find((v) => v.key === activeView)?.label
 
   return (
     <div className="space-y-4">
@@ -243,14 +275,10 @@ export default function BodyMap() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            disabled={uploadingRef}
+            disabled={uploadingRef || !activeView}
             className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
           >
-            {uploadingRef
-              ? 'Wysyłanie…'
-              : currentMap?.image_url
-                ? 'Zmień zdjęcie tła'
-                : 'Dodaj zdjęcie tła'}
+            {uploadingRef ? 'Wysyłanie…' : 'Zmień zdjęcie tła'}
           </button>
           {currentMap?.image_url ? (
             <button
@@ -266,40 +294,88 @@ export default function BodyMap() {
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            onChange={handleRefUpload}
+            onChange={(e) => handleRefUpload(e, activeView)}
+            className="hidden"
+          />
+          <input
+            ref={addInputRef}
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleRefUpload(e, addViewKey)}
             className="hidden"
           />
         </div>
       </div>
 
-      {/* Zakładki widoków */}
-      <div className="flex flex-wrap gap-2">
-        {VIEWS.map((v) => {
-          const hasMap = bodyMaps.some(
-            (m) => m.view_name === v.key && m.image_url
-          )
-          return (
-            <button
-              key={v.key}
-              type="button"
-              onClick={() => {
-                setView(v.key)
-                setPending(null)
-                setAddMode(false)
-              }}
-              className={[
-                'min-h-[40px] rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
-                view === v.key
-                  ? 'bg-teal-700 text-white dark:bg-teal-600'
-                  : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800',
-              ].join(' ')}
-            >
-              {v.label}
-              {hasMap ? '' : ' ·'}
-            </button>
-          )
-        })}
+      {/* Zakładki widoków - tylko te z aktualnym zdjęciem tła (pkt 1) */}
+      <div className="flex flex-wrap items-center gap-2">
+        {availableViews.map((v) => (
+          <button
+            key={v.key}
+            type="button"
+            onClick={() => {
+              setView(v.key)
+              setPending(null)
+              setAddMode(false)
+            }}
+            className={[
+              'min-h-[40px] rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
+              activeView === v.key
+                ? 'bg-teal-700 text-white dark:bg-teal-600'
+                : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800',
+            ].join(' ')}
+          >
+            {v.label}
+          </button>
+        ))}
+
+        {viewsToAdd.length > 0 ? (
+          <button
+            type="button"
+            onClick={() => {
+              setAddViewKey((k) =>
+                viewsToAdd.some((v) => v.key === k) ? k : viewsToAdd[0].key
+              )
+              setShowAddView((s) => !s)
+            }}
+            className="min-h-[40px] rounded-full border border-dashed border-slate-300 px-4 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+          >
+            {showAddView ? 'Zamknij' : '+ Dodaj widok'}
+          </button>
+        ) : null}
       </div>
+
+      {/* Panel dodawania nowego widoku (bez zdjęcia tła) */}
+      {showAddView && viewsToAdd.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-3 rounded-lg bg-slate-50 p-3 text-sm dark:bg-slate-800/50">
+          <label
+            htmlFor="add-view"
+            className="text-slate-700 dark:text-slate-200"
+          >
+            Nowy widok
+          </label>
+          <select
+            id="add-view"
+            value={addViewKey || viewsToAdd[0].key}
+            onChange={(e) => setAddViewKey(e.target.value)}
+            className="min-h-[40px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          >
+            {viewsToAdd.map((v) => (
+              <option key={v.key} value={v.key}>
+                {v.label}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => addInputRef.current?.click()}
+            disabled={uploadingRef}
+            className="min-h-[40px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-60 dark:bg-teal-600 dark:hover:bg-teal-500"
+          >
+            {uploadingRef ? 'Wysyłanie…' : 'Wgraj zdjęcie'}
+          </button>
+        </div>
+      ) : null}
 
       {error ? (
         <div
@@ -319,13 +395,26 @@ export default function BodyMap() {
       {/* Obszar mapy */}
       {!refUrl ? (
         <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-10 text-center dark:border-slate-700 dark:bg-slate-900">
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Brak zdjęcia referencyjnego dla widoku „{currentViewLabel}”.
-          </p>
-          <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
-            Dodaj zdjęcie danej okolicy ciała (przód/tył/bok/nogi), a
-            następnie rozmieszczaj na nim znamiona.
-          </p>
+          {activeView ? (
+            <>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Brak zdjęcia referencyjnego dla widoku „{currentViewLabel}”.
+              </p>
+              <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
+                Wgraj zdjęcie tła, aby korzystać z tego widoku.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Brak widoków ciała.
+              </p>
+              <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
+                Kliknij „+ Dodaj widok”, wybierz okolicę ciała i wgraj zdjęcie
+                referencyjne, aby zacząć.
+              </p>
+            </>
+          )}
         </div>
       ) : (
         <div className="relative inline-block w-full select-none">
