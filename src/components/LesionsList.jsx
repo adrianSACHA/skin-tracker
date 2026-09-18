@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { addWeeksYMD, daysSince, formatDate, todayYMD } from '../lib/date'
+import { DayPicker } from 'react-day-picker'
+import { pl } from 'react-day-picker/locale'
+import 'react-day-picker/style.css'
+import {
+  addWeeksYMD,
+  daysSince,
+  formatDate,
+  todayYMD,
+  toYMD,
+} from '../lib/date'
 import { STATUS_PRIORITY, statusMeta } from '../lib/status'
 import { useIntervalWeeks } from '../lib/interval'
 import StatusBadge from './StatusBadge'
@@ -22,6 +31,7 @@ export default function LesionsList() {
   const [error, setError] = useState(null)
   const [onlyAttention, setOnlyAttention] = useState(false)
   const [intervalWeeks, setIntervalWeeks] = useIntervalWeeks()
+  const [selectedDay, setSelectedDay] = useState(null)
 
   const load = async () => {
     setLoading(true)
@@ -69,6 +79,38 @@ export default function LesionsList() {
       return la.localeCompare(lb)
     })
   }, [lesions, onlyAttention, intervalWeeks])
+
+  // Przypomnienia per dzień (data ostatniej sesji + interwał) - dla kalendarza.
+  const reminderMap = useMemo(() => {
+    const map = new Map()
+    for (const lesion of lesions) {
+      const last = lastPhotoDate(lesion.lesion_photos)
+      const next = addWeeksYMD(last || todayYMD(), intervalWeeks)
+      const overdue = last ? daysSince(last) > intervalWeeks * 7 : false
+      const arr = map.get(next) || []
+      arr.push({ lesion, overdue })
+      map.set(next, arr)
+    }
+    return map
+  }, [lesions, intervalWeeks])
+
+  const reminderDates = useMemo(
+    () => [...reminderMap.keys()].map((ymd) => new Date(`${ymd}T00:00:00`)),
+    [reminderMap]
+  )
+
+  const overdueDates = useMemo(
+    () =>
+      [...reminderMap.entries()]
+        .filter(([, arr]) => arr.some((x) => x.overdue))
+        .map(([ymd]) => new Date(`${ymd}T00:00:00`)),
+    [reminderMap]
+  )
+
+  const selectedReminders = useMemo(() => {
+    if (!selectedDay) return null
+    return reminderMap.get(toYMD(selectedDay)) || []
+  }, [selectedDay, reminderMap])
 
   return (
     <div className="space-y-4">
@@ -127,6 +169,7 @@ export default function LesionsList() {
         </div>
       </div>
 
+      <div className="grid gap-4 lg:grid-cols-[1fr_20rem]">
       {loading ? (
         <p className="text-sm text-slate-500 dark:text-slate-400">
           Wczytywanie znamion…
@@ -190,6 +233,76 @@ export default function LesionsList() {
           })}
         </ul>
       )}
+
+      {/* Kalendarz przypomnień (pkt 6) - obok listy na szerokich ekranach */}
+      <aside className="space-y-3 lg:sticky lg:top-4 lg:self-start">
+        <div className="rdp-wrap rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+          <DayPicker
+            mode="single"
+            selected={selectedDay}
+            onSelect={(d) => setSelectedDay(d || null)}
+            locale={pl}
+            weekStartsOn={1}
+            defaultMonth={new Date()}
+            modifiers={{ reminder: reminderDates, overdue: overdueDates }}
+            modifiersClassNames={{
+              reminder: 'rdp-reminder',
+              overdue: 'rdp-overdue',
+            }}
+          />
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm dark:border-slate-800 dark:bg-slate-900">
+          {selectedDay ? (
+            selectedReminders && selectedReminders.length > 0 ? (
+              <ul className="space-y-2">
+                {selectedReminders.map(({ lesion, overdue }) => (
+                  <li
+                    key={lesion.id}
+                    className="flex flex-wrap items-center justify-between gap-2"
+                  >
+                    <Link
+                      to={`/person/${personId}/lesion/${lesion.id}`}
+                      className="font-medium text-slate-800 hover:text-teal-700 hover:underline dark:text-slate-100 dark:hover:text-teal-300"
+                    >
+                      {lesion.label}
+                    </Link>
+                    <span className="flex items-center gap-2">
+                      <StatusBadge status={lesion.status} />
+                      {overdue ? (
+                        <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-700 dark:bg-red-950 dark:text-red-300">
+                          zaległe
+                        </span>
+                      ) : null}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-slate-500 dark:text-slate-400">
+                Brak przypomnień na {formatDate(toYMD(selectedDay))}.
+              </p>
+            )
+          ) : (
+            <p className="text-slate-500 dark:text-slate-400">
+              Kliknij dzień z kropką, aby zobaczyć, których znamion dotyczy
+              przypomnienie.
+            </p>
+          )}
+        </div>
+
+        <p className="flex flex-wrap gap-3 text-xs text-slate-500 dark:text-slate-400">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-teal-700 dark:bg-teal-400" />
+            zaplanowana kontrola
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-red-500" />
+            zaległe
+          </span>
+        </p>
+      </aside>
+      </div>
 
       <p className="text-xs text-slate-400 dark:text-slate-500">
         Kolory statusów to prywatna organizacja dokumentacji, nie ocena
