@@ -11,8 +11,9 @@ import {
   removeStorageFile,
   uploadBodyMapImage,
 } from '../lib/uploadPhoto'
-import { statusMeta } from '../lib/status'
+import { STATUSES, statusMeta } from '../lib/status'
 import { usePerson } from '../context/PersonContext'
+import StatusBadge from './StatusBadge'
 
 const VIEWS = [
   { key: 'front', label: 'Przód' },
@@ -57,6 +58,12 @@ export default function BodyMap() {
   const addInputRef = useRef(null)
   const pointerRef = useRef(null) // start wciśnięcia - rozróżnia klik od przesuwania
   const [scale, setScale] = useState(1) // aktualna skala zoomu tła
+  const [selectedId, setSelectedId] = useState(null) // wybrany pin -> panel akcji
+  const [editForm, setEditForm] = useState(null) // { label, status }
+  const [moveModeId, setMoveModeId] = useState(null) // pin w trybie przesuwania
+  const [drag, setDrag] = useState(null) // { id, x, y } podczas przeciągania
+  const [savingEdit, setSavingEdit] = useState(false)
+  const contentDivRef = useRef(null)
 
   const load = async () => {
     setLoading(true)
@@ -258,6 +265,100 @@ export default function BodyMap() {
     }
   }
 
+  // --- Punkt 3: panel akcji pinu, edycja, przesuwanie ---
+  const selectedLesion = useMemo(
+    () => lesions.find((l) => l.id === selectedId) || null,
+    [lesions, selectedId]
+  )
+
+  const closePanel = () => {
+    setSelectedId(null)
+    setEditForm(null)
+    setMoveModeId(null)
+  }
+
+  const openPanel = (lesion) => {
+    if (moveModeId === lesion.id) return // w trybie przesuwania klik nie otwiera panelu
+    setPending(null)
+    setAddMode(false)
+    setEditForm(null)
+    setSelectedId((id) => (id === lesion.id ? null : lesion.id))
+  }
+
+  const startEdit = (lesion) => {
+    setMoveModeId(null)
+    setEditForm({ label: lesion.label, status: lesion.status })
+  }
+
+  const saveEdit = async () => {
+    if (!selectedLesion || !editForm) return
+    const label = editForm.label.trim()
+    if (!label) {
+      setError('Nazwa znamienia nie może być pusta.')
+      return
+    }
+    setSavingEdit(true)
+    const { error: updErr } = await supabase
+      .from('lesions')
+      .update({ label, status: editForm.status })
+      .eq('id', selectedLesion.id)
+    setSavingEdit(false)
+    if (updErr) {
+      setError(updErr.message)
+      return
+    }
+    // Aktualizacja lokalna (bez przeładowania mapy).
+    setLesions((prev) =>
+      prev.map((l) =>
+        l.id === selectedLesion.id ? { ...l, label, status: editForm.status } : l
+      )
+    )
+    setEditForm(null)
+  }
+
+  // Przeciąganie pinu w trybie "Przesuń".
+  const startPinDrag = (e, lesion) => {
+    if (!contentDivRef.current) return
+    e.preventDefault()
+    e.stopPropagation()
+    const rect = contentDivRef.current.getBoundingClientRect()
+    let last = null
+    const move = (ev) => {
+      const x = Math.min(
+        100,
+        Math.max(0, ((ev.clientX - rect.left) / rect.width) * 100)
+      )
+      const y = Math.min(
+        100,
+        Math.max(0, ((ev.clientY - rect.top) / rect.height) * 100)
+      )
+      last = { x: Number(x.toFixed(2)), y: Number(y.toFixed(2)) }
+      setDrag({ id: lesion.id, ...last })
+    }
+    const up = async () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      setDrag(null)
+      setMoveModeId(null)
+      if (!last) return
+      const { error: updErr } = await supabase
+        .from('lesions')
+        .update({ pos_x: last.x, pos_y: last.y })
+        .eq('id', lesion.id)
+      if (updErr) {
+        setError(updErr.message)
+        return
+      }
+      setLesions((prev) =>
+        prev.map((l) =>
+          l.id === lesion.id ? { ...l, pos_x: last.x, pos_y: last.y } : l
+        )
+      )
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+  }
+
   if (loading) {
     return (
       <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -450,6 +551,7 @@ export default function BodyMap() {
           centerOnInit
           doubleClick={{ disabled: true }}
           wheel={{ step: 0.15 }}
+          panning={{ disabled: Boolean(moveModeId) }}
         >
           {(utils) => {
             const inv = 1 / scale // przeciwskala, żeby piny nie rosły przy zoomie
@@ -501,6 +603,7 @@ export default function BodyMap() {
                   contentStyle={{ width: '100%' }}
                 >
                   <div
+                    ref={contentDivRef}
                     className="relative w-full select-none"
                     onPointerDown={handlePointerDown}
                     onClick={handleImageClick}
@@ -515,21 +618,32 @@ export default function BodyMap() {
 
                     {mapLesions.map((lesion) => {
                       const meta = statusMeta(lesion.status)
+                      const dragging = drag?.id === lesion.id
+                      const inMove = moveModeId === lesion.id
                       return (
                         <button
                           key={lesion.id}
                           type="button"
-                          onPointerDown={(e) => e.stopPropagation()}
+                          onPointerDown={(e) => {
+                            if (inMove) startPinDrag(e, lesion)
+                            else e.stopPropagation()
+                          }}
                           onClick={(e) => {
                             e.stopPropagation()
-                            navigate(`/person/${personId}/lesion/${lesion.id}`)
+                            openPanel(lesion)
                           }}
                           title={lesion.label}
                           aria-label={`${lesion.label} — ${meta.label}`}
-                          className="absolute h-5 w-5 rounded-full ring-2 ring-white hover:ring-teal-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-400 dark:ring-slate-900"
+                          className={[
+                            'absolute h-5 w-5 rounded-full ring-2 ring-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-400 dark:ring-slate-900',
+                            selectedId === lesion.id
+                              ? 'ring-4 ring-teal-400'
+                              : 'hover:ring-teal-300',
+                            inMove ? 'cursor-move' : '',
+                          ].join(' ')}
                           style={{
-                            left: `${lesion.pos_x}%`,
-                            top: `${lesion.pos_y}%`,
+                            left: `${dragging ? drag.x : lesion.pos_x}%`,
+                            top: `${dragging ? drag.y : lesion.pos_y}%`,
                             transform: `translate(-50%, -50%) scale(${inv})`,
                             backgroundColor: meta.dot,
                             boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
@@ -556,6 +670,127 @@ export default function BodyMap() {
           }}
         </TransformWrapper>
       )}
+
+      {/* Panel akcji wybranego pinu (pkt 3) - bez usuwania (pkt 4) */}
+      {selectedLesion ? (
+        <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusBadge status={selectedLesion.status} />
+              <span className="font-medium text-slate-800 dark:text-slate-100">
+                {selectedLesion.label}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={closePanel}
+              className="rounded-md px-2 py-1 text-sm text-slate-400 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300 dark:hover:text-slate-200"
+            >
+              Zamknij
+            </button>
+          </div>
+
+          {editForm ? (
+            <div className="space-y-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="pin-label"
+                    className="mb-1 block text-sm text-slate-700 dark:text-slate-200"
+                  >
+                    Nazwa / opis
+                  </label>
+                  <input
+                    id="pin-label"
+                    type="text"
+                    value={editForm.label}
+                    onChange={(e) =>
+                      setEditForm((f) => ({ ...f, label: e.target.value }))
+                    }
+                    className="min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="pin-status"
+                    className="mb-1 block text-sm text-slate-700 dark:text-slate-200"
+                  >
+                    Status
+                  </label>
+                  <select
+                    id="pin-status"
+                    value={editForm.status}
+                    onChange={(e) =>
+                      setEditForm((f) => ({ ...f, status: e.target.value }))
+                    }
+                    className="min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  >
+                    {STATUSES.map((s) => (
+                      <option key={s} value={s}>
+                        {statusMeta(s).label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={saveEdit}
+                  disabled={savingEdit}
+                  className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
+                >
+                  {savingEdit ? 'Zapisywanie…' : 'Zapisz zmiany'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditForm(null)}
+                  className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                >
+                  Anuluj
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(`/person/${personId}/lesion/${selectedLesion.id}`)
+                }
+                className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500"
+              >
+                Szczegóły
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditForm(null)
+                  setMoveModeId(selectedLesion.id)
+                }}
+                disabled={moveModeId === selectedLesion.id}
+                className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                {moveModeId === selectedLesion.id ? 'Przesuwanie…' : 'Przesuń'}
+              </button>
+              <button
+                type="button"
+                onClick={() => startEdit(selectedLesion)}
+                className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                Edytuj
+              </button>
+            </div>
+          )}
+
+          {moveModeId === selectedLesion.id ? (
+            <p className="text-xs text-teal-700 dark:text-teal-300">
+              Tryb przesuwania: przeciągnij pin na docelowe miejsce. Po
+              puszczeniu pozycja zapisze się automatycznie.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       {/* Formularz nowego pinu */}
       {pending ? (
