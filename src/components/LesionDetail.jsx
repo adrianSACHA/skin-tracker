@@ -19,6 +19,7 @@ import SignedImage from './SignedImage'
 import StatusBadge from './StatusBadge'
 import PhotoUploadForm from './PhotoUploadForm'
 import CalendarReminderButton from './CalendarReminderButton'
+import ConfirmDialog from './ConfirmDialog'
 
 function TrashIcon() {
   return (
@@ -46,6 +47,8 @@ export default function LesionDetail() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [showUpload, setShowUpload] = useState(false)
+  const [confirm, setConfirm] = useState(null) // { kind: 'lesion' | 'photo', photo? }
+  const [deleting, setDeleting] = useState(false)
 
   const [compareA, setCompareA] = useState(null) // id zdjęcia
   const [compareB, setCompareB] = useState(null)
@@ -133,19 +136,23 @@ export default function LesionDetail() {
     setLesion((prev) => (prev ? { ...prev, status } : prev))
   }
 
-  const deleteLesion = async () => {
-    const confirmed = window.confirm(
-      'Usunąć to znamię wraz z historią zdjęć? Tej operacji nie można cofnąć.'
-    )
-    if (!confirmed) return
+  // Usuwanie odbywa się WYŁĄCZNIE tutaj (LesionDetail), po potwierdzeniu w
+  // modalu. Na mapie ciała / pinie nie ma żadnego przycisku usuwania (pkt 4).
+  const askDeleteLesion = () => setConfirm({ kind: 'lesion' })
+  const askDeletePhoto = (photo) => setConfirm({ kind: 'photo', photo })
 
+  const runDeleteLesion = async () => {
+    setDeleting(true)
     const paths = photos.map((p) => p.photo_url).filter(Boolean)
 
     const { error: deleteError } = await supabase
       .from('lesions')
       .delete()
       .eq('id', lesionId)
+
     if (deleteError) {
+      setDeleting(false)
+      setConfirm(null)
       setError(deleteError.message)
       return
     }
@@ -153,18 +160,21 @@ export default function LesionDetail() {
     // Best-effort: usuń też pliki zdjęć z prywatnego bucketu.
     await Promise.allSettled(paths.map((p) => removeStorageFile(p)))
 
+    setDeleting(false)
+    setConfirm(null)
     navigate(`/person/${personId}`)
   }
 
-  const deletePhoto = async (photo) => {
-    const confirmed = window.confirm('Usunąć to zdjęcie z historii?')
-    if (!confirmed) return
-
+  const runDeletePhoto = async (photo) => {
+    setDeleting(true)
     const { error: deleteError } = await supabase
       .from('lesion_photos')
       .delete()
       .eq('id', photo.id)
+
     if (deleteError) {
+      setDeleting(false)
+      setConfirm(null)
       setError(deleteError.message)
       return
     }
@@ -176,6 +186,8 @@ export default function LesionDetail() {
       /* plik mógł już nie istnieć — ignorujemy */
     }
 
+    setDeleting(false)
+    setConfirm(null)
     setCompareA(null)
     setCompareB(null)
     load()
@@ -253,13 +265,6 @@ export default function LesionDetail() {
               </option>
             ))}
           </select>
-          <button
-            type="button"
-            onClick={deleteLesion}
-            className="min-h-[44px] rounded-lg border border-red-200 bg-white px-3 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-200 dark:border-red-900 dark:bg-slate-900 dark:text-red-300 dark:hover:bg-red-950/40"
-          >
-            Usuń znamię
-          </button>
         </div>
       </div>
 
@@ -459,7 +464,7 @@ export default function LesionDetail() {
                       </span>
                       <button
                         type="button"
-                        onClick={() => deletePhoto(photo)}
+                        onClick={() => askDeletePhoto(photo)}
                         className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200 dark:text-slate-500 dark:hover:bg-red-950/40 dark:hover:text-red-400"
                       >
                         <TrashIcon />
@@ -496,10 +501,53 @@ export default function LesionDetail() {
         </>
       )}
 
+      {/* Zarządzanie (pkt 4) - wizualnie oddzielone, usuwanie tylko tutaj */}
+      <section className="mt-8 space-y-3 rounded-xl border border-red-200 bg-red-50/50 p-4 dark:border-red-900/60 dark:bg-red-950/20">
+        <h2 className="text-base font-semibold text-red-800 dark:text-red-200">
+          Zarządzanie
+        </h2>
+        <p className="text-sm text-red-800/80 dark:text-red-200/80">
+          Usunięcie znamienia usuwa też całą historię jego zdjęć (oraz pliki z
+          magazynu). Operacja jest nieodwracalna.
+        </p>
+        <button
+          type="button"
+          onClick={askDeleteLesion}
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-red-300 bg-white px-4 font-medium text-red-700 transition-colors hover:bg-red-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-200 dark:border-red-800 dark:bg-slate-900 dark:text-red-300 dark:hover:bg-red-950/40"
+        >
+          <TrashIcon />
+          Usuń znamię
+        </button>
+      </section>
+
       <p className="text-xs text-slate-400 dark:text-slate-500">
         Status „{meta.label}” to Twoja prywatna organizacja dokumentacji, nie
         ocena medyczna.
       </p>
+
+      <ConfirmDialog
+        open={Boolean(confirm)}
+        busy={deleting}
+        title={
+          confirm?.kind === 'photo' ? 'Usunąć to zdjęcie?' : 'Usunąć to znamię?'
+        }
+        description={
+          confirm?.kind === 'photo'
+            ? 'Zdjęcie zostanie trwale usunięte z historii i z magazynu. Tej operacji nie można cofnąć.'
+            : 'Znamię i cała historia jego zdjęć zostaną trwale usunięte (także pliki z magazynu). Ta operacja jest nieodwracalna.'
+        }
+        confirmLabel={
+          confirm?.kind === 'photo' ? 'Tak, usuń zdjęcie' : 'Tak, usuń znamię'
+        }
+        onConfirm={() =>
+          confirm?.kind === 'photo'
+            ? runDeletePhoto(confirm.photo)
+            : runDeleteLesion()
+        }
+        onCancel={() => {
+          if (!deleting) setConfirm(null)
+        }}
+      />
     </div>
   )
 }
