@@ -25,3 +25,6 @@ Thumbs.db
 # Dane lokalne / cache
 *.local
 .cache/
+
+# Artefakty narzędzi (Playwright MCP itp.)
+.playwright-mcp/
