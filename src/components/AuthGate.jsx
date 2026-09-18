@@ -26,26 +26,26 @@ export default function AuthGate({ children }) {
   if (session === undefined) {
     return (
       <div
-        className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4"
+        className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 dark:bg-slate-950"
         role="status"
         aria-live="polite"
         aria-label="Sprawdzanie dostępu"
       >
         <div className="relative flex h-24 w-24 items-center justify-center">
           {/* Obracający się pierścień */}
-          <div className="absolute inset-0 rounded-full border-[5px] border-teal-900/20 border-t-teal-900 motion-safe:animate-spin" />
+          <div className="absolute inset-0 rounded-full border-[5px] border-teal-900/20 border-t-teal-900 motion-safe:animate-spin dark:border-teal-400/20 dark:border-t-teal-400" />
           {/* Nieruchomy symbol "znamienia" */}
-          <div className="relative flex h-16 w-16 items-center justify-center rounded-full border-2 border-teal-700 bg-gradient-to-br from-teal-300 via-teal-500 to-teal-700 shadow-md">
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-full border-2 border-teal-700 bg-gradient-to-br from-teal-300 via-teal-500 to-teal-700 shadow-md dark:border-teal-500 dark:from-teal-500 dark:via-teal-600 dark:to-teal-800">
             <span
               aria-hidden="true"
-              className="h-4 w-4 rounded-full bg-teal-950/80"
+              className="h-4 w-4 rounded-full bg-teal-950/80 dark:bg-teal-950"
             />
           </div>
         </div>
-        <p className="mt-5 text-base font-semibold text-gray-800">
+        <p className="mt-5 text-base font-semibold text-gray-800 dark:text-slate-100">
           Wczytywanie aplikacji…
         </p>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
           Sprawdzanie dostępu i przygotowywanie danych
         </p>
       </div>

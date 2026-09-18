@@ -58,11 +58,12 @@ adresu.*
 └── src
     ├── App.jsx                      # routing
     ├── main.jsx                     # HashRouter + rejestracja web componentu
-    ├── index.css                    # @import "tailwindcss"
+    ├── index.css                    # Tailwind + wariant trybu ciemnego
     ├── context/PersonContext.jsx    # wybrany profil (Ja/Syn)
+    ├── context/ThemeContext.jsx     # tryb jasny/ciemny (+ zapis w localStorage)
     ├── lib
     │   ├── supabase.js              # klient Supabase
-    │   ├── uploadPhoto.js           # kompresja + upload + signed URL
+    │   ├── uploadPhoto.js           # kompresja + upload + signed URL + usuwanie plików
     │   ├── status.js                # statusy i kolory
     │   ├── date.js                  # helpery dat
     │   └── interval.js              # interwał kontroli (localStorage)
@@ -71,6 +72,7 @@ adresu.*
         ├── Login.jsx
         ├── LoadingFallback.jsx
         ├── Layout.jsx               # nagłówek + nawigacja + stopka
+        ├── ThemeToggle.jsx          # przełącznik trybu jasny/ciemny
         ├── PersonSelector.jsx       # wybór profilu
         ├── BodyMap.jsx              # mapa ciała + piny
         ├── LesionDetail.jsx         # szczegóły + porównanie + kalendarz

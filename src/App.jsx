@@ -19,7 +19,9 @@ export default function App() {
         <Layout>
           <Suspense
             fallback={
-              <p className="text-sm text-slate-500">Wczytywanie widoku…</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Wczytywanie widoku…
+              </p>
             }
           >
             <Routes>

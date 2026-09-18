@@ -37,7 +37,11 @@ export default function BodyMap() {
     setError(null)
 
     const [personRes, mapsRes, lesionsRes] = await Promise.all([
-      supabase.from('monitored_persons').select('*').eq('id', personId).maybeSingle(),
+      supabase
+        .from('monitored_persons')
+        .select('*')
+        .eq('id', personId)
+        .maybeSingle(),
       supabase.from('body_maps').select('*').eq('person_id', personId),
       supabase.from('lesions').select('*').eq('person_id', personId),
     ])
@@ -153,17 +157,23 @@ export default function BodyMap() {
   }
 
   if (loading) {
-    return <p className="text-sm text-slate-500">Wczytywanie mapy ciała…</p>
+    return (
+      <p className="text-sm text-slate-500 dark:text-slate-400">
+        Wczytywanie mapy ciała…
+      </p>
+    )
   }
+
+  const currentViewLabel = VIEWS.find((v) => v.key === view)?.label
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-slate-800">
+          <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
             Mapa ciała{person ? ` — ${person.display_name}` : ''}
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Kliknij pin, aby otworzyć szczegóły znamienia.
           </p>
         </div>
@@ -179,9 +189,9 @@ export default function BodyMap() {
             className={[
               'min-h-[44px] rounded-lg px-4 font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
               addMode
-                ? 'bg-teal-800 text-white hover:bg-teal-900'
-                : 'bg-teal-700 text-white hover:bg-teal-800',
-              !currentMap ? 'cursor-not-allowed bg-gray-300' : '',
+                ? 'bg-teal-800 text-white hover:bg-teal-900 dark:bg-teal-500 dark:hover:bg-teal-400'
+                : 'bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500',
+              !currentMap ? 'cursor-not-allowed bg-gray-300 dark:bg-slate-700' : '',
             ].join(' ')}
             title={!currentMap ? 'Najpierw dodaj zdjęcie referencyjne' : ''}
           >
@@ -191,9 +201,13 @@ export default function BodyMap() {
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploadingRef}
-            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-60"
+            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
           >
-            {uploadingRef ? 'Wysyłanie…' : currentMap?.image_url ? 'Zmień zdjęcie tła' : 'Dodaj zdjęcie tła'}
+            {uploadingRef
+              ? 'Wysyłanie…'
+              : currentMap?.image_url
+                ? 'Zmień zdjęcie tła'
+                : 'Dodaj zdjęcie tła'}
           </button>
           <input
             ref={fileInputRef}
@@ -208,7 +222,9 @@ export default function BodyMap() {
       {/* Zakładki widoków */}
       <div className="flex flex-wrap gap-2">
         {VIEWS.map((v) => {
-          const hasMap = bodyMaps.some((m) => m.view_name === v.key && m.image_url)
+          const hasMap = bodyMaps.some(
+            (m) => m.view_name === v.key && m.image_url
+          )
           return (
             <button
               key={v.key}
@@ -221,8 +237,8 @@ export default function BodyMap() {
               className={[
                 'min-h-[40px] rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
                 view === v.key
-                  ? 'bg-teal-700 text-white'
-                  : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-slate-50',
+                  ? 'bg-teal-700 text-white dark:bg-teal-600'
+                  : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800',
               ].join(' ')}
             >
               {v.label}
@@ -235,26 +251,25 @@ export default function BodyMap() {
       {error ? (
         <div
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
         >
           {error}
         </div>
       ) : null}
 
       {addMode ? (
-        <p className="rounded-lg bg-teal-50 px-3 py-2 text-sm text-teal-800">
+        <p className="rounded-lg bg-teal-50 px-3 py-2 text-sm text-teal-800 dark:bg-teal-950/40 dark:text-teal-200">
           Tryb dodawania aktywny — kliknij w zdjęciu w miejscu znamienia.
         </p>
       ) : null}
 
       {/* Obszar mapy */}
       {!refUrl ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-10 text-center">
-          <p className="text-sm text-slate-500">
-            Brak zdjęcia referencyjnego dla widoku „
-            {VIEWS.find((v) => v.key === view)?.label}”.
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-10 text-center dark:border-slate-700 dark:bg-slate-900">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Brak zdjęcia referencyjnego dla widoku „{currentViewLabel}”.
           </p>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
             Dodaj zdjęcie całej okolicy ciała (przód/tył/bok), a następnie
             rozmieszczaj na nim znamiona.
           </p>
@@ -263,10 +278,10 @@ export default function BodyMap() {
         <div className="relative inline-block w-full select-none">
           <img
             src={refUrl}
-            alt={`Zdjęcie referencyjne — ${VIEWS.find((v) => v.key === view)?.label}`}
+            alt={`Zdjęcie referencyjne — ${currentViewLabel}`}
             onClick={handleImageClick}
             className={[
-              'block w-full rounded-xl border border-slate-200 bg-black/5',
+              'block w-full rounded-xl border border-slate-200 bg-black/5 dark:border-slate-800 dark:bg-black/40',
               addMode ? 'cursor-crosshair' : 'cursor-default',
             ].join(' ')}
             draggable="false"
@@ -284,7 +299,7 @@ export default function BodyMap() {
                 }}
                 title={lesion.label}
                 aria-label={`${lesion.label} — ${meta.label}`}
-                className="absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-white transition-transform hover:scale-125 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-400"
+                className="absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-white transition-transform hover:scale-125 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-400 dark:ring-slate-900"
                 style={{
                   left: `${lesion.pos_x}%`,
                   top: `${lesion.pos_y}%`,
@@ -304,9 +319,9 @@ export default function BodyMap() {
             e.preventDefault()
             savePending()
           }}
-          className="space-y-3 rounded-xl border border-teal-200 bg-teal-50/60 p-4"
+          className="space-y-3 rounded-xl border border-teal-200 bg-teal-50/60 p-4 dark:border-teal-800 dark:bg-teal-950/30"
         >
-          <p className="text-sm font-medium text-teal-800">
+          <p className="text-sm font-medium text-teal-800 dark:text-teal-200">
             Nowe znamię @ {pending.pos_x}% / {pending.pos_y}%
           </p>
           <div className="flex flex-col gap-2 sm:flex-row">
@@ -318,19 +333,19 @@ export default function BodyMap() {
                 setPending((p) => ({ ...p, label: e.target.value }))
               }
               placeholder="Nazwa/opis, np. „plecy, prawa łopatka”"
-              className="min-h-[44px] flex-1 rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300"
+              className="min-h-[44px] flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
             />
             <button
               type="submit"
               disabled={savingPin || !pending.label.trim()}
-              className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300"
+              className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
             >
               {savingPin ? 'Zapisywanie…' : 'Zapisz znamię'}
             </button>
             <button
               type="button"
               onClick={() => setPending(null)}
-              className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300"
+              className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             >
               Anuluj
             </button>
@@ -339,7 +354,7 @@ export default function BodyMap() {
       ) : null}
 
       {/* Legenda */}
-      <div className="flex flex-wrap gap-4 pt-2 text-xs text-slate-500">
+      <div className="flex flex-wrap gap-4 pt-2 text-xs text-slate-500 dark:text-slate-400">
         {Object.entries({
           stable: 'Stabilne',
           watch: 'Do obserwacji',

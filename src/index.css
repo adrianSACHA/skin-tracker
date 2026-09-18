@@ -1,7 +1,17 @@
 @import 'tailwindcss';
 
+/* Tryb ciemny sterowany klasą .dark na <html> (przełącznik w UI). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 html {
   -webkit-text-size-adjust: 100%;
+  color-scheme: light;
+  background-color: #f8fafc; /* slate-50 */
+}
+
+html.dark {
+  color-scheme: dark;
+  background-color: #020617; /* slate-950 */
 }
 
 body {

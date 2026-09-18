@@ -66,8 +66,10 @@ export default function PersonSelector() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-800">Wybierz profil</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
+          Wybierz profil
+        </h1>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Dla kogo chcesz teraz prowadzić dokumentację?
         </p>
       </div>
@@ -75,16 +77,18 @@ export default function PersonSelector() {
       {error ? (
         <div
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
         >
           {error}
         </div>
       ) : null}
 
       {loading ? (
-        <p className="text-sm text-slate-500">Wczytywanie profili…</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Wczytywanie profili…
+        </p>
       ) : persons.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-300 bg-white px-4 py-6 text-center text-sm text-slate-500">
+        <div className="rounded-lg border border-dashed border-slate-300 bg-white px-4 py-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
           Brak profili. Dodaj pierwszy profil poniżej (np. „Ja”).
         </div>
       ) : (
@@ -94,12 +98,12 @@ export default function PersonSelector() {
               <button
                 type="button"
                 onClick={() => choose(person)}
-                className="w-full rounded-xl border border-slate-200 bg-white p-4 text-left transition-colors hover:border-teal-400 hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300"
+                className="w-full rounded-xl border border-slate-200 bg-white p-4 text-left transition-colors hover:border-teal-400 hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-teal-600 dark:hover:bg-teal-950/40"
               >
-                <span className="block text-lg font-semibold text-slate-800">
+                <span className="block text-lg font-semibold text-slate-800 dark:text-slate-100">
                   {person.display_name}
                 </span>
-                <span className="mt-1 block text-sm text-teal-700">
+                <span className="mt-1 block text-sm text-teal-700 dark:text-teal-300">
                   Otwórz mapę ciała →
                 </span>
               </button>
@@ -110,11 +114,11 @@ export default function PersonSelector() {
 
       <form
         onSubmit={handleAdd}
-        className="rounded-xl border border-slate-200 bg-white p-4"
+        className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
       >
         <label
           htmlFor="new-person"
-          className="mb-1 block text-sm font-medium text-slate-700"
+          className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200"
         >
           Dodaj profil
         </label>
@@ -125,12 +129,12 @@ export default function PersonSelector() {
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="np. Ja"
-            className="min-h-[44px] flex-1 rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300"
+            className="min-h-[44px] flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
           />
           <button
             type="submit"
             disabled={adding || !newName.trim()}
-            className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300"
+            className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
           >
             {adding ? 'Dodawanie…' : 'Dodaj'}
           </button>

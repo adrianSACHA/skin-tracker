@@ -1,5 +1,6 @@
 import 'add-to-calendar-button'
 import { addWeeksYMD, formatDate, todayYMD } from '../lib/date'
+import { useTheme } from '../context/ThemeContext'
 
 // 100% client-side: web component <add-to-calendar-button> generuje
 // wydarzenie dla Google/Apple/Outlook oraz uniwersalny plik .ics.
@@ -13,6 +14,8 @@ export default function CalendarReminderButton({
   notes,
   className = '',
 }) {
+  const { theme } = useTheme()
+
   const baseDate = lastDate || todayYMD()
   const startDate = addWeeksYMD(baseDate, intervalWeeks)
   const timeZone =
@@ -42,7 +45,7 @@ export default function CalendarReminderButton({
         label="Dodaj przypomnienie do kalendarza"
         trigger="click"
         buttonStyle="date"
-        lightMode="light"
+        lightMode={theme === 'dark' ? 'dark' : 'light'}
         hideBranding="true"
       />
     </div>
