@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { toast } from 'sonner'
 import {
   TransformComponent,
   TransformWrapper,
@@ -186,6 +187,7 @@ export default function BodyMap() {
       return
     }
 
+    toast.success('Znamię dodane')
     setPending(null)
     setAddMode(false)
     load()
@@ -313,6 +315,7 @@ export default function BodyMap() {
         l.id === selectedLesion.id ? { ...l, label, status: editForm.status } : l
       )
     )
+    toast.success('Zmiany zapisane')
     setEditForm(null)
   }
 
@@ -354,6 +357,7 @@ export default function BodyMap() {
           l.id === lesion.id ? { ...l, pos_x: last.x, pos_y: last.y } : l
         )
       )
+      toast.success('Zmiany zapisane')
     }
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)

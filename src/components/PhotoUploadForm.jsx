@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 import { supabase } from '../lib/supabase'
 import { uploadLesionPhoto } from '../lib/uploadPhoto'
 import { todayYMD } from '../lib/date'
@@ -88,6 +89,7 @@ export default function PhotoUploadForm({
       if (insertError) throw insertError
 
       const kb = Math.round((compressed?.size || 0) / 1024)
+      toast.success('Zdjęcie zapisane')
       setInfo(`Zapisano zdjęcie (skompresowane do ~${kb} kB).`)
       onUploaded?.()
     } catch (err) {

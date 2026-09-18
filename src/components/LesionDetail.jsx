@@ -13,6 +13,7 @@ import { supabase } from '../lib/supabase'
 import { formatDate } from '../lib/date'
 import { STATUSES, statusMeta } from '../lib/status'
 import { useIntervalWeeks } from '../lib/interval'
+import { toast } from 'sonner'
 import { removeStorageFile } from '../lib/uploadPhoto'
 import { useTheme } from '../context/ThemeContext'
 import SignedImage from './SignedImage'
@@ -134,6 +135,7 @@ export default function LesionDetail() {
       return
     }
     setLesion((prev) => (prev ? { ...prev, status } : prev))
+    toast.success('Zmiany zapisane')
   }
 
   // Usuwanie odbywa się WYŁĄCZNIE tutaj (LesionDetail), po potwierdzeniu w
@@ -162,6 +164,7 @@ export default function LesionDetail() {
 
     setDeleting(false)
     setConfirm(null)
+    toast.success('Znamię usunięte')
     navigate(`/person/${personId}`)
   }
 
@@ -188,6 +191,7 @@ export default function LesionDetail() {
 
     setDeleting(false)
     setConfirm(null)
+    toast.success('Zdjęcie usunięte')
     setCompareA(null)
     setCompareB(null)
     load()
