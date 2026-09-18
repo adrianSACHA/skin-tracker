@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import AuthGate from './components/AuthGate'
 import Layout from './components/Layout'
 import PersonSelector from './components/PersonSelector'
@@ -28,13 +28,16 @@ export default function App() {
           >
             <Routes>
               <Route path="/" element={<PersonSelector />} />
-              <Route path="/person/:personId" element={<BodyMap />} />
-              <Route path="/person/:personId/list" element={<LesionsList />} />
-              <Route
-                path="/person/:personId/lesion/:lesionId"
-                element={<LesionDetail />}
-              />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              {/* Zagnieżdżone trasy pod profilem - czytelna hierarchia */}
+              <Route path="/person/:personId">
+                <Route index element={<BodyMap />} />
+                <Route path="list" element={<LesionsList />} />
+                <Route path="lesion/:lesionId" element={<LesionDetail />} />
+              </Route>
+              {/* Nieznany adres -> ekran wyboru profilu.
+                  Celowo BEZ <Navigate replace> - taki redirect podmieniał wpis
+                  w historii i psuł "wstecz" (pkt 7). */}
+              <Route path="*" element={<PersonSelector />} />
             </Routes>
           </Suspense>
         </Layout>

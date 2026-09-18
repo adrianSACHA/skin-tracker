@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   CartesianGrid,
   Line,
@@ -58,6 +58,14 @@ export default function LesionDetail() {
 
   const inputClass =
     'min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100'
+
+  // "Wstecz": jeśli mamy wpisy w historii tej sesji, cofnij o krok (np. do
+  // mapy ciała); w razie wejścia z linku wprost - przejdź jawnie do mapy.
+  const goBack = () => {
+    const idx = window.history.state?.idx
+    if (typeof idx === 'number' && idx > 0) navigate(-1)
+    else navigate(`/person/${personId}`)
+  }
 
   const load = async () => {
     setLoading(true)
@@ -211,12 +219,13 @@ export default function LesionDetail() {
         <p className="text-sm text-slate-500 dark:text-slate-400">
           Nie znaleziono znamienia.
         </p>
-        <Link
-          to={`/person/${personId}`}
-          className="text-sm font-medium text-teal-700 hover:underline dark:text-teal-300"
+        <button
+          type="button"
+          onClick={goBack}
+          className="self-start text-sm font-medium text-teal-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300 dark:text-teal-300"
         >
           ← Wróć do mapy ciała
-        </Link>
+        </button>
       </div>
     )
   }
@@ -226,12 +235,13 @@ export default function LesionDetail() {
 
   return (
     <div className="space-y-6">
-      <Link
-        to={`/person/${personId}`}
-        className="text-sm font-medium text-teal-700 hover:underline dark:text-teal-300"
+      <button
+        type="button"
+        onClick={goBack}
+        className="self-start text-sm font-medium text-teal-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300 dark:text-teal-300"
       >
         ← Wróć do mapy ciała
-      </Link>
+      </button>
 
       {error ? (
         <div
