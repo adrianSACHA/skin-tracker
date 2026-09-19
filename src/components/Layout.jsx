@@ -25,7 +25,7 @@ export default function Layout({ children }) {
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3">
+        <div className="mx-auto flex max-w-4xl lg:max-w-6xl items-center justify-between gap-3 px-4 py-3">
           <Link
             to="/"
             className="font-semibold text-teal-800 dark:text-teal-300"
@@ -53,7 +53,7 @@ export default function Layout({ children }) {
         </div>
 
         {person ? (
-          <nav className="mx-auto flex max-w-4xl gap-2 px-4 pb-2">
+          <nav className="mx-auto flex max-w-4xl lg:max-w-6xl gap-2 px-4 pb-2">
             <NavLink to={`/person/${person.id}`} end className={navClass}>
               Mapa ciała
             </NavLink>
@@ -64,11 +64,11 @@ export default function Layout({ children }) {
         ) : null}
       </header>
 
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
+      <main className="mx-auto w-full max-w-4xl lg:max-w-6xl flex-1 px-4 py-6">
         {children}
       </main>
 
-      <footer className="mx-auto w-full max-w-4xl px-4 py-6 text-xs leading-relaxed text-slate-400 dark:text-slate-500">
+      <footer className="mx-auto w-full max-w-4xl lg:max-w-6xl px-4 py-6 text-xs leading-relaxed text-slate-400 dark:text-slate-500">
         Narzędzie wyłącznie do dokumentacji i porównywania zdjęć w czasie. Nie
         diagnozuje i nie ocenia zmian — decyzje medyczne zawsze podejmuj z
         lekarzem.

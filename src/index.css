@@ -58,3 +58,32 @@ body {
 .rdp-wrap .rdp-overdue::after {
   background: #ef4444;
 }
+
+/* Pin na mapie: natychmiastowy feedback po kliknięciu (puls) */
+@keyframes pinPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+    box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.65);
+  }
+  60% {
+    transform: scale(1.28);
+    opacity: 0.75;
+    box-shadow: 0 0 0 8px rgba(13, 148, 136, 0.25);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+    box-shadow: 0 0 0 12px rgba(13, 148, 136, 0);
+  }
+}
+
+.pin-pulse {
+  animation: pinPulse 400ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin-pulse {
+    animation: none;
+  }
+}
