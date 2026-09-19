@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
@@ -61,6 +61,7 @@ export default function BodyMap() {
   const [scale, setScale] = useState(1) // aktualna skala zoomu tła
   const [selectedId, setSelectedId] = useState(null) // wybrany pin -> panel akcji
   const [pulse, setPulse] = useState(null) // { id, n } - re-trigger animacji pinu
+  const [hoveredId, setHoveredId] = useState(null) // tooltip przy pinie (desktop)
   const [editForm, setEditForm] = useState(null) // { label, status }
   const [moveModeId, setMoveModeId] = useState(null) // pin w trybie przesuwania
   const [drag, setDrag] = useState(null) // { id, x, y } podczas przeciągania
@@ -655,9 +656,10 @@ export default function BodyMap() {
                       const dragging = drag?.id === lesion.id
                       const inMove = moveModeId === lesion.id
                       const isSel = selectedId === lesion.id
+                      const showTip = hoveredId === lesion.id && !inMove
                       return (
+                        <Fragment key={lesion.id}>
                         <button
-                          key={lesion.id}
                           type="button"
                           onPointerDown={(e) => {
                             if (inMove) startPinDrag(e, lesion)
@@ -667,7 +669,14 @@ export default function BodyMap() {
                             e.stopPropagation()
                             openPanel(lesion)
                           }}
-                          title={lesion.label}
+                          onMouseEnter={() => setHoveredId(lesion.id)}
+                          onMouseLeave={() =>
+                            setHoveredId((h) => (h === lesion.id ? null : h))
+                          }
+                          onFocus={() => setHoveredId(lesion.id)}
+                          onBlur={() =>
+                            setHoveredId((h) => (h === lesion.id ? null : h))
+                          }
                           aria-label={`${lesion.label} — ${meta.label}`}
                           className={[
                             'absolute h-5 w-5 rounded-full focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-400',
@@ -692,6 +701,25 @@ export default function BodyMap() {
                             />
                           ) : null}
                         </button>
+
+                        {/* Tooltip (desktop) - ten sam układ co piny, więc
+                            trzyma się pina przy zoomie/panie. */}
+                        {showTip ? (
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute"
+                            style={{
+                              left: `${dragging ? drag.x : lesion.pos_x}%`,
+                              top: `${dragging ? drag.y : lesion.pos_y}%`,
+                              transform: `translate(-50%, -50%) scale(${inv})`,
+                            }}
+                          >
+                            <span className="pin-tip absolute bottom-full left-1/2 mb-3 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white shadow-lg dark:bg-slate-100 dark:text-slate-900">
+                              {lesion.label}
+                            </span>
+                          </span>
+                        ) : null}
+                        </Fragment>
                       )
                     })}
 

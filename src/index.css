@@ -87,3 +87,14 @@ body {
     animation: none;
   }
 }
+
+/* Podpowiedź (tooltip) przy pinie - tylko urządzenia z hoverem (desktop) */
+.pin-tip {
+  display: none;
+}
+
+@media (hover: hover) {
+  .pin-tip {
+    display: block;
+  }
+}
