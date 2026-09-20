@@ -1,8 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { HashRouter } from 'react-router-dom'
-// Rejestruje web component <add-to-calendar-button>.
-import 'add-to-calendar-button'
 import App from './App.jsx'
 import { ThemeProvider } from './context/ThemeContext.jsx'
 import './index.css'

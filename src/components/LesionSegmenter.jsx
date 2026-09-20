@@ -435,7 +435,7 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
               setError(null)
             }}
             className={[
-              'min-h-[40px] rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-50',
+              'min-h-[44px] rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-50',
               mode === s.key
                 ? 'bg-teal-700 text-white dark:bg-teal-600'
                 : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800',
@@ -474,7 +474,7 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
               min="1"
               value={coinMm}
               onChange={(e) => setCoinMm(Number(e.target.value) || 0)}
-              className="min-h-[40px] w-28 rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              className="min-h-[44px] w-28 rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
             <datalist id="coin-presets">
               {COIN_PRESETS.map((c) => (
@@ -514,7 +514,7 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
               type="button"
               onClick={() => setBrush('positive')}
               className={[
-                'min-h-[40px] rounded-lg px-3 text-sm font-medium',
+                'min-h-[44px] rounded-lg px-3 text-sm font-medium',
                 brush === 'positive'
                   ? 'bg-blue-600 text-white'
                   : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-300 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700',
@@ -526,7 +526,7 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
               type="button"
               onClick={() => setBrush('negative')}
               className={[
-                'min-h-[40px] rounded-lg px-3 text-sm font-medium',
+                'min-h-[44px] rounded-lg px-3 text-sm font-medium',
                 brush === 'negative'
                   ? 'bg-red-600 text-white'
                   : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-300 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700',

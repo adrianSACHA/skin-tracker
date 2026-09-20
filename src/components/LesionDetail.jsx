@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   CartesianGrid,
   Line,
@@ -41,20 +41,38 @@ function TrashIcon() {
 export default function LesionDetail() {
   const { personId, lesionId } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const { theme } = useTheme()
+
+  // Skąd przyszliśmy - żeby „Wróć" prowadziło tam, gdzie użytkownik był.
+  const backBySection = {
+    list: { to: `/person/${personId}/list`, label: '← Wróć do listy znamion' },
+    reminders: {
+      to: `/person/${personId}/reminders`,
+      label: '← Wróć do kontroli',
+    },
+  }
+  const back = backBySection[location.state?.from] || {
+    to: `/person/${personId}`,
+    label: '← Wróć do mapy ciała',
+  }
 
   const [lesion, setLesion] = useState(null)
   const [photos, setPhotos] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [showUpload, setShowUpload] = useState(false)
+  // Wejście z zakładki „Kontrole" (przycisk „Dodaj sesję") otwiera formularz.
+  const [showUpload, setShowUpload] = useState(Boolean(location.state?.openUpload))
   const [confirm, setConfirm] = useState(null) // { kind: 'lesion' | 'photo', photo? }
   const [deleting, setDeleting] = useState(false)
 
   const [compareA, setCompareA] = useState(null) // id zdjęcia
   const [compareB, setCompareB] = useState(null)
   const [opacity, setOpacity] = useState(50)
-  const [intervalWeeks, setIntervalWeeks] = useIntervalWeeks()
+  // Interwał kontroli jest ustawiany w JEDNYM miejscu (lista znamion) - tutaj
+  // tylko odczytujemy wartość, żeby nie było dwóch rozjeżdżających się pól.
+  const [intervalWeeks] = useIntervalWeeks()
+  const [leadDays, setLeadDays] = useState(7)
 
   const inputClass =
     'min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100'
@@ -64,14 +82,14 @@ export default function LesionDetail() {
   const goBack = () => {
     const idx = window.history.state?.idx
     if (typeof idx === 'number' && idx > 0) navigate(-1)
-    else navigate(`/person/${personId}`)
+    else navigate(back.to)
   }
 
   const load = async () => {
     setLoading(true)
     setError(null)
 
-    const [lesionRes, photosRes] = await Promise.all([
+    const [lesionRes, photosRes, personRes] = await Promise.all([
       supabase.from('lesions').select('*').eq('id', lesionId).maybeSingle(),
       supabase
         .from('lesion_photos')
@@ -79,10 +97,18 @@ export default function LesionDetail() {
         .eq('lesion_id', lesionId)
         .order('taken_at', { ascending: true })
         .order('created_at', { ascending: true }),
+      supabase
+        .from('monitored_persons')
+        .select('*')
+        .eq('id', personId)
+        .maybeSingle(),
     ])
 
     if (lesionRes.error) setError(lesionRes.error.message)
     setLesion(lesionRes.data || null)
+
+    const ld = personRes?.data?.reminder_lead_days
+    setLeadDays(Number.isFinite(ld) ? ld : 7)
 
     setPhotos(photosRes.data || [])
     setLoading(false)
@@ -119,6 +145,23 @@ export default function LesionDetail() {
         .map((p) => ({ date: formatDate(p.taken_at), size: Number(p.size_mm) })),
     [photos]
   )
+
+  // Tekstowe podsumowanie trendu - czytelne też dla czytników ekranu
+  // (wykres sam w sobie jest tylko grafiką). Bez oceny medycznej.
+  const sizeSummary = useMemo(() => {
+    if (sizeData.length < 2) return null
+    const first = sizeData[0]
+    const last = sizeData[sizeData.length - 1]
+    const diff = last.size - first.size
+    const num = (n) => Number(n).toLocaleString('pl-PL', { maximumFractionDigits: 1 })
+    const signed = (n) => `${n > 0 ? '+' : '−'}${num(Math.abs(n))}`
+    if (Math.abs(diff) < 0.05) {
+      return `Zakres: ${first.date} (${num(first.size)} mm) → ${last.date} (${num(last.size)} mm). Bez istotnej zmiany rozmiaru.`
+    }
+    const pct = first.size ? ` (${signed(Math.round((diff / first.size) * 100))}%)` : ''
+    const dir = diff > 0 ? 'wzrost' : 'spadek'
+    return `Zakres: ${first.date} (${num(first.size)} mm) → ${last.date} (${num(last.size)} mm). Zmiana: ${signed(diff)} mm${pct} — ${dir}.`
+  }, [sizeData])
 
   // Kolory wykresu dopasowane do trybu jasny/ciemny.
   const dark = theme === 'dark'
@@ -224,7 +267,7 @@ export default function LesionDetail() {
           onClick={goBack}
           className="self-start text-sm font-medium text-teal-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300 dark:text-teal-300"
         >
-          ← Wróć do mapy ciała
+          {back.label}
         </button>
       </div>
     )
@@ -240,8 +283,8 @@ export default function LesionDetail() {
         onClick={goBack}
         className="self-start text-sm font-medium text-teal-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300 dark:text-teal-300"
       >
-        ← Wróć do mapy ciała
-      </button>
+        {back.label}
+        </button>
 
       {error ? (
         <div
@@ -292,25 +335,38 @@ export default function LesionDetail() {
           {showUpload ? 'Zamknij formularz' : '+ Dodaj zdjęcie sesji'}
         </button>
 
-        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-          <label htmlFor="interval-weeks-detail">Interwał kontroli (tyg.)</label>
-          <input
-            id="interval-weeks-detail"
-            type="number"
-            min="1"
-            max="52"
-            value={intervalWeeks}
-            onChange={(e) =>
-              setIntervalWeeks(Math.max(1, Number(e.target.value) || 1))
-            }
-            className="min-h-[40px] w-20 rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-          />
-        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <p className="text-sm text-slate-600 dark:text-slate-300">
+          Interwał kontroli:{' '}
+          <strong className="text-slate-800 dark:text-slate-100">
+            co {intervalWeeks} tyg.
+          </strong>{' '}
+          <Link
+            to={`/person/${personId}/list`}
+            className="text-teal-700 hover:underline dark:text-teal-300"
+          >
+            (zmień na liście znamion)
+          </Link>
+        </p>
 
         <CalendarReminderButton
           label={lesion.label}
           lastDate={lastDate}
           intervalWeeks={intervalWeeks}
+          leadDays={leadDays}
         />
       </div>
 
@@ -452,6 +508,17 @@ export default function LesionDetail() {
                   </LineChart>
                 </ResponsiveContainer>
               </div>
+              {sizeSummary ? (
+                <>
+                  <p className="text-sm text-slate-600 dark:text-slate-300">
+                    {sizeSummary}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    To tylko odczyt zapisanych pomiarów. Zmiany rozmiaru oceniaj
+                    z lekarzem.
+                  </p>
+                </>
+              ) : null}
             </section>
           ) : null}
 
@@ -479,7 +546,7 @@ export default function LesionDetail() {
                       <button
                         type="button"
                         onClick={() => askDeletePhoto(photo)}
-                        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200 dark:text-slate-500 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200 dark:text-slate-400 dark:hover:bg-red-950/40 dark:hover:text-red-400"
                       >
                         <TrashIcon />
                         Usuń zdjęcie
@@ -534,7 +601,7 @@ export default function LesionDetail() {
         </button>
       </section>
 
-      <p className="text-xs text-slate-400 dark:text-slate-500">
+      <p className="text-xs text-slate-500 dark:text-slate-400">
         Status „{meta.label}” to Twoja prywatna organizacja dokumentacji, nie
         ocena medyczna.
       </p>

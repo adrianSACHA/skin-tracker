@@ -124,10 +124,14 @@ export default function PhotoUploadForm({
 
       {/* Zdjęcie */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">
+        <label
+          htmlFor="lesion-photo"
+          className="block text-sm font-medium text-slate-700 dark:text-slate-200"
+        >
           Zdjęcie
         </label>
         <input
+          id="lesion-photo"
           ref={inputRef}
           type="file"
           accept="image/*"
@@ -142,7 +146,7 @@ export default function PhotoUploadForm({
             className="max-h-72 w-auto rounded-lg border border-slate-200 dark:border-slate-700"
           />
         ) : null}
-        <p className="text-xs text-slate-400 dark:text-slate-500">
+        <p className="text-xs text-slate-500 dark:text-slate-400">
           Zdjęcie zostanie automatycznie skompresowane (max ~0.4 MB, webp,
           orientacja EXIF).
         </p>

@@ -39,7 +39,8 @@ adresu.*
 - **React Router** (`HashRouter` — brak problemów z odświeżaniem na GitHub Pages)
 - **Supabase**: Postgres + Auth + Storage (darmowy tier)
 - **browser-image-compression** (kompresja zdjęć w Web Workerze)
-- **add-to-calendar-button** (przypomnienia bez backendu)
+- **własny generator `.ics`** (`src/lib/ics.js`) — **cykliczne** przypomnienia
+  (RRULE + alarm) bez backendu i bez zależności zewnętrznych
 - **Recharts** (trend rozmiaru w mm)
 
 ---
@@ -66,6 +67,7 @@ adresu.*
     │   ├── uploadPhoto.js           # kompresja + upload + signed URL + usuwanie plików
     │   ├── status.js                # statusy i kolory
     │   ├── date.js                  # helpery dat
+    │   ├── ics.js                   # generator .ics (RRULE + alarm) i deep-linki
     │   └── interval.js              # interwał kontroli (localStorage)
     └── components
         ├── AuthGate.jsx             # blokada aplikacji bez sesji
@@ -79,8 +81,9 @@ adresu.*
         ├── LesionDetail.jsx         # szczegóły + porównanie + kalendarz + "Zarządzanie"
         ├── LesionSegmenter.jsx      # pomiar z obrysu (MediaPipe, tylko geometria)
         ├── PhotoUploadForm.jsx      # upload + ABCDE + pomiar z obrysu
-        ├── LesionsList.jsx          # lista + kalendarz przypomnień
-        ├── CalendarReminderButton.jsx
+        ├── LesionsList.jsx          # lista znamion (statusy, sugerowana data kontroli)
+        ├── Reminders.jsx            # "Kontrole": terminy, przesuwanie, przypomnienia
+        ├── CalendarReminderButton.jsx  # eksport cyklicznego .ics / Google / Outlook
         ├── ConfirmDialog.jsx        # modal potwierdzenia (akcje destrukcyjne)
         ├── SignedImage.jsx          # signed URL → <img>
         └── StatusBadge.jsx
@@ -244,9 +247,13 @@ Postęp znajdziesz w zakładce **Actions** w repo.
    - porównaj dwa zdjęcia suwakiem przezroczystości,
    - obejrzyj trend rozmiaru (wykres) i historię ABCDE,
    - ustaw status,
-   - „**Dodaj przypomnienie do kalendarza**" (Google/Apple/Outlook/.ics).
-5. **Lista znamion** — statusy do obserwacji, data następnej kontroli i
-   przypomnienia.
+   - „**Do kalendarza**" — cykliczne przypomnienie (`.ics` / Google / Outlook).
+5. **Lista znamion** — statusy do obserwacji i sugerowana data następnej
+   kontroli.
+6. **Kontrole** — lista najpilniejszych kontroli (zaległe / w ciągu 30 dni),
+   przesuwanie terminu („Przesuń o N tyg."), ustawienie „przypomnij X dni
+   wcześniej" (zapisywane w bazie) oraz eksport **cyklicznego** wydarzenia
+   („Do kalendarza": `.ics` / Google / Outlook).
 
 ---
 
@@ -259,7 +266,8 @@ Postęp znajdziesz w zakładce **Actions** w repo.
   `maxWidthOrHeight: 1800`, `useWebWorker: true`, `fileType: 'image/webp'`.
   Orientacja EXIF obsługiwana automatycznie.
 - **Hosting:** GitHub Pages — zero kosztów.
-- **Przypomnienia:** generowane w przeglądarce (bez backendu) — zero kosztów.
+- **Przypomnienia:** generowane w przeglądarce jako **cykliczny** `.ics`
+  (RRULE + alarm) — bez backendu, zero kosztów.
 
 ---
 
@@ -296,4 +304,4 @@ limitów Supabase i nie wymagają zmiany hostingu.
 | „Brak konfiguracji Supabase" | Nie ustawiono `VITE_SUPABASE_*` (lokalnie w `.env`, w Actions w secrets). |
 | Nie widać zdjęć | Bucket musi być **prywatny**, a polityki Storage z `rls-setup.sql` uruchomione. |
 | Brak dostępu do profili | Sprawdź UID w `monitored_persons.owner_user_id` i polityki RLS. |
-| Przycisk kalendarza się nie pojawia | Sprawdź, czy `add-to-calendar-button` jest zainstalowany (`npm install`). |
+| Przycisk „Do kalendarza" nie działa / brak zapisu kontroli | Uruchom **sekcję 7** z `supabase/rls-setup.sql` (dodaje `monitored_persons.reminder_lead_days` i `lesions.next_check_at`). |

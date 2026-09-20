@@ -11,7 +11,7 @@ export default function ThemeToggle() {
       aria-label={isDark ? 'Włącz tryb jasny' : 'Włącz tryb ciemny'}
       aria-pressed={isDark}
       title={isDark ? 'Tryb jasny' : 'Tryb ciemny'}
-      className="flex h-9 w-9 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+      className="flex h-11 w-11 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
     >
       {isDark ? (
         <svg

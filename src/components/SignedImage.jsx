@@ -42,7 +42,7 @@ export default function SignedImage({
   if (status === 'error') {
     return (
       <div
-        className={`flex items-center justify-center bg-slate-100 text-xs text-slate-400 dark:bg-slate-800 dark:text-slate-500 ${className}`}
+        className={`flex items-center justify-center bg-slate-100 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300 ${className}`}
         style={style}
       >
         Nie udało się wczytać zdjęcia

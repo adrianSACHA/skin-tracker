@@ -20,45 +20,6 @@ body {
     sans-serif;
 }
 
-/* Kalendarz (react-day-picker): akcent + ciemny motyw + kropki przypomnień */
-.rdp-wrap,
-.rdp-wrap .rdp-root {
-  --rdp-accent-color: #0f766e;
-  --rdp-accent-background-color: #ccfbf1;
-  --rdp-today-color: #0f766e;
-}
-
-.dark .rdp-wrap,
-.dark .rdp-wrap .rdp-root {
-  --rdp-accent-color: #2dd4bf;
-  --rdp-accent-background-color: #134e4a;
-  --rdp-today-color: #2dd4bf;
-  color: #e2e8f0;
-}
-
-/* Dni z zaplanowanym przypomnieniem -> kropka pod numerem */
-.rdp-wrap .rdp-reminder {
-  position: relative;
-  font-weight: 700;
-}
-
-.rdp-wrap .rdp-reminder::after {
-  content: '';
-  position: absolute;
-  bottom: 3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 5px;
-  height: 5px;
-  border-radius: 9999px;
-  background: var(--rdp-accent-color);
-}
-
-/* Zaległe przypomnienia -> czerwona kropka */
-.rdp-wrap .rdp-overdue::after {
-  background: #ef4444;
-}
-
 /* Pin na mapie: natychmiastowy feedback po kliknięciu (puls) */
 @keyframes pinPulse {
   0% {
@@ -88,13 +49,23 @@ body {
   }
 }
 
-/* Podpowiedź (tooltip) przy pinie - tylko urządzenia z hoverem (desktop) */
+/* Podpowiedź (tooltip) z nazwą pinu. Widoczność steruje JS (hover/fokus ORAZ
+   wybrany pin) - dzięki temu etykieta pokazuje się także na dotyku, gdzie nie
+   ma hovera. */
 .pin-tip {
-  display: none;
+  display: block;
 }
 
-@media (hover: hover) {
-  .pin-tip {
-    display: block;
-  }
+/* Powiększony obszar klikalny pinu na mapie ciała (min. 44x44 px wg wytycznych
+   dotykowych). Wizualnie pin pozostaje mały; powiększamy tylko strefę dotyku
+   niewidocznym pseudo-elementem, więc precyzja patrzenia w zdjęcie nie cierpi. */
+.pin-hit::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+  border-radius: 9999px;
 }

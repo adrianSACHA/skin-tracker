@@ -34,11 +34,11 @@ export default function LesionInfoPanel({
   const moving = moveModeId === lesion.id
 
   const selectClass =
-    'min-h-[40px] w-full rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100'
+    'min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100'
   const btnPrimary =
-    'min-h-[40px] rounded-lg bg-teal-700 px-3 text-sm font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500'
+    'min-h-[44px] rounded-lg bg-teal-700 px-3 text-sm font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500'
   const btnSecondary =
-    'min-h-[40px] rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+    'min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
 
   return (
     <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
@@ -54,7 +54,7 @@ export default function LesionInfoPanel({
         <button
           type="button"
           onClick={onClose}
-          className="rounded-md px-2 py-1 text-sm text-slate-400 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300 dark:hover:text-slate-200"
+          className="rounded-md px-2 py-1 text-sm text-slate-500 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300 dark:text-slate-300 dark:hover:text-slate-100"
         >
           Zamknij
         </button>
@@ -126,7 +126,7 @@ export default function LesionInfoPanel({
               onChange={(e) =>
                 onEditFormChange({ ...editForm, label: e.target.value })
               }
-              className="min-h-[40px] w-full rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              className="min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
           </div>
           <div>
@@ -191,7 +191,7 @@ export default function LesionInfoPanel({
         </p>
       ) : null}
 
-      <p className="text-xs text-slate-400 dark:text-slate-500">
+      <p className="text-xs text-slate-500 dark:text-slate-400">
         Usuń znamię w widoku szczegółów (sekcja „Zarządzanie").
       </p>
     </div>

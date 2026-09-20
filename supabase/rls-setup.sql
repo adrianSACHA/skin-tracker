@@ -273,3 +273,22 @@ create policy lesion_photos_storage_delete on storage.objects
 -- values
 --   ('<TWOJE-UID>', 'Ja'),
 --   ('<TWOJE-UID>', 'Syn');
+
+-- ============================================================================
+-- 7. PRZYPOMNIENIA (zakładka "Kontrole")
+--    reminder_lead_days - ile dni wcześniej przypominać (ustawienie per profil).
+--    next_check_at      - ręcznie ustalona/przesunięta data następnej kontroli
+--                         (NULL = wyliczana z ostatniej sesji + interwał).
+--    Dodane idempotentnie - bezpieczne dla istniejących instalacji.
+-- ============================================================================
+alter table public.monitored_persons
+  add column if not exists reminder_lead_days integer not null default 7;
+
+alter table public.monitored_persons
+  drop constraint if exists monitored_persons_reminder_lead_days_check;
+alter table public.monitored_persons
+  add constraint monitored_persons_reminder_lead_days_check
+  check (reminder_lead_days between 0 and 60);
+
+alter table public.lesions
+  add column if not exists next_check_at date;

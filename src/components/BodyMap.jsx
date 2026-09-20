@@ -15,6 +15,7 @@ import {
 import { STATUSES, statusMeta } from '../lib/status'
 import { usePerson } from '../context/PersonContext'
 import LesionInfoPanel from './LesionInfoPanel'
+import ConfirmDialog from './ConfirmDialog'
 
 const VIEWS = [
   { key: 'front', label: 'Przód' },
@@ -53,6 +54,7 @@ export default function BodyMap() {
   const [refUrl, setRefUrl] = useState(null)
   const [uploadingRef, setUploadingRef] = useState(false)
   const [deletingRef, setDeletingRef] = useState(false)
+  const [refConfirm, setRefConfirm] = useState(false)
   const [showAddView, setShowAddView] = useState(false)
   const [addViewKey, setAddViewKey] = useState('')
   const fileInputRef = useRef(null)
@@ -241,12 +243,8 @@ export default function BodyMap() {
     }
   }
 
-  const handleRefDelete = async () => {
+  const runDeleteRef = async () => {
     if (!currentMap?.image_url) return
-    const confirmed = window.confirm(
-      'Usunąć zdjęcie tła dla tego widoku? Piny znamion zostaną zachowane.'
-    )
-    if (!confirmed) return
 
     setDeletingRef(true)
     setError(null)
@@ -274,6 +272,7 @@ export default function BodyMap() {
       setError(err.message)
     } finally {
       setDeletingRef(false)
+      setRefConfirm(false)
     }
   }
 
@@ -443,7 +442,7 @@ export default function BodyMap() {
           {currentMap?.image_url ? (
             <button
               type="button"
-              onClick={handleRefDelete}
+              onClick={() => setRefConfirm(true)}
               disabled={deletingRef}
               className="min-h-[44px] rounded-lg border border-red-200 bg-white px-4 font-medium text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-200 disabled:opacity-60 dark:border-red-900 dark:bg-slate-900 dark:text-red-300 dark:hover:bg-red-950/40"
             >
@@ -479,7 +478,7 @@ export default function BodyMap() {
               setAddMode(false)
             }}
             className={[
-              'min-h-[40px] rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
+              'min-h-[44px] rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
               activeView === v.key
                 ? 'bg-teal-700 text-white dark:bg-teal-600'
                 : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800',
@@ -498,7 +497,7 @@ export default function BodyMap() {
               )
               setShowAddView((s) => !s)
             }}
-            className="min-h-[40px] rounded-full border border-dashed border-slate-300 px-4 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+            className="min-h-[44px] rounded-full border border-dashed border-slate-300 px-4 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
           >
             {showAddView ? 'Zamknij' : '+ Dodaj widok'}
           </button>
@@ -518,7 +517,7 @@ export default function BodyMap() {
             id="add-view"
             value={addViewKey || viewsToAdd[0].key}
             onChange={(e) => setAddViewKey(e.target.value)}
-            className="min-h-[40px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
           >
             {viewsToAdd.map((v) => (
               <option key={v.key} value={v.key}>
@@ -530,7 +529,7 @@ export default function BodyMap() {
             type="button"
             onClick={() => addInputRef.current?.click()}
             disabled={uploadingRef}
-            className="min-h-[40px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-60 dark:bg-teal-600 dark:hover:bg-teal-500"
+            className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-60 dark:bg-teal-600 dark:hover:bg-teal-500"
           >
             {uploadingRef ? 'Wysyłanie…' : 'Wgraj zdjęcie'}
           </button>
@@ -563,7 +562,7 @@ export default function BodyMap() {
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 Brak zdjęcia referencyjnego dla widoku „{currentViewLabel}”.
               </p>
-              <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 Wgraj zdjęcie tła, aby korzystać z tego widoku.
               </p>
             </>
@@ -572,7 +571,7 @@ export default function BodyMap() {
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 Brak widoków ciała.
               </p>
-              <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 Kliknij „+ Dodaj widok”, wybierz okolicę ciała i wgraj zdjęcie
                 referencyjne, aby zacząć.
               </p>
@@ -603,7 +602,7 @@ export default function BodyMap() {
                       type="button"
                       onClick={() => utils.zoomOut()}
                       aria-label="Oddal"
-                      className="h-9 w-9 rounded-lg border border-slate-300 bg-white text-lg font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                      className="h-11 w-11 rounded-lg border border-slate-300 bg-white text-lg font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                     >
                       −
                     </button>
@@ -614,14 +613,14 @@ export default function BodyMap() {
                       type="button"
                       onClick={() => utils.zoomIn()}
                       aria-label="Przybliż"
-                      className="h-9 w-9 rounded-lg border border-slate-300 bg-white text-lg font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                      className="h-11 w-11 rounded-lg border border-slate-300 bg-white text-lg font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                     >
                       +
                     </button>
                     <button
                       type="button"
                       onClick={() => utils.resetTransform()}
-                      className="ml-1 min-h-[36px] rounded-lg border border-slate-300 bg-white px-3 text-xs font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                      className="ml-1 min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 text-xs font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                     >
                       Dopasuj
                     </button>
@@ -656,7 +655,7 @@ export default function BodyMap() {
                       const dragging = drag?.id === lesion.id
                       const inMove = moveModeId === lesion.id
                       const isSel = selectedId === lesion.id
-                      const showTip = hoveredId === lesion.id && !inMove
+                      const showTip = (hoveredId === lesion.id || selectedId === lesion.id) && !inMove
                       return (
                         <Fragment key={lesion.id}>
                         <button
@@ -679,7 +678,7 @@ export default function BodyMap() {
                           }
                           aria-label={`${lesion.label} — ${meta.label}`}
                           className={[
-                            'absolute h-5 w-5 rounded-full focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-400',
+                            'pin-hit absolute h-5 w-5 rounded-full focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-400',
                             isSel
                               ? 'ring-2 ring-white ring-offset-2 ring-offset-teal-500 dark:ring-offset-teal-400'
                               : 'ring-2 ring-white hover:ring-teal-300 dark:ring-slate-900',
@@ -711,7 +710,7 @@ export default function BodyMap() {
                             style={{
                               left: `${dragging ? drag.x : lesion.pos_x}%`,
                               top: `${dragging ? drag.y : lesion.pos_y}%`,
-                              transform: `translate(-50%, -50%) scale(${inv})`,
+                                                            transform: `translate(-50%, -50%) scale(${inv})`,
                             }}
                           >
                             <span className="pin-tip absolute bottom-full left-1/2 mb-3 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white shadow-lg dark:bg-slate-100 dark:text-slate-900">
@@ -756,7 +755,9 @@ export default function BodyMap() {
             onCancelEdit={() => setEditForm(null)}
             onOpenDetail={() =>
               selectedLesion &&
-              navigate(`/person/${personId}/lesion/${selectedLesion.id}`)
+              navigate(`/person/${personId}/lesion/${selectedLesion.id}`, {
+                state: { from: 'map' },
+              })
             }
             onStartMove={() => {
               setEditForm(null)
@@ -779,11 +780,20 @@ export default function BodyMap() {
           }}
           className="space-y-3 rounded-xl border border-teal-200 bg-teal-50/60 p-4 dark:border-teal-800 dark:bg-teal-950/30"
         >
-          <p className="text-sm font-medium text-teal-800 dark:text-teal-200">
-            Nowe znamię @ {pending.pos_x}% / {pending.pos_y}%
-          </p>
+          <div>
+            <label
+              htmlFor="new-lesion-label"
+              className="block text-sm font-medium text-teal-800 dark:text-teal-200"
+            >
+              Nazwa / opis znamienia
+            </label>
+            <p className="mt-0.5 text-xs text-teal-700 dark:text-teal-300">
+              Nowa pozycja na mapie: {pending.pos_x}% / {pending.pos_y}%
+            </p>
+          </div>
           <div className="flex flex-col gap-2 sm:flex-row">
             <input
+              id="new-lesion-label"
               type="text"
               autoFocus
               value={pending.label}
@@ -830,6 +840,20 @@ export default function BodyMap() {
           </span>
         ))}
       </div>
+
+      {/* Potwierdzenie usunięcia tła - spójne z usuwaniem znamienia/zdjęcia
+          (własny modal zamiast natywnego window.confirm). */}
+      <ConfirmDialog
+        open={refConfirm}
+        busy={deletingRef}
+        title="Usunąć zdjęcie tła?"
+        description="Usunięte zostanie tylko zdjęcie tła tego widoku. Piny znamion i ich historia pozostaną zachowane."
+        confirmLabel="Tak, usuń zdjęcie tła"
+        onConfirm={runDeleteRef}
+        onCancel={() => {
+          if (!deletingRef) setRefConfirm(false)
+        }}
+      />
     </div>
   )
 }
