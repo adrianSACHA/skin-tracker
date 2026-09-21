@@ -58,23 +58,25 @@ describe('buildRows', () => {
     { id: 'b', status: 'new', lesion_photos: [] },
   ]
 
-  it('buduje wiersze z terminem i liczbą dni od ostatniego zdjęcia', () => {
+  it('liczy termin i zaległość każdego znamienia', () => {
     const rows = buildRows(lesions, { intervalWeeks: 4, today: '2025-02-01' })
 
     expect(rows).toHaveLength(2)
+    // Termin '2025-01-29' już minął względem '2025-02-01'.
     expect(rows[0]).toMatchObject({
       last: '2025-01-01',
       next: '2025-01-29',
-      overdueDays: 31,
+      overdue: true,
     })
+    // Termin '2025-03-01' jest jeszcze przed nami.
     expect(rows[1]).toMatchObject({
       last: null,
       next: '2025-03-01',
-      overdueDays: null,
+      overdue: false,
     })
   })
 
-  it('ręczny termin kontroli ma pierwszeństwo nad wyliczonym', () => {
+  it('ręczny termin w przyszłości nie jest zaległy', () => {
     const rows = buildRows(
       [
         {
@@ -87,7 +89,23 @@ describe('buildRows', () => {
       { intervalWeeks: 4, today: '2025-02-01' }
     )
 
-    expect(rows[0].next).toBe('2025-06-01')
+    expect(rows[0]).toMatchObject({ next: '2025-06-01', overdue: false })
+  })
+
+  it('ręczny termin w przeszłości jest zaległy', () => {
+    const rows = buildRows(
+      [
+        {
+          id: 'a',
+          status: 'watch',
+          next_check_at: '2025-01-15',
+          lesion_photos: [{ taken_at: '2025-01-01' }],
+        },
+      ],
+      { intervalWeeks: 4, today: '2025-02-01' }
+    )
+
+    expect(rows[0]).toMatchObject({ next: '2025-01-15', overdue: true })
   })
 })
 

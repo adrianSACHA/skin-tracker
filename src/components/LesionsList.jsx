@@ -189,9 +189,7 @@ export default function LesionsList() {
         </div>
       ) : (
         <ul className="space-y-3">
-          {rows.map(({ lesion, last, next, overdueDays }) => {
-            const overdue =
-              overdueDays !== null && overdueDays > intervalWeeks * 7
+          {rows.map(({ lesion, last, next, overdue }) => {
             return (
               <li
                 key={lesion.id}

@@ -5,7 +5,6 @@ import { supabase } from '../lib/supabase'
 import {
   addDaysYMD,
   addWeeksYMD,
-  daysBetween,
   formatDate,
   todayYMD,
 } from '../lib/date'
@@ -96,18 +95,13 @@ export default function Reminders() {
   }, [personId])
 
   const rows = useMemo(() => {
-    const today = todayYMD()
-    const built = buildRows(lesions, { intervalWeeks, today })
-    const mapped = built.map((row) => {
-      const daysLeft = daysBetween(today, row.next)
-      return {
-        ...row,
-        daysLeft,
-        overdue: daysLeft !== null && daysLeft < 0,
-        snoozed: Boolean(row.lesion.next_check_at),
-        remindOn: addDaysYMD(row.next, -leadDays),
-      }
-    })
+    const built = buildRows(lesions, { intervalWeeks, today: todayYMD() })
+    const mapped = built.map((row) => ({
+      ...row,
+      daysLeft: row.daysUntilNext,
+      snoozed: Boolean(row.lesion.next_check_at),
+      remindOn: addDaysYMD(row.next, -leadDays),
+    }))
     // Najpilniejsze (najbardziej zaległe / najbliższe) na górze.
     return mapped.sort((a, b) => a.next.localeCompare(b.next))
   }, [lesions, intervalWeeks, leadDays])

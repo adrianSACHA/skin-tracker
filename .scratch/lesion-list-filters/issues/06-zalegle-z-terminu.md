@@ -14,13 +14,17 @@ datę **i** „zaległe" jednocześnie.
 
 ## Kryteria akceptacji
 
-- [ ] `overdue` na liście = `Termin kontroli` w przeszłości (jak w Kontrolach).
-- [ ] `Znamię` z ręcznym terminem w przyszłości NIE pokazuje „zaległe".
-- [ ] `overdueDays` (wiek ostatniego zdjęcia) znika z `lesionView`, jeśli przestaje być potrzebne.
-- [ ] Testy pokrywają: termin w przeszłości = zaległe, w przyszłości = nie.
+- [x] `overdue` na liście = `Termin kontroli` w przeszłości (jak w Kontrolach).
+- [x] `Znamię` z ręcznym terminem w przyszłości NIE pokazuje „zaległe".
+- [x] `overdueDays` (wiek ostatniego zdjęcia) znika z `lesionView`, jeśli przestaje być potrzebne.
+- [x] Testy pokrywają: termin w przeszłości = zaległe, w przyszłości = nie.
 
 ## Comments
 
 - Znalezione przez `/code-review` po ticketach 01–05. Ta sama rodzina błędu co
   ticket 02 (lista vs Kontrole), tylko o krok dalej — lista pokazuje wspólny
   termin, ale zaległość liczy jeszcze po staremu.
+- Zrealizowane (TDD). `buildRows` zwraca teraz `daysUntilNext` + `overdue`
+  (`overdue = termin w przeszłości`); `overdueDays` usunięte. `LesionsList`
+  i `Reminders` korzystają z `row.overdue`. Przy okazji usunięty martwy
+  `daysSince` z `date.js` (jego jedynym konsumentem była stara logika zaległości).

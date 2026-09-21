@@ -33,15 +33,6 @@ export function formatDate(ymd) {
   })
 }
 
-// Ile dni minęło od danej daty (do wyliczania "zaległych" kontroli).
-export function daysSince(ymd) {
-  if (!ymd) return null
-  const date = new Date(`${ymd}T00:00:00`)
-  if (Number.isNaN(date.getTime())) return null
-  const diffMs = Date.now() - date.getTime()
-  return Math.floor(diffMs / (1000 * 60 * 60 * 24))
-}
-
 // Liczba dni z 'YYYY-MM-DD' do 'YYYY-MM-DD' (dodatnia, gdy `to` jest później).
 // Deterministyczne - bez zależności od bieżącego czasu, więc łatwe do testów.
 export function daysBetween(fromYMD, toYMD) {

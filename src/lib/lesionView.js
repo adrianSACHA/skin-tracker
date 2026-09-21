@@ -29,12 +29,16 @@ export function effectiveNext(last, intervalWeeks, nextCheckAt, today = todayYMD
 export function buildRows(lesions, { intervalWeeks, today = todayYMD() } = {}) {
   return (lesions || []).map((lesion) => {
     const last = lastPhotoDate(lesion.lesion_photos)
+    const next = effectiveNext(last, intervalWeeks, lesion.next_check_at, today)
+    const daysUntilNext = daysBetween(today, next)
     return {
       lesion,
       last,
       // Termin kontroli: ręczny (`next_check_at`) ma pierwszeństwo nad wyliczonym.
-      next: effectiveNext(last, intervalWeeks, lesion.next_check_at, today),
-      overdueDays: last ? daysBetween(last, today) : null,
+      next,
+      daysUntilNext,
+      // Zaległe = termin już minął (spójnie z Kontrolami).
+      overdue: daysUntilNext !== null && daysUntilNext < 0,
     }
   })
 }
