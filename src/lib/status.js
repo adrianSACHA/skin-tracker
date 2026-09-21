@@ -23,7 +23,7 @@ export const STATUS_META = {
       'bg-yellow-100 text-yellow-800 ring-yellow-200 dark:bg-yellow-950 dark:text-yellow-200 dark:ring-yellow-800',
   },
   urgent: {
-    label: 'Do pilnej konsultacji',
+    label: 'Wymaga uwagi',
     dot: '#ef4444', // czerwony
     badge:
       'bg-red-100 text-red-800 ring-red-200 dark:bg-red-950 dark:text-red-200 dark:ring-red-800',
