@@ -12,11 +12,12 @@ kontroli` są na górze.
 
 ## Kryteria akceptacji
 
-- [ ] Lista sortuje się po `Terminie kontroli` rosnąco.
-- [ ] `Znamiona` bez terminu trafiają na koniec.
-- [ ] Przy równych terminach kolejność jest zdeterminowana (nie losowa).
-- [ ] Testy pokrywają sortowanie.
+- [x] Lista sortuje się po `Terminie kontroli` rosnąco.
+- [x] `Znamiona` bez terminu trafiają na koniec.
+- [x] Przy równych terminach kolejność jest zdeterminowana (nie losowa).
+- [x] Testy pokrywają sortowanie.
 
 ## Comments
 
 - Zlecone przez `/to-tickets` z `spec.md`. Wymaga 02, bo sortuje po spójnym terminie.
+- Zrealizowane. `sortRowsByNext` w `lesionView` (rosnąco, bez terminu na koniec, tie-break po nazwie); kontrolka „Sortuj" w `LesionsList` z opcjami: Termin kontroli (domyślnie) / Status. 3 nowe testy.

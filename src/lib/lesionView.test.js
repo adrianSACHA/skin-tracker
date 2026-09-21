@@ -6,6 +6,7 @@ import {
   buildRows,
   filterByStatus,
   sortRows,
+  sortRowsByNext,
 } from './lesionView'
 
 describe('lastPhotoDate', () => {
@@ -144,5 +145,39 @@ describe('sortRows', () => {
     sortRows(rows)
 
     expect(rows).toEqual(snapshot)
+  })
+})
+
+describe('sortRowsByNext', () => {
+  it('sortuje po terminie rosnąco (najpilniejsze na górze)', () => {
+    const rows = [
+      { lesion: { label: 'c' }, next: '2025-06-01' },
+      { lesion: { label: 'a' }, next: '2025-01-01' },
+      { lesion: { label: 'b' }, next: '2025-03-01' },
+    ]
+
+    expect(sortRowsByNext(rows).map((r) => r.next)).toEqual([
+      '2025-01-01',
+      '2025-03-01',
+      '2025-06-01',
+    ])
+  })
+
+  it('znamiona bez terminu trafiają na koniec', () => {
+    const rows = [
+      { lesion: { label: 'x' }, next: null },
+      { lesion: { label: 'y' }, next: '2025-02-01' },
+    ]
+
+    expect(sortRowsByNext(rows).map((r) => r.lesion.label)).toEqual(['y', 'x'])
+  })
+
+  it('przy równych terminach decyduje nazwa (deterministycznie)', () => {
+    const rows = [
+      { lesion: { label: 'b' }, next: '2025-01-01' },
+      { lesion: { label: 'a' }, next: '2025-01-01' },
+    ]
+
+    expect(sortRowsByNext(rows).map((r) => r.lesion.label)).toEqual(['a', 'b'])
   })
 })

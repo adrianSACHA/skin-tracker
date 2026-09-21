@@ -55,3 +55,22 @@ export function sortRows(rows) {
     return (a.last || '').localeCompare(b.last || '')
   })
 }
+
+// Kolejność wg `Terminu kontroli`: najpilniejsze (najwcześniejsze) na górze,
+// znamiona bez terminu na końcu, a przy równych terminach - alfabetycznie
+// po nazwie (żeby kolejność była zdeterminowana).
+export function sortRowsByNext(rows) {
+  return [...rows].sort((a, b) => {
+    const na = a.next || ''
+    const nb = b.next || ''
+    if (!na && !nb) return byLabel(a, b)
+    if (!na) return 1
+    if (!nb) return -1
+    if (na !== nb) return na.localeCompare(nb)
+    return byLabel(a, b)
+  })
+}
+
+function byLabel(a, b) {
+  return (a.lesion.label || '').localeCompare(b.lesion.label || '')
+}

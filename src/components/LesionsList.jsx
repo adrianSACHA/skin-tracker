@@ -3,7 +3,12 @@ import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatDate, todayYMD } from '../lib/date'
 import { useIntervalWeeks } from '../lib/interval'
-import { buildRows, filterByStatus, sortRows } from '../lib/lesionView'
+import {
+  buildRows,
+  filterByStatus,
+  sortRows,
+  sortRowsByNext,
+} from '../lib/lesionView'
 import { STATUSES, statusMeta } from '../lib/status'
 import StatusBadge from './StatusBadge'
 
@@ -13,6 +18,7 @@ export default function LesionsList() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedStatuses, setSelectedStatuses] = useState([])
+  const [sortBy, setSortBy] = useState('next')
   const [intervalWeeks, setIntervalWeeks] = useIntervalWeeks()
 
   const load = async () => {
@@ -35,11 +41,11 @@ export default function LesionsList() {
 
   const { rows, total } = useMemo(() => {
     const built = buildRows(lesions, { intervalWeeks, today: todayYMD() })
-    return {
-      rows: sortRows(filterByStatus(built, selectedStatuses)),
-      total: built.length,
-    }
-  }, [lesions, selectedStatuses, intervalWeeks])
+    const filtered = filterByStatus(built, selectedStatuses)
+    const sorted =
+      sortBy === 'status' ? sortRows(filtered) : sortRowsByNext(filtered)
+    return { rows: sorted, total: built.length }
+  }, [lesions, selectedStatuses, sortBy, intervalWeeks])
 
   const toggleStatus = (status) => {
     setSelectedStatuses((prev) =>
@@ -126,19 +132,34 @@ export default function LesionsList() {
           </div>
         </fieldset>
 
-        <div className="flex items-center gap-2">
-          <label htmlFor="interval-weeks-list">Interwał (tyg.)</label>
-          <input
-            id="interval-weeks-list"
-            type="number"
-            min="1"
-            max="52"
-            value={intervalWeeks}
-            onChange={(e) =>
-              setIntervalWeeks(Math.max(1, Number(e.target.value) || 1))
-            }
-            className="min-h-[44px] w-20 rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-          />
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="flex items-center gap-2">
+            <label htmlFor="interval-weeks-list">Interwał (tyg.)</label>
+            <input
+              id="interval-weeks-list"
+              type="number"
+              min="1"
+              max="52"
+              value={intervalWeeks}
+              onChange={(e) =>
+                setIntervalWeeks(Math.max(1, Number(e.target.value) || 1))
+              }
+              className="min-h-[44px] w-20 rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label htmlFor="sort-by">Sortuj</label>
+            <select
+              id="sort-by"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            >
+              <option value="next">Termin kontroli (najpilniejsze)</option>
+              <option value="status">Status (pilność)</option>
+            </select>
+          </div>
         </div>
       </div>
 
