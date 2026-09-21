@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { formatDate, todayYMD } from '../lib/date'
 import { useIntervalWeeks } from '../lib/interval'
 import { buildRows, filterByStatus, sortRows } from '../lib/lesionView'
+import { STATUSES, statusMeta } from '../lib/status'
 import StatusBadge from './StatusBadge'
 
 export default function LesionsList() {
@@ -11,7 +12,7 @@ export default function LesionsList() {
   const [lesions, setLesions] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [onlyAttention, setOnlyAttention] = useState(false)
+  const [selectedStatuses, setSelectedStatuses] = useState([])
   const [intervalWeeks, setIntervalWeeks] = useIntervalWeeks()
 
   const load = async () => {
@@ -32,15 +33,21 @@ export default function LesionsList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [personId])
 
-  const rows = useMemo(() => {
+  const { rows, total } = useMemo(() => {
     const built = buildRows(lesions, { intervalWeeks, today: todayYMD() })
-    // Filtr pilności wyrażamy statusami - docelowo zastąpi go filtr po `Status` (ticket 03).
-    const filtered = filterByStatus(
-      built,
-      onlyAttention ? ['watch', 'urgent'] : []
+    return {
+      rows: sortRows(filterByStatus(built, selectedStatuses)),
+      total: built.length,
+    }
+  }, [lesions, selectedStatuses, intervalWeeks])
+
+  const toggleStatus = (status) => {
+    setSelectedStatuses((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status]
     )
-    return sortRows(filtered)
-  }, [lesions, onlyAttention, intervalWeeks])
+  }
 
   return (
     <div className="space-y-4">
@@ -50,8 +57,7 @@ export default function LesionsList() {
             Lista znamion
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Statusy „Do obserwacji" i „Do pilnej konsultacji" oraz sugerowana
-            data następnej kontroli.
+            Filtruj po statusie i sprawdzaj sugerowaną datę następnej kontroli.
           </p>
         </div>
         <Link
@@ -72,16 +78,53 @@ export default function LesionsList() {
       ) : null}
 
       {/* Ustawienia */}
-      <div className="flex flex-wrap items-center gap-4 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
-        <label className="flex min-h-[44px] items-center gap-2">
-          <input
-            type="checkbox"
-            checked={onlyAttention}
-            onChange={(e) => setOnlyAttention(e.target.checked)}
-            className="h-5 w-5 rounded border-slate-300 text-teal-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-600 dark:bg-slate-800"
-          />
-          Pokaż tylko „do obserwacji" i „do pilnej konsultacji"
-        </label>
+      <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+        <fieldset>
+          <legend className="mb-2 flex flex-wrap items-center gap-x-2 font-medium text-slate-700 dark:text-slate-200">
+            Filtr po statusie
+            <span className="font-normal text-slate-500 dark:text-slate-400">
+              {rows.length} z {total}
+            </span>
+          </legend>
+          <div className="flex flex-wrap gap-2">
+            {STATUSES.map((s) => {
+              const meta = statusMeta(s)
+              const checked = selectedStatuses.includes(s)
+              return (
+                <label
+                  key={s}
+                  className={`flex min-h-[44px] cursor-pointer items-center gap-2 rounded-full border px-3 transition-colors ${
+                    checked
+                      ? 'border-teal-600 bg-teal-50 text-teal-800 dark:border-teal-400 dark:bg-teal-950 dark:text-teal-200'
+                      : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleStatus(s)}
+                    className="h-4 w-4 rounded border-slate-300 text-teal-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-600 dark:bg-slate-800"
+                  />
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: meta.dot }}
+                    aria-hidden="true"
+                  />
+                  {meta.label}
+                </label>
+              )
+            })}
+            {selectedStatuses.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => setSelectedStatuses([])}
+                className="min-h-[44px] rounded-full px-3 text-sm font-medium text-teal-700 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-300"
+              >
+                Wyczyść
+              </button>
+            ) : null}
+          </div>
+        </fieldset>
 
         <div className="flex items-center gap-2">
           <label htmlFor="interval-weeks-list">Interwał (tyg.)</label>
@@ -105,7 +148,9 @@ export default function LesionsList() {
         </p>
       ) : rows.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
-          Brak znamion do wyświetlenia.
+          {total === 0
+            ? 'Brak znamion do wyświetlenia.'
+            : 'Brak znamion dla wybranych statusów.'}
         </div>
       ) : (
         <ul className="space-y-3">
