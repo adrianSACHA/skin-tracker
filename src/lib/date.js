@@ -41,3 +41,13 @@ export function daysSince(ymd) {
   const diffMs = Date.now() - date.getTime()
   return Math.floor(diffMs / (1000 * 60 * 60 * 24))
 }
+
+// Liczba dni z 'YYYY-MM-DD' do 'YYYY-MM-DD' (dodatnia, gdy `to` jest później).
+// Deterministyczne - bez zależności od bieżącego czasu, więc łatwe do testów.
+export function daysBetween(fromYMD, toYMD) {
+  if (!fromYMD || !toYMD) return null
+  const from = new Date(`${fromYMD}T00:00:00`)
+  const to = new Date(`${toYMD}T00:00:00`)
+  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) return null
+  return Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24))
+}

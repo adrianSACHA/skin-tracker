@@ -1,18 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { addWeeksYMD, daysSince, formatDate, todayYMD } from '../lib/date'
-import { STATUS_PRIORITY, statusMeta } from '../lib/status'
+import { formatDate, todayYMD } from '../lib/date'
 import { useIntervalWeeks } from '../lib/interval'
+import { buildRows, filterByStatus, sortRows } from '../lib/lesionView'
 import StatusBadge from './StatusBadge'
-
-function lastPhotoDate(photos) {
-  if (!photos || photos.length === 0) return null
-  return photos.reduce(
-    (max, p) => (max && max > p.taken_at ? max : p.taken_at),
-    null
-  )
-}
 
 export default function LesionsList() {
   const { personId } = useParams()
@@ -41,32 +33,13 @@ export default function LesionsList() {
   }, [personId])
 
   const rows = useMemo(() => {
-    const mapped = lesions.map((lesion) => {
-      const last = lastPhotoDate(lesion.lesion_photos)
-      return {
-        lesion,
-        last,
-        next: addWeeksYMD(last || todayYMD(), intervalWeeks),
-        overdueDays: last ? daysSince(last) : null,
-      }
-    })
-
-    const filtered = onlyAttention
-      ? mapped.filter(
-          ({ lesion }) =>
-            lesion.status === 'watch' || lesion.status === 'urgent'
-        )
-      : mapped
-
-    return filtered.sort((a, b) => {
-      const pa = STATUS_PRIORITY[a.lesion.status] ?? 9
-      const pb = STATUS_PRIORITY[b.lesion.status] ?? 9
-      if (pa !== pb) return pa - pb
-      // Dawniej kontrolowane (bardziej zaległe) na górze.
-      const la = a.last || ''
-      const lb = b.last || ''
-      return la.localeCompare(lb)
-    })
+    const built = buildRows(lesions, { intervalWeeks, today: todayYMD() })
+    // Filtr pilności wyrażamy statusami - docelowo zastąpi go filtr po `Status` (ticket 03).
+    const filtered = filterByStatus(
+      built,
+      onlyAttention ? ['watch', 'urgent'] : []
+    )
+    return sortRows(filtered)
   }, [lesions, onlyAttention, intervalWeeks])
 
   return (
@@ -136,7 +109,7 @@ export default function LesionsList() {
         </div>
       ) : (
         <ul className="space-y-3">
-          {rows.map(({ lesion, last, next, overdueDays }) => {
+          {rows.map(({ lesion, last, nextComputed, overdueDays }) => {
             const overdue =
               overdueDays !== null && overdueDays > intervalWeeks * 7
             return (
@@ -171,7 +144,7 @@ export default function LesionsList() {
                         : 'text-slate-800 dark:text-slate-100'
                     }
                   >
-                    {formatDate(next)}
+                    {formatDate(nextComputed)}
                   </strong>
                   {overdue ? (
                     <span className="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-700 dark:bg-red-950 dark:text-red-300">

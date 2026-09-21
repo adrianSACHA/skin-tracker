@@ -5,29 +5,16 @@ import { supabase } from '../lib/supabase'
 import {
   addDaysYMD,
   addWeeksYMD,
-  daysSince,
+  daysBetween,
   formatDate,
   todayYMD,
 } from '../lib/date'
 import { useIntervalWeeks } from '../lib/interval'
+import { buildRows } from '../lib/lesionView'
 import StatusBadge from './StatusBadge'
 import CalendarReminderButton from './CalendarReminderButton'
 
 const SOON_DAYS = 30 // horyzont "wkrótce" w pasku podsumowania
-
-function lastPhotoDate(photos) {
-  if (!photos || photos.length === 0) return null
-  return photos.reduce(
-    (max, p) => (max && max > p.taken_at ? max : p.taken_at),
-    null
-  )
-}
-
-// Ile dni do danej daty (ujemne = zaległe).
-function daysLeftTo(ymd) {
-  const since = daysSince(ymd)
-  return since === null ? null : -since
-}
 
 // Sekcja przesuwania terminu: wybierz liczbę tygodni, potem „Przesuń".
 function SnoozeControl({ defaultWeeks, busy, onSnooze }) {
@@ -109,18 +96,17 @@ export default function Reminders() {
   }, [personId])
 
   const rows = useMemo(() => {
-    const mapped = lesions.map((lesion) => {
-      const last = lastPhotoDate(lesion.lesion_photos)
-      const computed = addWeeksYMD(last || todayYMD(), intervalWeeks)
-      const next = lesion.next_check_at || computed
-      const daysLeft = daysLeftTo(next)
+    const today = todayYMD()
+    const built = buildRows(lesions, { intervalWeeks, today })
+    const mapped = built.map((row) => {
+      const next = row.nextEffective
+      const daysLeft = daysBetween(today, next)
       return {
-        lesion,
-        last,
+        ...row,
         next,
         daysLeft,
         overdue: daysLeft !== null && daysLeft < 0,
-        snoozed: Boolean(lesion.next_check_at),
+        snoozed: Boolean(row.lesion.next_check_at),
         remindOn: addDaysYMD(next, -leadDays),
       }
     })

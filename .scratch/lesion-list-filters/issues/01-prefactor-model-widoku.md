@@ -1,6 +1,5 @@
 # 01 — Prefactor: model widoku listy + testy
 
-
 Type: task
 Status: ready-for-agent
 Blocked by: brak
@@ -16,11 +15,12 @@ jest pokryta testami jednostkowymi.
 
 ## Kryteria akceptacji
 
-- [ ] Działa runner testów (`npm test`) skonfigurowany pod Vite/React.
-- [ ] Powstaje czysty moduł (bez JSX) liczący `last`, `Termin kontroli`, `overdue` oraz udostępniający `filterByStatus` i `sortRows`.
-- [ ] `LesionsList` i `Reminders` korzystają z tego modułu — duplikat `lastPhotoDate` usunięty.
-- [ ] Testy pokrywają: brak zdjęć, jedno zdjęcie, wiele zdjęć, sortowanie.
+- [x] Działa runner testów (`npm test`) skonfigurowany pod Vite/React.
+- [x] Powstaje czysty moduł (bez JSX) liczący `last`, `Termin kontroli`, `overdue` oraz udostępniający `filterByStatus` i `sortRows`.
+- [x] `LesionsList` i `Reminders` korzystają z tego modułu — duplikat `lastPhotoDate` usunięty.
+- [x] Testy pokrywają: brak zdjęć, jedno zdjęcie, wiele zdjęć, sortowanie.
 
 ## Comments
 
 - Zlecone przez `/to-tickets` z `spec.md`.
+- Zrealizowane. Vitest 2.1.9 (Vite 5 wymaga <3), `src/lib/lesionView.js` + `lesionView.test.js` (14 testów), `daysBetween` w `date.js`. Zachowanie zachowane: `LesionsList` nadal używa `nextComputed`, `Reminders` `nextEffective` — ujednolicenie należy do ticketu 02.
