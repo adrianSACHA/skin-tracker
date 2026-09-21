@@ -4,7 +4,7 @@ const STORAGE_KEY = 'skin-tracker:selected-person'
 
 const PersonContext = createContext(null)
 
-// Wybrany profil ("Ja" / "Syn") trzymany globalnie + w localStorage,
+// Wybrana osoba ("Ja" / "Syn") trzymana globalnie + w localStorage,
 // żeby przetrwał odświeżenie strony.
 export function PersonProvider({ children }) {
   const [person, setPersonState] = useState(null)

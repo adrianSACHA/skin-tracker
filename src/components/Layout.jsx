@@ -35,7 +35,7 @@ export default function Layout({ children }) {
           <div className="flex items-center gap-2 text-sm">
             {person ? (
               <span className="hidden text-slate-600 sm:inline dark:text-slate-300">
-                Profil:{' '}
+                Osoba:{' '}
                 <strong className="dark:text-slate-100">
                   {person.display_name}
                 </strong>

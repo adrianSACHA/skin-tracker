@@ -60,7 +60,7 @@ export default function LesionInfoPanel({
         </button>
       </div>
 
-      {/* Ostatnie zdjęcie + liczba sesji */}
+      {/* Ostatnie zdjęcie + liczba zdjęć */}
       {last ? (
         <div className="flex gap-3">
           <SignedImage
@@ -76,7 +76,7 @@ export default function LesionInfoPanel({
               {formatDate(last.taken_at)}
             </p>
             <p className="text-slate-500 dark:text-slate-400">
-              Sesji: {photos.length}
+              Zdjęć: {photos.length}
             </p>
           </div>
         </div>

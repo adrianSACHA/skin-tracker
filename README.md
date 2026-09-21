@@ -1,8 +1,8 @@
 # Skin Tracker
 
-Osobista aplikacja do **systematycznej, fotograficznej dokumentacji znamion /
-zmian skórnych** (u mnie i u syna). Służy do zapisu zdjęć w czasie i ich
-porównywania — nic więcej.
+Osobista aplikacja do **systematycznej, fotograficznej dokumentacji znamion**
+(u mnie i u syna). Służy do zapisu zdjęć w czasie i ich porównywania — nic
+więcej.
 
 > ⚠️ **To NIE jest wyrób medyczny i nie diagnozuje.** Aplikacja nie ocenia
 > charakteru zmian i nie podaje żadnego „risk score". Statusy (`new`, `stable`,
@@ -60,7 +60,7 @@ adresu.*
     ├── App.jsx                      # routing
     ├── main.jsx                     # HashRouter + rejestracja web componentu
     ├── index.css                    # Tailwind + wariant trybu ciemnego
-    ├── context/PersonContext.jsx    # wybrany profil (Ja/Syn)
+    ├── context/PersonContext.jsx    # wybrana osoba (Ja/Syn)
     ├── context/ThemeContext.jsx     # tryb jasny/ciemny (+ zapis w localStorage)
     ├── lib
     │   ├── supabase.js              # klient Supabase
@@ -70,13 +70,13 @@ adresu.*
     │   ├── ics.js                   # generator .ics (RRULE + alarm) i deep-linki
     │   └── interval.js              # interwał kontroli (localStorage)
     └── components
-        ├── AuthGate.jsx             # blokada aplikacji bez sesji
+        ├── AuthGate.jsx             # blokada aplikacji bez zalogowania
         ├── Login.jsx
         ├── AppToaster.jsx           # toasty (sonner, motyw jasny/ciemny)
         ├── LoadingFallback.jsx
         ├── Layout.jsx               # nagłówek + nawigacja + stopka
         ├── ThemeToggle.jsx          # przełącznik trybu jasny/ciemny
-        ├── PersonSelector.jsx       # wybór profilu
+        ├── PersonSelector.jsx       # wybór osoby
         ├── BodyMap.jsx              # mapa ciała: zoom/pan + piny (dodaj/przesuń/edytuj)
         ├── LesionDetail.jsx         # szczegóły + porównanie + kalendarz + "Zarządzanie"
         ├── LesionSegmenter.jsx      # pomiar z obrysu (MediaPipe, tylko geometria)
@@ -124,12 +124,12 @@ git push -u origin main
    [`supabase/rls-setup.sql`](supabase/rls-setup.sql) i kliknij **Run**.
    Skrypt tworzy tabele, polityki RLS oraz **prywatny** bucket
    `lesion-photos`. Jest idempotentny — można go uruchamiać ponownie.
-4. **Authentication → Users → Add user** — utwórz **jeden** użytkownik (swój
+4. **Authentication → Users → Add user** — utwórz **jedno** konto (swój
    email + hasło). Zaznacz **Auto Confirm User** (albo potwierdź email przez
    link).
-5. Skopiuj **UID** tego użytkownika (Authentication → Users).
-6. Utwórz dwa profile. Albo przez UI aplikacji (przycisk „Dodaj profil" na
-   ekranie wyboru profilu), albo od razu w SQL:
+5. Skopiuj **UID** tego konta (Authentication → Users).
+6. Utwórz dwie osoby. Albo przez UI aplikacji (przycisk „Dodaj osobę" na
+   ekranie wyboru osoby), albo od razu w SQL:
 
 ```sql
 insert into public.monitored_persons (owner_user_id, display_name)
@@ -139,7 +139,7 @@ values
 ```
 
 7. (Opcjonalnie) **Authentication → Providers → Email** — możesz wyłączyć
-   rejestrację nowych użytkowników, jeśli chcesz mieć pewność, że nikt się nie
+   rejestrację nowych kont, jeśli chcesz mieć pewność, że nikt się nie
    zapisze.
 
 ### Struktura danych (po co jest RLS)
@@ -239,11 +239,11 @@ Postęp znajdziesz w zakładce **Actions** w repo.
 ## Jak używać (flow)
 
 1. Zaloguj się (jedno konto).
-2. Wybierz profil: **Ja** / **Syn**.
+2. Wybierz osobę: **Ja** / **Syn**.
 3. **Mapa ciała** — dodaj zdjęcie tła (przód/tył/boki), potem włącz
    „+ Dodaj znamię" i klikaj miejsca na zdjęciu, aby tworzyć piny.
 4. Kliknij pin → **szczegóły znamienia**:
-   - dodaj kolejne zdjęcia (sesje),
+   - dodaj kolejne zdjęcia,
    - porównaj dwa zdjęcia suwakiem przezroczystości,
    - obejrzyj trend rozmiaru (wykres) i historię ABCDE,
    - ustaw status,
@@ -260,7 +260,7 @@ Postęp znajdziesz w zakładce **Actions** w repo.
 ## Limity i budżet
 
 - **Supabase free tier:** 500 MB baza, 1 GB Storage. Realistyczne użycie
-  (kilkanaście znamion, sesje co 4–8 tygodni) mieści się w tym z dużym
+  (kilkanaście znamion, zdjęcia co 4–8 tygodni) mieści się w tym z dużym
   zapasem dzięki kompresji.
 - **Kompresja:** `browser-image-compression` → `maxSizeMB: 0.4`,
   `maxWidthOrHeight: 1800`, `useWebWorker: true`, `fileType: 'image/webp'`.
@@ -303,5 +303,5 @@ limitów Supabase i nie wymagają zmiany hostingu.
 | `npm ci` failuje w Actions | Brak `package-lock.json` — uruchom `npm install` i zacommituj lockfile. |
 | „Brak konfiguracji Supabase" | Nie ustawiono `VITE_SUPABASE_*` (lokalnie w `.env`, w Actions w secrets). |
 | Nie widać zdjęć | Bucket musi być **prywatny**, a polityki Storage z `rls-setup.sql` uruchomione. |
-| Brak dostępu do profili | Sprawdź UID w `monitored_persons.owner_user_id` i polityki RLS. |
+| Brak dostępu do osób | Sprawdź UID w `monitored_persons.owner_user_id` i polityki RLS. |
 | Przycisk „Do kalendarza" nie działa / brak zapisu kontroli | Uruchom **sekcję 7** z `supabase/rls-setup.sql` (dodaje `monitored_persons.reminder_lead_days` i `lesions.next_check_at`). |

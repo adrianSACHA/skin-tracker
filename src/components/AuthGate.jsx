@@ -4,7 +4,7 @@ import LoadingFallback from './LoadingFallback'
 
 const Login = lazy(() => import('./Login'))
 
-// Blokuje cały widok aplikacji bez aktywnej sesji.
+// Blokuje cały widok aplikacji bez zalogowania.
 // Wzorzec 1:1 z repo numizmatycznego (session === undefined = stan ładowania).
 export default function AuthGate({ children }) {
   const [session, setSession] = useState(undefined)

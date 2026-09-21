@@ -279,7 +279,7 @@ export default function Reminders() {
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
                     <StatusBadge status={lesion.status} />
                     <span className="text-sm text-slate-500 dark:text-slate-400">
-                      Ostatnia sesja: {formatDate(last)}
+                      Ostatnie zdjęcie: {formatDate(last)}
                     </span>
                     {snoozed ? (
                       <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
@@ -315,7 +315,7 @@ export default function Reminders() {
                   onClick={() => addSession(lesion)}
                   className="inline-flex min-h-[44px] items-center rounded-lg bg-teal-700 px-3 text-sm font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500"
                 >
-                  Dodaj sesję
+                  Dodaj zdjęcie
                 </button>
                 <SnoozeControl
                   defaultWeeks={intervalWeeks}
@@ -346,7 +346,7 @@ export default function Reminders() {
       )}
 
       <p className="text-xs text-slate-500 dark:text-slate-400">
-        Daty są wyliczane z ostatniej sesji + interwał (albo z ręcznie
+        Daty są wyliczane z ostatniego zdjęcia + interwał (albo z ręcznie
         przesuniętej daty). To organizacja dokumentacji, nie ocena medyczna.
       </p>
     </div>

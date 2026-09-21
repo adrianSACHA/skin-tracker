@@ -7,7 +7,7 @@ import { todayYMD } from '../lib/date'
 // MediaPipe jest duży - ładujemy go leniwie, dopiero gdy otworzysz pomiar z obrysu.
 const LesionSegmenter = lazy(() => import('./LesionSegmenter'))
 
-// Formularz sesji zdjęciowej: kompresja przed wysłaniem (browser-image-compression),
+// Formularz nowego zdjęcia: kompresja przed wysłaniem (browser-image-compression),
 // opcjonalny rozmiar w mm + krótki formularz ABCDE wypełniany świadomie.
 export default function PhotoUploadForm({
   lesion,
@@ -105,7 +105,7 @@ export default function PhotoUploadForm({
       className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
     >
       <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">
-        Nowa sesja zdjęciowa
+        Nowe zdjęcie
       </h3>
 
       {error ? (
@@ -285,7 +285,7 @@ export default function PhotoUploadForm({
             htmlFor="evolution-notes"
             className="mb-1 block text-sm text-slate-700 dark:text-slate-200"
           >
-            Ewolucja / zmiany od ostatniej sesji (E)
+            Ewolucja / zmiany od ostatniego zdjęcia (E)
           </label>
           <textarea
             id="evolution-notes"
@@ -320,7 +320,7 @@ export default function PhotoUploadForm({
           disabled={busy}
           className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
         >
-          {busy ? 'Przetwarzanie…' : 'Zapisz sesję'}
+          {busy ? 'Przetwarzanie…' : 'Zapisz zdjęcie'}
         </button>
         <button
           type="button"

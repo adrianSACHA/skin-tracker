@@ -1,5 +1,5 @@
 // Statusy znamion + mapowanie kolorów (używane przy pinach i odznakach).
-// UWAGA: to etykiety organizacyjne użytkownika - nie są oceną medyczną.
+// UWAGA: to etykiety organizacyjne konta - nie są oceną medyczną.
 
 export const STATUSES = ['urgent', 'watch', 'new', 'stable', 'removed']
 

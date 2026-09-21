@@ -44,7 +44,7 @@ export default function LesionDetail() {
   const location = useLocation()
   const { theme } = useTheme()
 
-  // Skąd przyszliśmy - żeby „Wróć" prowadziło tam, gdzie użytkownik był.
+  // Skąd przyszliśmy - żeby „Wróć" cofnęło do poprzedniego widoku.
   const backBySection = {
     list: { to: `/person/${personId}/list`, label: '← Wróć do listy znamion' },
     reminders: {
@@ -61,7 +61,7 @@ export default function LesionDetail() {
   const [photos, setPhotos] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  // Wejście z zakładki „Kontrole" (przycisk „Dodaj sesję") otwiera formularz.
+  // Wejście z zakładki „Kontrole" (przycisk „Dodaj zdjęcie") otwiera formularz.
   const [showUpload, setShowUpload] = useState(Boolean(location.state?.openUpload))
   const [confirm, setConfirm] = useState(null) // { kind: 'lesion' | 'photo', photo? }
   const [deleting, setDeleting] = useState(false)
@@ -77,7 +77,7 @@ export default function LesionDetail() {
   const inputClass =
     'min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100'
 
-  // "Wstecz": jeśli mamy wpisy w historii tej sesji, cofnij o krok (np. do
+  // "Wstecz": jeśli mamy wpisy w historii tego widoku, cofnij o krok (np. do
   // mapy ciała); w razie wejścia z linku wprost - przejdź jawnie do mapy.
   const goBack = () => {
     const idx = window.history.state?.idx
@@ -304,7 +304,7 @@ export default function LesionDetail() {
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <StatusBadge status={lesion.status} />
             <span className="text-sm text-slate-500 dark:text-slate-400">
-              Sesji: {photos.length}
+              Zdjęć: {photos.length}
               {lastDate ? ` · ostatnia: ${formatDate(lastDate)}` : ''}
             </span>
           </div>
@@ -332,7 +332,7 @@ export default function LesionDetail() {
           onClick={() => setShowUpload((v) => !v)}
           className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500"
         >
-          {showUpload ? 'Zamknij formularz' : '+ Dodaj zdjęcie sesji'}
+          {showUpload ? 'Zamknij formularz' : '+ Dodaj zdjęcie'}
         </button>
 
 
@@ -387,7 +387,7 @@ export default function LesionDetail() {
       {/* Brak zdjęć */}
       {photos.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
-          Brak zdjęć. Dodaj pierwszą sesję zdjęciową powyżej.
+          Brak zdjęć. Dodaj pierwsze zdjęcie powyżej.
         </div>
       ) : (
         <>
@@ -525,7 +525,7 @@ export default function LesionDetail() {
           {/* Oś czasu zdjęć + ABCDE */}
           <section className="space-y-3">
             <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">
-              Historia sesji
+              Historia zdjęć
             </h2>
             <ol className="space-y-3">
               {chrono.map((photo) => (

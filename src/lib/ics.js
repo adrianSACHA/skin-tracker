@@ -171,7 +171,7 @@ export function checkupDescription({
 }) {
   const parts = [
     `Zaplanowana kontrola znamienia „${label}”.`,
-    lastDate ? `Ostatnia sesja zdjęciowa: ${formatDate(lastDate)}.` : null,
+    lastDate ? `Ostatnie zdjęcie: ${formatDate(lastDate)}.` : null,
     `Powtarza się co ${intervalWeeks} tyg.${
       leadDays > 0
         ? ` (przypomnienie ${leadDays} dni przed i w dniu kontroli)`

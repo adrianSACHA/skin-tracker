@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { usePerson } from '../context/PersonContext'
 
-// Ekran wyboru profilu ("Ja" / "Syn"). Syn nie ma własnego konta —
-// jest profilem zarządzanym przez moje konto.
+// Ekran wyboru osoby ("Ja" / "Syn"). Syn nie ma własnego konta —
+// jest osobą zarządzaną przez moje konto.
 export default function PersonSelector() {
   const [persons, setPersons] = useState([])
   const [loading, setLoading] = useState(true)
@@ -38,7 +38,7 @@ export default function PersonSelector() {
 
     const { data: userData, error: userError } = await supabase.auth.getUser()
     if (userError || !userData?.user) {
-      setError('Brak aktywnej sesji.')
+      setError('Brak zalogowania.')
       setAdding(false)
       return
     }
@@ -67,7 +67,7 @@ export default function PersonSelector() {
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
-          Wybierz profil
+          Wybierz osobę
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Dla kogo chcesz teraz prowadzić dokumentację?
@@ -85,11 +85,11 @@ export default function PersonSelector() {
 
       {loading ? (
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Wczytywanie profili…
+          Wczytywanie osób…
         </p>
       ) : persons.length === 0 ? (
         <div className="rounded-lg border border-dashed border-slate-300 bg-white px-4 py-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
-          Brak profili. Dodaj pierwszy profil poniżej (np. „Ja”).
+          Brak osób. Dodaj pierwszą osobę poniżej (np. „Ja”).
         </div>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2">
@@ -120,7 +120,7 @@ export default function PersonSelector() {
           htmlFor="new-person"
           className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200"
         >
-          Dodaj profil
+          Dodaj osobę
         </label>
         <div className="flex flex-col gap-2 sm:flex-row">
           <input

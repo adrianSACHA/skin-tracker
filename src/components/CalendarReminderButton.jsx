@@ -11,7 +11,7 @@ import {
 // Tworzymy CYKLICZNE wydarzenie (co N tyg.) z alarmem X dni wcześniej, więc
 // kalendarz sam przypomni o kolejnych kontrolach.
 //
-// Data pierwszego wydarzenia = data ostatniej sesji + interwał (domyślnie 6 tyg.).
+// Data pierwszego wydarzenia = data ostatniego zdjęcia + interwał (domyślnie 6 tyg.).
 export default function CalendarReminderButton({
   label,
   lastDate,

@@ -13,7 +13,7 @@ import AppToaster from './components/AppToaster'
 // leniwie, żeby nie powiększać początkowego bundle'a.
 const LesionDetail = lazy(() => import('./components/LesionDetail'))
 
-// Flow: logowanie (AuthGate) -> wybór profilu -> mapa ciała -> szczegóły znamienia.
+// Flow: logowanie (AuthGate) -> wybór osoby -> mapa ciała -> szczegóły znamienia.
 export default function App() {
   return (
     <AuthGate>
@@ -29,14 +29,14 @@ export default function App() {
           >
             <Routes>
               <Route path="/" element={<PersonSelector />} />
-              {/* Zagnieżdżone trasy pod profilem - czytelna hierarchia */}
+              {/* Zagnieżdżone trasy pod osobą - czytelna hierarchia */}
               <Route path="/person/:personId">
                 <Route index element={<BodyMap />} />
                 <Route path="list" element={<LesionsList />} />
                 <Route path="reminders" element={<Reminders />} />
                 <Route path="lesion/:lesionId" element={<LesionDetail />} />
               </Route>
-              {/* Nieznany adres -> ekran wyboru profilu.
+              {/* Nieznany adres -> ekran wyboru osoby.
                   Celowo BEZ <Navigate replace> - taki redirect podmieniał wpis
                   w historii i psuł "wstecz" (pkt 7). */}
               <Route path="*" element={<PersonSelector />} />

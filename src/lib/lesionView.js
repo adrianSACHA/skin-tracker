@@ -3,7 +3,7 @@
 import { addWeeksYMD, daysBetween, todayYMD } from './date'
 import { STATUS_PRIORITY } from './status'
 
-// Data najpóźniejszego zdjęcia ("ostatnia sesja") albo null, gdy brak zdjęć.
+// Data najpóźniejszego zdjęcia ("ostatnie zdjęcie") albo null, gdy brak zdjęć.
 export function lastPhotoDate(photos) {
   if (!photos || photos.length === 0) return null
   return photos.reduce(

@@ -22,7 +22,7 @@ function randomSuffix() {
 
 async function currentUserId() {
   const { data, error } = await supabase.auth.getUser()
-  if (error || !data?.user) throw new Error('Brak aktywnej sesji.')
+  if (error || !data?.user) throw new Error('Brak zalogowania.')
   return data.user.id
 }
 
