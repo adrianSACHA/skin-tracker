@@ -99,15 +99,13 @@ export default function Reminders() {
     const today = todayYMD()
     const built = buildRows(lesions, { intervalWeeks, today })
     const mapped = built.map((row) => {
-      const next = row.nextEffective
-      const daysLeft = daysBetween(today, next)
+      const daysLeft = daysBetween(today, row.next)
       return {
         ...row,
-        next,
         daysLeft,
         overdue: daysLeft !== null && daysLeft < 0,
         snoozed: Boolean(row.lesion.next_check_at),
-        remindOn: addDaysYMD(next, -leadDays),
+        remindOn: addDaysYMD(row.next, -leadDays),
       }
     })
     // Najpilniejsze (najbardziej zaległe / najbliższe) na górze.

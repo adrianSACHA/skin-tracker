@@ -63,17 +63,17 @@ describe('buildRows', () => {
     expect(rows).toHaveLength(2)
     expect(rows[0]).toMatchObject({
       last: '2025-01-01',
-      nextComputed: '2025-01-29',
+      next: '2025-01-29',
       overdueDays: 31,
     })
     expect(rows[1]).toMatchObject({
       last: null,
-      nextComputed: '2025-03-01',
+      next: '2025-03-01',
       overdueDays: null,
     })
   })
 
-  it('ręczny termin trafia tylko do nextEffective', () => {
+  it('ręczny termin kontroli ma pierwszeństwo nad wyliczonym', () => {
     const rows = buildRows(
       [
         {
@@ -86,8 +86,7 @@ describe('buildRows', () => {
       { intervalWeeks: 4, today: '2025-02-01' }
     )
 
-    expect(rows[0].nextComputed).toBe('2025-01-29')
-    expect(rows[0].nextEffective).toBe('2025-06-01')
+    expect(rows[0].next).toBe('2025-06-01')
   })
 })
 

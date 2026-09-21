@@ -14,11 +14,12 @@ rozjeżdżają.
 
 ## Kryteria akceptacji
 
-- [ ] Lista respektuje ręcznie ustawiony `Termin kontroli` z bazy.
-- [ ] Bez ręcznego terminu data = ostatnie `Zdjęcie` + `Interwał kontroli`.
-- [ ] Dla tego samego `Znamienia` data na liście = data w Kontrolach.
-- [ ] Testy pokrywają oba przypadki.
+- [x] Lista respektuje ręcznie ustawiony `Termin kontroli` z bazy.
+- [x] Bez ręcznego terminu data = ostatnie `Zdjęcie` + `Interwał kontroli`.
+- [x] Dla tego samego `Znamienia` data na liście = data w Kontrolach.
+- [x] Testy pokrywają oba przypadki.
 
 ## Comments
 
 - Zlecone przez `/to-tickets` z `spec.md`. Brama dla ticketu 04 (sortowanie po terminie).
+- Zrealizowane. `LesionsList` używa teraz wspólnego `next` (`next_check_at` ?? wyliczony), tak jak Kontrole. Sprzątanie z `/code-review`: zwinięto podwójne pola `nextComputed`/`nextEffective` do jednego `next`.

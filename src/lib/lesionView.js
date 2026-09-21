@@ -29,19 +29,11 @@ export function effectiveNext(last, intervalWeeks, nextCheckAt, today = todayYMD
 export function buildRows(lesions, { intervalWeeks, today = todayYMD() } = {}) {
   return (lesions || []).map((lesion) => {
     const last = lastPhotoDate(lesion.lesion_photos)
-    // Oba terminy liczymy celowo: `LesionsList` używa `nextComputed`,
-    // a `Reminders` `nextEffective`. Ujednolicenie to osobny ticket (02) -
-    // nie zwijaj tego do jednego pola przy okazji.
     return {
       lesion,
       last,
-      nextComputed: computedNext(last, intervalWeeks, today),
-      nextEffective: effectiveNext(
-        last,
-        intervalWeeks,
-        lesion.next_check_at,
-        today
-      ),
+      // Termin kontroli: ręczny (`next_check_at`) ma pierwszeństwo nad wyliczonym.
+      next: effectiveNext(last, intervalWeeks, lesion.next_check_at, today),
       overdueDays: last ? daysBetween(last, today) : null,
     }
   })
