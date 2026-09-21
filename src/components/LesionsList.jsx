@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatDate, todayYMD } from '../lib/date'
 import { useIntervalWeeks } from '../lib/interval'
@@ -10,6 +10,7 @@ import {
   sortRowsByNext,
 } from '../lib/lesionView'
 import { STATUSES, statusMeta } from '../lib/status'
+import { readListParams, buildListParams } from '../lib/listParams'
 import StatusBadge from './StatusBadge'
 
 export default function LesionsList() {
@@ -17,9 +18,14 @@ export default function LesionsList() {
   const [lesions, setLesions] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [selectedStatuses, setSelectedStatuses] = useState([])
-  const [sortBy, setSortBy] = useState('next')
+  const [searchParams, setSearchParams] = useSearchParams()
   const [intervalWeeks, setIntervalWeeks] = useIntervalWeeks()
+
+  // Filtr i sortowanie żyją w URL (HashRouter) - przetrwają odświeżenie i powrót.
+  const { statuses: selectedStatuses, sort: sortBy } = useMemo(
+    () => readListParams(searchParams),
+    [searchParams]
+  )
 
   const load = async () => {
     setLoading(true)
@@ -47,13 +53,21 @@ export default function LesionsList() {
     return { rows: sorted, total: built.length }
   }, [lesions, selectedStatuses, sortBy, intervalWeeks])
 
-  const toggleStatus = (status) => {
-    setSelectedStatuses((prev) =>
-      prev.includes(status)
-        ? prev.filter((s) => s !== status)
-        : [...prev, status]
-    )
+  const setListParams = ({ statuses, sort }) => {
+    setSearchParams(buildListParams({ statuses, sort }), { replace: true })
   }
+
+  const toggleStatus = (status) => {
+    const statuses = selectedStatuses.includes(status)
+      ? selectedStatuses.filter((s) => s !== status)
+      : [...selectedStatuses, status]
+    setListParams({ statuses, sort: sortBy })
+  }
+
+  const clearStatuses = () => setListParams({ statuses: [], sort: sortBy })
+
+  const changeSort = (value) =>
+    setListParams({ statuses: selectedStatuses, sort: value })
 
   return (
     <div className="space-y-4">
@@ -123,7 +137,7 @@ export default function LesionsList() {
             {selectedStatuses.length > 0 ? (
               <button
                 type="button"
-                onClick={() => setSelectedStatuses([])}
+                onClick={clearStatuses}
                 className="min-h-[44px] rounded-full px-3 text-sm font-medium text-teal-700 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-300"
               >
                 Wyczyść
@@ -153,7 +167,7 @@ export default function LesionsList() {
             <select
               id="sort-by"
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) => changeSort(e.target.value)}
               className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
               <option value="next">Termin kontroli (najpilniejsze)</option>
