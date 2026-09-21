@@ -3,7 +3,7 @@
 import { STATUSES } from './status'
 
 export const DEFAULT_SORT = 'next'
-export const SORTS = ['next', 'status']
+const SORTS = ['next', 'status']
 
 // Czyta filtr i sortowanie z parametrów URL. Nieznane wartości pomija,
 // więc wadliwy URL nie psuje widoku.

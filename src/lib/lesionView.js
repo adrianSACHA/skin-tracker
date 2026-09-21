@@ -1,40 +1,22 @@
 // Czysty model widoku listy znamion - bez JSX i bez I/O, więc łatwy do testów.
+// Publiczny szew: `buildRows`, `filterByStatus`, `sortRows`, `sortRowsByNext`.
 // Współdzielony przez `LesionsList` i `Reminders` (usuwa duplikat `lastPhotoDate`).
 import { addWeeksYMD, daysBetween, todayYMD } from './date'
 import { STATUS_PRIORITY } from './status'
-
-// Data najpóźniejszego zdjęcia ("ostatnie zdjęcie") albo null, gdy brak zdjęć.
-export function lastPhotoDate(photos) {
-  if (!photos || photos.length === 0) return null
-  return photos.reduce(
-    (max, p) => (max && max > p.taken_at ? max : p.taken_at),
-    null
-  )
-}
-
-// Termin kontroli wyliczony z samego interwału: ostatnie zdjęcie + interwał
-// (albo dziś + interwał, gdy nie ma jeszcze żadnego zdjęcia).
-export function computedNext(last, intervalWeeks, today = todayYMD()) {
-  return addWeeksYMD(last || today, intervalWeeks)
-}
-
-// Termin kontroli "efektywny": ręcznie ustawiony (`next_check_at`) ma
-// pierwszeństwo, w przeciwnym razie wyliczony.
-export function effectiveNext(last, intervalWeeks, nextCheckAt, today = todayYMD()) {
-  return nextCheckAt || computedNext(last, intervalWeeks, today)
-}
 
 // Wiersze widoku dla listy znamion. `today` podawane jawnie, by wynik był
 // deterministyczny i testowalny.
 export function buildRows(lesions, { intervalWeeks, today = todayYMD() } = {}) {
   return (lesions || []).map((lesion) => {
     const last = lastPhotoDate(lesion.lesion_photos)
-    const next = effectiveNext(last, intervalWeeks, lesion.next_check_at, today)
+    // Termin kontroli: ręczny (`next_check_at`) ma pierwszeństwo nad wyliczonym
+    // (ostatnie zdjęcie + interwał, albo dziś + interwał, gdy brak zdjęć).
+    const computed = addWeeksYMD(last || today, intervalWeeks)
+    const next = lesion.next_check_at || computed
     const daysUntilNext = daysBetween(today, next)
     return {
       lesion,
       last,
-      // Termin kontroli: ręczny (`next_check_at`) ma pierwszeństwo nad wyliczonym.
       next,
       daysUntilNext,
       // Zaległe = termin już minął (spójnie z Kontrolami).
@@ -73,6 +55,15 @@ export function sortRowsByNext(rows) {
     if (na !== nb) return na.localeCompare(nb)
     return byLabel(a, b)
   })
+}
+
+// Data najpóźniejszego zdjęcia ("ostatnie zdjęcie") albo null, gdy brak zdjęć.
+function lastPhotoDate(photos) {
+  if (!photos || photos.length === 0) return null
+  return photos.reduce(
+    (max, p) => (max && max > p.taken_at ? max : p.taken_at),
+    null
+  )
 }
 
 function byLabel(a, b) {
