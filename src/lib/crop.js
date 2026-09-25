@@ -72,17 +72,21 @@ export function denormalizeBox(box, imgW, imgH) {
 // Złożenie: z maski (AI) albo obrysu ręcznego -> znormalizowany kwadratowy kadr.
 // Zwraca null, gdy nie ma czego kadrować (pusta maska / brak obrysu).
 //
-// padding 1.0 => bok kadru = 2x bounding box (znamię ~1/2 kadru + margines).
-// minSideFraction => kadr nie mniejszy niż ta część krótszego boku obrazu,
-//   czyli zoom nie większy niż ~1/minSideFraction (chroni przed zbyt mocnym
-//   przybliżeniem małych znamion).
+// Kadr liczymy OD ZNAMIENIA: bok = (1 + padding) x większy wymiar bounding boxa.
+// Dzięki temu jest NIEZALEŻNY od odległości zdjęcia - czy zrobisz je bliżej, czy
+// dalej, znamię zajmuje w kadrze tę samą część, więc dwa zdjęcia da się nałożyć.
+// (Cena: realny wzrost/ubytek nie będzie "widoczny" na nakładce - do tego jest
+// liczba mm i wykres trendu.)
+//
+// padding 2.0 => bok = 3x bounding box (znamię ~1/3 kadru + margines).
+// minSidePx => tylko zabezpieczenie przed degeneratem (bardzo mały bok).
 export function centeredCropBox({
   mask,
   points,
   imgW,
   imgH,
-  padding = 1.0,
-  minSideFraction = 0.4,
+  padding = 2.0,
+  minSidePx = 64,
 }) {
   if (!imgW || !imgH) return null
   let bbox = null
@@ -94,14 +98,14 @@ export function centeredCropBox({
 
   const px = squareCropBoxPx(bbox, imgW, imgH, padding)
 
-  // Minimalny bok kadru - nie przybliżamy mocniej niż dozwolone.
-  const minSide = Math.round(minSideFraction * Math.min(imgW, imgH))
-  if (px.w < minSide) {
+  // Zabezpieczenie: skrajnie mały bok -> rozszerz do minSidePx (środek bez zmian).
+  const side = Math.max(px.w, Math.min(minSidePx, Math.min(imgW, imgH)))
+  if (side !== px.w) {
     const cx = px.x + px.w / 2
     const cy = px.y + px.h / 2
-    const x = Math.max(0, Math.min(cx - minSide / 2, imgW - minSide))
-    const y = Math.max(0, Math.min(cy - minSide / 2, imgH - minSide))
-    return normalizeBox({ x, y, w: minSide, h: minSide }, imgW, imgH)
+    const x = Math.max(0, Math.min(cx - side / 2, imgW - side))
+    const y = Math.max(0, Math.min(cy - side / 2, imgH - side))
+    return normalizeBox({ x, y, w: side, h: side }, imgW, imgH)
   }
   return normalizeBox(px, imgW, imgH)
 }

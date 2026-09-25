@@ -86,28 +86,38 @@ describe('normalizeBox / denormalizeBox', () => {
 })
 
 describe('centeredCropBox', () => {
-  it('z maski -> kwadratowy kadr wokół znamienia (z marginesem)', () => {
+  it('z maski -> kadr 3x bounding box wokół znamienia', () => {
     const mask = makeMask(100, 100, { x: 40, y: 40, w: 20, h: 20 })
     const crop = centeredCropBox({ mask, points: null, imgW: 400, imgH: 400 })
-    // bbox 80px, padding 1.0 -> bok 160px, środek (200,200) -> (120,120,160,160)
+    // bbox 80px, padding 2.0 -> bok 240px, środek (200,200) -> (80,80,240,240)
     expect(denormalizeBox(crop, 400, 400)).toEqual({
-      x: 120,
-      y: 120,
-      w: 160,
-      h: 160,
+      x: 80,
+      y: 80,
+      w: 240,
+      h: 240,
     })
   })
 
-  it('małe znamię -> kadr nie mniejszy niż minSideFraction (limit zoomu)', () => {
-    const mask = makeMask(100, 100, { x: 48, y: 48, w: 4, h: 4 })
-    const crop = centeredCropBox({ mask, points: null, imgW: 400, imgH: 400 })
-    // bbox 16px, padding 1.0 -> 32px, ale min bok = 0.4*400 = 160
-    expect(denormalizeBox(crop, 400, 400)).toEqual({
-      x: 120,
-      y: 120,
-      w: 160,
-      h: 160,
+  it('kadr skaluje się ze znamieniem (niezależny od odległości zdjęcia)', () => {
+    const big = centeredCropBox({
+      mask: makeMask(100, 100, { x: 40, y: 40, w: 20, h: 20 }),
+      imgW: 400,
+      imgH: 400,
     })
+    const small = centeredCropBox({
+      mask: makeMask(100, 100, { x: 40, y: 40, w: 10, h: 10 }),
+      imgW: 400,
+      imgH: 400,
+    })
+    // bbox o połowę mniejszy -> kadr o połowę mniejszy (to samo kadrowanie)
+    expect(small.w).toBeCloseTo(big.w / 2, 5)
+    expect(small.h).toBeCloseTo(big.h / 2, 5)
+  })
+
+  it('skrajnie małe znamię -> bok nie mniejszy niż minSidePx', () => {
+    const mask = makeMask(100, 100, { x: 48, y: 48, w: 2, h: 2 })
+    const crop = centeredCropBox({ mask, points: null, imgW: 200, imgH: 200 })
+    expect(denormalizeBox(crop, 200, 200).w).toBe(64)
   })
 
   it('pusta maska i brak punktów -> null (fallback)', () => {
