@@ -49,8 +49,7 @@ adresu.*
 
 ```
 .
-├── .env.example                     # placeholdery zmiennych Supabase (do skopiowania)
-├── env.example                      # ← patrz uwaga w sekcji 3
+├── env.example                      # placeholdery zmiennych Supabase (patrz uwaga w sekcji 3)
 ├── .github/workflows/deploy.yml     # build + publikacja na GitHub Pages
 ├── index.html
 ├── package.json
@@ -58,7 +57,7 @@ adresu.*
 ├── supabase/rls-setup.sql           # schemat + RLS + prywatny bucket
 └── src
     ├── App.jsx                      # routing
-    ├── main.jsx                     # HashRouter + rejestracja web componentu
+    ├── main.jsx                     # HashRouter + ThemeProvider + mount React
     ├── index.css                    # Tailwind + wariant trybu ciemnego
     ├── context/PersonContext.jsx    # wybrana osoba (Ja/Syn)
     ├── context/ThemeContext.jsx     # tryb jasny/ciemny (+ zapis w localStorage)
@@ -170,7 +169,7 @@ gdy pierwszy folder = `auth.uid()`.
 npm install
 ```
 
-Utwórz plik `.env` w katalogu głównym (skopiuj z `env.example` / `.env.example`):
+Utwórz plik `.env` w katalogu głównym (skopiuj z `env.example`):
 
 ```
 VITE_SUPABASE_URL=https://TWOJ-PROJEKT.supabase.co
