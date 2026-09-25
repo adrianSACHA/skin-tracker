@@ -71,7 +71,19 @@ export function denormalizeBox(box, imgW, imgH) {
 
 // Złożenie: z maski (AI) albo obrysu ręcznego -> znormalizowany kwadratowy kadr.
 // Zwraca null, gdy nie ma czego kadrować (pusta maska / brak obrysu).
-export function centeredCropBox({ mask, points, imgW, imgH, padding = 0.25 }) {
+//
+// padding 1.0 => bok kadru = 2x bounding box (znamię ~1/2 kadru + margines).
+// minSideFraction => kadr nie mniejszy niż ta część krótszego boku obrazu,
+//   czyli zoom nie większy niż ~1/minSideFraction (chroni przed zbyt mocnym
+//   przybliżeniem małych znamion).
+export function centeredCropBox({
+  mask,
+  points,
+  imgW,
+  imgH,
+  padding = 1.0,
+  minSideFraction = 0.4,
+}) {
   if (!imgW || !imgH) return null
   let bbox = null
   if (mask) bbox = bboxFromMaskInImage(mask, imgW, imgH)
@@ -79,7 +91,18 @@ export function centeredCropBox({ mask, points, imgW, imgH, padding = 0.25 }) {
     bbox = bboxFromPoints(points, imgW, imgH)
   }
   if (!bbox || bbox.w <= 0 || bbox.h <= 0) return null
+
   const px = squareCropBoxPx(bbox, imgW, imgH, padding)
+
+  // Minimalny bok kadru - nie przybliżamy mocniej niż dozwolone.
+  const minSide = Math.round(minSideFraction * Math.min(imgW, imgH))
+  if (px.w < minSide) {
+    const cx = px.x + px.w / 2
+    const cy = px.y + px.h / 2
+    const x = Math.max(0, Math.min(cx - minSide / 2, imgW - minSide))
+    const y = Math.max(0, Math.min(cy - minSide / 2, imgH - minSide))
+    return normalizeBox({ x, y, w: minSide, h: minSide }, imgW, imgH)
+  }
   return normalizeBox(px, imgW, imgH)
 }
 

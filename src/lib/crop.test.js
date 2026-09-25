@@ -86,14 +86,27 @@ describe('normalizeBox / denormalizeBox', () => {
 })
 
 describe('centeredCropBox', () => {
-  it('z maski -> kwadratowy kadr wokół znamienia', () => {
+  it('z maski -> kwadratowy kadr wokół znamienia (z marginesem)', () => {
     const mask = makeMask(100, 100, { x: 40, y: 40, w: 20, h: 20 })
     const crop = centeredCropBox({ mask, points: null, imgW: 400, imgH: 400 })
+    // bbox 80px, padding 1.0 -> bok 160px, środek (200,200) -> (120,120,160,160)
     expect(denormalizeBox(crop, 400, 400)).toEqual({
-      x: 150,
-      y: 150,
-      w: 100,
-      h: 100,
+      x: 120,
+      y: 120,
+      w: 160,
+      h: 160,
+    })
+  })
+
+  it('małe znamię -> kadr nie mniejszy niż minSideFraction (limit zoomu)', () => {
+    const mask = makeMask(100, 100, { x: 48, y: 48, w: 4, h: 4 })
+    const crop = centeredCropBox({ mask, points: null, imgW: 400, imgH: 400 })
+    // bbox 16px, padding 1.0 -> 32px, ale min bok = 0.4*400 = 160
+    expect(denormalizeBox(crop, 400, 400)).toEqual({
+      x: 120,
+      y: 120,
+      w: 160,
+      h: 160,
     })
   })
 
