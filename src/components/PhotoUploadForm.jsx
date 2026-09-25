@@ -3,11 +3,12 @@ import { toast } from 'sonner'
 import { supabase } from '../lib/supabase'
 import { uploadLesionPhoto } from '../lib/uploadPhoto'
 import { todayYMD } from '../lib/date'
+import { applyEdit, isIdentityEdit } from '../lib/editImage'
 
 // MediaPipe jest duży - ładujemy go leniwie, dopiero gdy otworzysz pomiar z obrysu.
 const LesionSegmenter = lazy(() => import('./LesionSegmenter'))
 
-// Formularz nowego zdjęcia: kompresja przed wysłaniem (browser-image-compression),
+// Formularz nowego zdjęcia: edycja (obrót/flip/reset) + kompresja przed wysłaniem,
 // opcjonalny rozmiar w mm + krótki formularz ABCDE wypełniany świadomie.
 export default function PhotoUploadForm({
   lesion,
@@ -15,8 +16,13 @@ export default function PhotoUploadForm({
   onUploaded,
   onCancel,
 }) {
-  const [file, setFile] = useState(null)
+  const [originalFile, setOriginalFile] = useState(null) // surowy wybór (niezmiennik edycji)
+  const [workingFile, setWorkingFile] = useState(null) // po edycji - TEN plik wysyłamy
   const [previewUrl, setPreviewUrl] = useState(null)
+  const [rotate, setRotate] = useState(0) // 0 | 90 | 180 | 270
+  const [flipH, setFlipH] = useState(false)
+  const [flipV, setFlipV] = useState(false)
+
   const [takenAt, setTakenAt] = useState(todayYMD())
   const [sizeMm, setSizeMm] = useState('')
   const [notes, setNotes] = useState('')
@@ -26,6 +32,8 @@ export default function PhotoUploadForm({
   const [evolutionNotes, setEvolutionNotes] = useState('')
   const [hasScaleReference, setHasScaleReference] = useState(false)
   const [showSegmenter, setShowSegmenter] = useState(false)
+  const [cropBox, setCropBox] = useState(null) // znormalizowany kadr z segmentatora (ticket 11)
+  const [centerOnLesion, setCenterOnLesion] = useState(true)
 
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
@@ -38,25 +46,67 @@ export default function PhotoUploadForm({
   const checkboxClass =
     'h-5 w-5 rounded border-slate-300 text-teal-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-600 dark:bg-slate-800'
 
-  // Sprzątanie podglądu (object URL).
+  const editBtnClass =
+    'min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+
+  // Edycja (obrót/odbicia) -> plik roboczy i podgląd. Bez edycji podglądamy surowy
+  // plik; z edycją renderujemy przez <canvas>. Podglądem posługuje się też segmentator.
   useEffect(() => {
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    let active = true
+    let objectUrl = null
+
+    async function build() {
+      if (!originalFile) {
+        setWorkingFile(null)
+        setPreviewUrl(null)
+        return
+      }
+      if (isIdentityEdit({ rotate, flipH, flipV })) {
+        setWorkingFile(originalFile)
+        objectUrl = URL.createObjectURL(originalFile)
+        if (active) setPreviewUrl(objectUrl)
+        return
+      }
+      const blob = await applyEdit(originalFile, { rotate, flipH, flipV })
+      if (!active) return
+      setWorkingFile(blob)
+      objectUrl = URL.createObjectURL(blob)
+      setPreviewUrl(objectUrl)
     }
-  }, [previewUrl])
+
+    build().catch(() => {
+      if (active) setError('Nie udało się przetworzyć zdjęcia.')
+    })
+
+    return () => {
+      active = false
+      if (objectUrl) URL.revokeObjectURL(objectUrl)
+    }
+  }, [originalFile, rotate, flipH, flipV])
 
   const handleFile = (e) => {
     const selected = e.target.files?.[0]
     if (!selected) return
-    if (previewUrl) URL.revokeObjectURL(previewUrl)
-    setFile(selected)
-    setPreviewUrl(URL.createObjectURL(selected))
+    setOriginalFile(selected)
+    // Nowe zdjęcie resetuje edycję i kadr.
+    setRotate(0)
+    setFlipH(false)
+    setFlipV(false)
+    setCropBox(null)
     setInfo(null)
   }
 
+  const resetEdit = () => {
+    setRotate(0)
+    setFlipH(false)
+    setFlipV(false)
+  }
+
+  const editActive = !isIdentityEdit({ rotate, flipH, flipV })
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!file) {
+    if (!workingFile) {
       setError('Wybierz zdjęcie.')
       return
     }
@@ -67,9 +117,10 @@ export default function PhotoUploadForm({
 
     try {
       const { path, compressed } = await uploadLesionPhoto({
-        file,
+        file: workingFile,
         personId,
         lesionId: lesion.id,
+        crop: cropBox && centerOnLesion ? cropBox : undefined,
       })
 
       const { error: insertError } = await supabase
@@ -146,6 +197,48 @@ export default function PhotoUploadForm({
             className="max-h-72 w-auto rounded-lg border border-slate-200 dark:border-slate-700"
           />
         ) : null}
+        {originalFile ? (
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setRotate((r) => (r + 270) % 360)}
+              className={editBtnClass}
+            >
+              ⟲ Obróć w lewo
+            </button>
+            <button
+              type="button"
+              onClick={() => setRotate((r) => (r + 90) % 360)}
+              className={editBtnClass}
+            >
+              ⟳ Obróć w prawo
+            </button>
+            <button
+              type="button"
+              onClick={() => setFlipH((v) => !v)}
+              aria-pressed={flipH}
+              className={editBtnClass}
+            >
+              ↔ Odbij w poziomie
+            </button>
+            <button
+              type="button"
+              onClick={() => setFlipV((v) => !v)}
+              aria-pressed={flipV}
+              className={editBtnClass}
+            >
+              ↕ Odbij w pionie
+            </button>
+            <button
+              type="button"
+              onClick={resetEdit}
+              disabled={!editActive}
+              className={editBtnClass}
+            >
+              Reset
+            </button>
+          </div>
+        ) : null}
         <p className="text-xs text-slate-500 dark:text-slate-400">
           Zdjęcie zostanie automatycznie skompresowane (max ~0.4 MB, webp,
           orientacja EXIF).
@@ -157,12 +250,19 @@ export default function PhotoUploadForm({
         <input
           type="checkbox"
           checked={hasScaleReference}
-          onChange={(e) => setHasScaleReference(e.target.checked)}
+          onChange={(e) => {
+            setHasScaleReference(e.target.checked)
+            // Bez potwierdzonej skali pomiar z obrysu jest niedostępny (ticket 10).
+            if (!e.target.checked) {
+              setShowSegmenter(false)
+              setCropBox(null)
+            }
+          }}
           className={`mt-0.5 ${checkboxClass}`}
         />
         <span>
-          W kadrze znajduje się skala referencyjna (moneta / linijka) — ułatwia
-          późniejsze przeliczenie rozmiaru w&nbsp;mm.
+          W kadrze znajduje się skala referencyjna (moneta / linijka) — jest
+          potrzebna, aby przeliczyć rozmiar w&nbsp;mm.
         </span>
       </label>
 
@@ -203,20 +303,26 @@ export default function PhotoUploadForm({
         </div>
       </div>
 
-      {/* Pomiar z obrysu (opcjonalny, MediaPipe - geometria, nie diagnoza) */}
+      {/* Pomiar z obrysu (MediaPipe - geometria, nie diagnoza).
+          Dostępny tylko, gdy potwierdzono skalę w kadrze (ticket 10). */}
       {previewUrl ? (
-        <div className="space-y-3">
+        <div className="space-y-2">
           <button
             type="button"
+            disabled={!hasScaleReference}
             onClick={() => setShowSegmenter((v) => !v)}
-            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:disabled:hover:bg-slate-800"
           >
-            {showSegmenter
-              ? 'Zamknij pomiar z obrysu'
-              : 'Pomiar z obrysu (opcjonalnie)'}
+            {showSegmenter ? 'Zamknij pomiar z obrysu' : 'Pomiar z obrysu'}
           </button>
+          {!hasScaleReference ? (
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Aby mierzyć z obrysu, zaznacz powyżej, że w kadrze jest skala
+              (moneta / linijka).
+            </p>
+          ) : null}
 
-          {showSegmenter ? (
+          {showSegmenter && hasScaleReference ? (
             <Suspense
               fallback={
                 <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -226,13 +332,25 @@ export default function PhotoUploadForm({
             >
               <LesionSegmenter
                 imageUrl={previewUrl}
-                onApply={({ sizeMm }) => {
+                onApply={({ sizeMm, crop }) => {
                   setSizeMm(String(sizeMm))
+                  setCropBox(crop || null)
                   setShowSegmenter(false)
                 }}
                 onCancel={() => setShowSegmenter(false)}
               />
             </Suspense>
+          ) : null}
+          {cropBox ? (
+            <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+              <input
+                type="checkbox"
+                checked={centerOnLesion}
+                onChange={(e) => setCenterOnLesion(e.target.checked)}
+                className={checkboxClass}
+              />
+              Wyśrodkuj kadr na znamieniu (przytnij do znamienia)
+            </label>
           ) : null}
         </div>
       ) : null}
@@ -317,7 +435,7 @@ export default function PhotoUploadForm({
       <div className="flex flex-wrap gap-2">
         <button
           type="submit"
-          disabled={busy}
+          disabled={busy || !workingFile}
           className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
         >
           {busy ? 'Przetwarzanie…' : 'Zapisz zdjęcie'}

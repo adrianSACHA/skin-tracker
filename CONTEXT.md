@@ -37,7 +37,7 @@ Zaznaczony na zdjęciu kontur znamienia, z którego liczy się pomiar.
 _Avoid_: maska, kontur
 
 **Kalibracja**:
-Odniesienie skali (np. znana średnica monety) pozwalające przeliczyć obrys na milimetry.
+Odniesienie skali (np. średnica monety albo odcinek linijki) pozwalające przeliczyć obrys na milimetry.
 _Avoid_: skalowanie
 
 **ABCDE**:

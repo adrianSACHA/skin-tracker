@@ -442,16 +442,16 @@ export default function LesionDetail() {
                 </div>
               </div>
 
-              <div className="relative mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-xl border border-slate-200 bg-black/5 dark:border-slate-800 dark:bg-black/40">
+              <div className="relative mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-xl border border-slate-200 bg-black/5 dark:border-slate-800 dark:bg-black/40">
                 <SignedImage
                   path={photoA?.photo_url}
                   alt={`Zdjęcie ${photoA ? formatDate(photoA.taken_at) : 'A'}`}
-                  className="absolute inset-0 h-full w-full object-contain"
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
                 <SignedImage
                   path={photoB?.photo_url}
                   alt={`Zdjęcie ${photoB ? formatDate(photoB.taken_at) : 'B'}`}
-                  className="absolute inset-0 h-full w-full object-contain"
+                  className="absolute inset-0 h-full w-full object-cover"
                   style={{ opacity: opacity / 100 }}
                 />
               </div>

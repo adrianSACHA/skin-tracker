@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FilesetResolver, InteractiveSegmenter } from '@mediapipe/tasks-vision'
+import { centeredCropBox } from '../lib/crop'
 
 // UWAGA (zweryfikowane empirycznie na @mediapipe/tasks-vision 1.0.1):
 // - Nowe API `InteractiveSegmenter` + model `interactive_segmentation.task` (v2).
@@ -95,7 +96,10 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
   const [modelState, setModelState] = useState('loading') // loading | ready | error
   const [modelError, setModelError] = useState(null)
 
-  const [mode, setMode] = useState('calibrate') // calibrate | segment | manual
+  // Kreator dwukrokowy (ticket 09): krok 1 = skala, krok 2 = znamię.
+  // "Jak zaznaczyć znamię" (AI / ręcznie) to metoda KROKU 2, nie osobny tryb.
+  const [step, setStep] = useState(1) // 1 | 2
+  const [method, setMethod] = useState('auto') // 'auto' | 'manual'
   const [coinPoints, setCoinPoints] = useState([])
   const [coinMm, setCoinMm] = useState(23.0)
   const [brush, setBrush] = useState('positive') // positive | negative(gumka)
@@ -153,7 +157,7 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
         if (!active) return
         setModelError(err?.message || 'Nie udało się wczytać modelu.')
         setModelState('error')
-        setMode('manual')
+        setMethod('manual') // bez modelu zostaje obrys ręczny
       }
     }
     create()
@@ -213,7 +217,7 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
     ctx.drawImage(image, 0, 0, W, H)
 
     // Overlay maski (z uwzględnieniem gumki)
-    if (mask && mode !== 'calibrate') {
+    if (mask) {
       const id = new ImageData(mask.width, mask.height)
       const px = id.data
       for (let y = 0; y < mask.height; y += 1) {
@@ -301,7 +305,7 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
         ctx.fill()
       })
     }
-  }, [img.dw, mask, mode, coinPoints, positives, erasers, manualPoints])
+  }, [img.dw, mask, coinPoints, positives, erasers, manualPoints])
 
   useEffect(() => {
     draw()
@@ -328,23 +332,44 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
     }
   }, [])
 
+  const goToStep = (target) => {
+    if (target === 2 && !pxPerMm) {
+      setError(
+        'Najpierw ustaw skalę (krok 1): wskaż dwa końce znanego odcinka (moneta / linijka).'
+      )
+      return
+    }
+    setError(null)
+    setResult(null)
+    setStep(target)
+  }
+
   const handleCanvasClick = (e) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const x = (e.clientX - rect.left) / rect.width
     const y = (e.clientY - rect.top) / rect.height
     setResult(null)
 
-    if (mode === 'calibrate') {
-      setCoinPoints((prev) =>
-        prev.length >= 2 ? [{ x, y }] : [...prev, { x, y }]
-      )
+    // KROK 1: skala - dwa końce znanego odcinka.
+    if (step === 1) {
+      const next =
+        coinPoints.length >= 2 ? [{ x, y }] : [...coinPoints, { x, y }]
+      setCoinPoints(next)
+      if (next.length === 2) {
+        // Auto-przejście do kroku 2 (ticket 09), z zachowaniem możliwości powrotu.
+        setError(null)
+        setStep(2)
+      }
       return
     }
-    if (mode === 'manual') {
+
+    // KROK 2: znamię - obrys ręczny.
+    if (method === 'manual') {
       setManualPoints((prev) => [...prev, { x, y }])
       return
     }
 
+    // KROK 2: znamię - segmentacja (AI).
     if (modelState !== 'ready') return
     if (brush === 'negative') {
       // Gumka: tylko lokalnie, bez wywołania modelu.
@@ -364,16 +389,23 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
   }
 
   const confirmOutline = () => {
-    const areaMm2 = mode === 'manual' ? manualArea : maskArea
     if (!pxPerMm) {
-      setError('Najpierw ustaw skalę (krok 1): kliknij 2 końce średnicy monety.')
+      setError(
+        'Najpierw ustaw skalę (krok 1): wskaż dwa końce znanego odcinka (moneta / linijka).'
+      )
+      setStep(1)
       return
     }
+    if (step !== 2) {
+      setStep(2)
+      return
+    }
+    const areaMm2 = method === 'manual' ? manualArea : maskArea
     if (areaMm2 === null) {
       setError(
-        mode === 'manual'
+        method === 'manual'
           ? 'Zaznacz co najmniej 3 punkty obrysu.'
-          : 'Najpierw kliknij w środek znamienia.'
+          : 'Najpierw kliknij w znamię.'
       )
       return
     }
@@ -388,11 +420,31 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
 
   const haveScale = Boolean(pxPerMm)
 
+  // Kadr centrujący (ticket 11): z maski AI albo z obrysu ręcznego (decyzja 05).
+  const cropBox = useMemo(
+    () =>
+      centeredCropBox({
+        mask: method === 'manual' ? null : mask,
+        points: method === 'manual' ? manualPoints : null,
+        imgW: img.nw,
+        imgH: img.nh,
+      }),
+    [method, mask, manualPoints, img.nw, img.nh]
+  )
+
+  const stepBtn = (active) =>
+    [
+      'min-h-[44px] rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-50',
+      active
+        ? 'bg-teal-700 text-white dark:bg-teal-600'
+        : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800',
+    ].join(' ')
+
   return (
     <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
       <div>
         <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">
-          Pomiar z obrysu (opcjonalny)
+          Pomiar z obrysu
         </h3>
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
           Narzędzie liczy tylko geometrię (pole powierzchni) ze zdjęcia. Nie
@@ -418,32 +470,28 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
         </div>
       ) : null}
 
-      {/* Kroki */}
-      <div className="flex flex-wrap gap-2">
-        {[
-          { key: 'calibrate', label: '1. Skala (moneta)' },
-          { key: 'segment', label: '2. Zaznacz znamię' },
-          { key: 'manual', label: 'Ręcznie (obrys)' },
-        ].map((s) => (
-          <button
-            key={s.key}
-            type="button"
-            disabled={s.key === 'segment' && modelState !== 'ready'}
-            onClick={() => {
-              setMode(s.key)
-              setResult(null)
-              setError(null)
-            }}
-            className={[
-              'min-h-[44px] rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-50',
-              mode === s.key
-                ? 'bg-teal-700 text-white dark:bg-teal-600'
-                : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800',
-            ].join(' ')}
-          >
-            {s.label}
-          </button>
-        ))}
+      {/* Wskaźnik kroków (sekwencyjne prowadzenie) */}
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          aria-current={step === 1 ? 'step' : undefined}
+          onClick={() => goToStep(1)}
+          className={stepBtn(step === 1)}
+        >
+          Krok 1 z 2 · Skala {haveScale ? '✓' : ''}
+        </button>
+        <span aria-hidden="true" className="text-slate-400">
+          →
+        </span>
+        <button
+          type="button"
+          aria-current={step === 2 ? 'step' : undefined}
+          disabled={!haveScale}
+          onClick={() => goToStep(2)}
+          className={stepBtn(step === 2)}
+        >
+          Krok 2 z 2 · Znamię
+        </button>
       </div>
 
       {error ? (
@@ -455,19 +503,19 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
         </div>
       ) : null}
 
-      {/* Panel: kalibracja */}
-      {mode === 'calibrate' ? (
+      {/* Panel: KROK 1 - skala */}
+      {step === 1 ? (
         <div className="space-y-3 rounded-lg bg-slate-50 p-3 text-sm dark:bg-slate-800/50">
           <p className="text-slate-600 dark:text-slate-300">
-            Kliknij <strong>dwa końce średnicy monety</strong> na zdjęciu (moneta
-            musi być w tym samym kadrze co znamię).
+            Wskaż <strong>dwa końce znanego odcinka</strong> — średnicę monety
+            albo odcinek na linijce (musi być w tym samym kadrze co znamię).
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            <label htmlFor="coin-mm" className="text-slate-700 dark:text-slate-200">
-              Średnica monety (mm)
+            <label htmlFor="ref-mm" className="text-slate-700 dark:text-slate-200">
+              Długość odcinka referencyjnego (mm)
             </label>
             <input
-              id="coin-mm"
+              id="ref-mm"
               type="number"
               list="coin-presets"
               step="0.1"
@@ -485,7 +533,10 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
             </datalist>
             <button
               type="button"
-              onClick={() => setCoinPoints([])}
+              onClick={() => {
+                setCoinPoints([])
+                setResult(null)
+              }}
               className={BTN_SECONDARY}
             >
               Wyczyść punkty
@@ -503,75 +554,117 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
         </div>
       ) : null}
 
-      {/* Panel: segmentacja */}
-      {mode === 'segment' ? (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg bg-slate-50 p-3 text-sm dark:bg-slate-800/50">
-          <span className="text-slate-600 dark:text-slate-300">
-            Kliknij na znamię, potem doprecyzuj:
-          </span>
-          <div className="flex gap-2">
+      {/* Panel: KROK 2 - znamię (metoda to wybór w środku kroku) */}
+      {step === 2 ? (
+        <div className="space-y-3 rounded-lg bg-slate-50 p-3 text-sm dark:bg-slate-800/50">
+          {haveScale ? (
+            <p className="text-green-700 dark:text-green-300">
+              Skala ustawiona. Teraz <strong>zaznacz znamię</strong>.
+            </p>
+          ) : null}
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-slate-600 dark:text-slate-300">Metoda:</span>
             <button
               type="button"
-              onClick={() => setBrush('positive')}
+              onClick={() => {
+                setMethod('auto')
+                setResult(null)
+              }}
+              disabled={modelState !== 'ready'}
               className={[
-                'min-h-[44px] rounded-lg px-3 text-sm font-medium',
-                brush === 'positive'
+                'min-h-[44px] rounded-lg px-3 text-sm font-medium disabled:opacity-50',
+                method === 'auto'
                   ? 'bg-blue-600 text-white'
                   : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-300 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700',
               ].join(' ')}
             >
-              + dodaj do obrysu
+              Automatycznie (AI)
             </button>
             <button
               type="button"
-              onClick={() => setBrush('negative')}
+              onClick={() => {
+                setMethod('manual')
+                setResult(null)
+              }}
               className={[
                 'min-h-[44px] rounded-lg px-3 text-sm font-medium',
-                brush === 'negative'
-                  ? 'bg-red-600 text-white'
+                method === 'manual'
+                  ? 'bg-sky-600 text-white'
                   : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-300 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700',
               ].join(' ')}
             >
-              − usuń z obrysu (gumka)
+              Ręcznie (obrys)
             </button>
           </div>
-          <button
-            type="button"
-            onClick={resetSegment}
-            disabled={positives.length === 0 && erasers.length === 0}
-            className={BTN_SECONDARY}
-          >
-            Wyczyść i zaznacz od nowa
-          </button>
-          {busy ? (
-            <span className="text-slate-500 dark:text-slate-400">
-              Przeliczanie…
-            </span>
-          ) : null}
-        </div>
-      ) : null}
 
-      {/* Panel: ręcznie */}
-      {mode === 'manual' ? (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg bg-slate-50 p-3 text-sm dark:bg-slate-800/50">
-          <span className="text-slate-600 dark:text-slate-300">
-            Klikaj kolejne wierzchołki obrysu (min. 3). Ostatni punkt łączy się z
-            pierwszym.
-          </span>
-          <button
-            type="button"
-            onClick={() => {
-              setManualPoints([])
-              setResult(null)
-            }}
-            disabled={manualPoints.length === 0}
-            className={BTN_SECONDARY}
-          >
-            Wyczyść obrys
-          </button>
-          <span className="text-slate-500 dark:text-slate-400">
-            {manualPoints.length} pkt
-          </span>
+          {method === 'auto' ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-slate-600 dark:text-slate-300">
+                Kliknij na znamię, potem doprecyzuj:
+              </span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setBrush('positive')}
+                  className={[
+                    'min-h-[44px] rounded-lg px-3 text-sm font-medium',
+                    brush === 'positive'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-300 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700',
+                  ].join(' ')}
+                >
+                  + dodaj do obrysu
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBrush('negative')}
+                  className={[
+                    'min-h-[44px] rounded-lg px-3 text-sm font-medium',
+                    brush === 'negative'
+                      ? 'bg-red-600 text-white'
+                      : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-300 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700',
+                  ].join(' ')}
+                >
+                  − usuń z obrysu (gumka)
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={resetSegment}
+                disabled={positives.length === 0 && erasers.length === 0}
+                className={BTN_SECONDARY}
+              >
+                Wyczyść i zaznacz od nowa
+              </button>
+              {busy ? (
+                <span className="text-slate-500 dark:text-slate-400">
+                  Przeliczanie…
+                </span>
+              ) : null}
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-slate-600 dark:text-slate-300">
+                Klikaj kolejne wierzchołki obrysu (min. 3). Ostatni punkt łączy
+                się z pierwszym.
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setManualPoints([])
+                  setResult(null)
+                }}
+                disabled={manualPoints.length === 0}
+                className={BTN_SECONDARY}
+              >
+                Wyczyść obrys
+              </button>
+              <span className="text-slate-500 dark:text-slate-400">
+                {manualPoints.length} pkt
+              </span>
+            </div>
+          )}
         </div>
       ) : null}
 
@@ -596,7 +689,12 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => onApply({ sizeMm: Number(result.sizeMm.toFixed(1)) })}
+              onClick={() =>
+                onApply({
+                  sizeMm: Number(result.sizeMm.toFixed(1)),
+                  crop: cropBox,
+                })
+              }
               className={BTN_PRIMARY}
             >
               Zastosuj rozmiar ({result.sizeMm.toFixed(1)} mm)
@@ -625,13 +723,6 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
           </button>
         </div>
       )}
-
-      {!haveScale ? (
-        <p className="text-xs text-amber-700 dark:text-amber-300">
-          Uwaga: bez skali (krok 1) nie obliczę mm²/mm. Bez monety w kadrze możesz
-          wpisać rozmiar ręcznie w formularzu.
-        </p>
-      ) : null}
     </div>
   )
 }
