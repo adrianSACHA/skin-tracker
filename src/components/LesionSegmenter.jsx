@@ -683,7 +683,7 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
         width={img.dw || MAX_DISPLAY_WIDTH}
         height={img.dh || MAX_DISPLAY_WIDTH}
         onClick={handleCanvasClick}
-        className="w-full max-w-full cursor-crosshair rounded-lg border border-slate-200 bg-black/5 dark:border-slate-700 dark:bg-black/40"
+        className="mx-auto block w-full max-w-2xl cursor-crosshair rounded-lg border border-slate-200 bg-black/5 dark:border-slate-700 dark:bg-black/40"
         style={{ maxWidth: '100%', height: 'auto', touchAction: 'manipulation' }}
       />
 

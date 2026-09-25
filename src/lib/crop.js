@@ -122,6 +122,15 @@ export function lesionCenterNorm({ mask, points, imgW, imgH }) {
   return { x: (bbox.x + bbox.w / 2) / imgW, y: (bbox.y + bbox.h / 2) / imgH }
 }
 
+// Sugerowane pole widzenia (mm) z rozmiaru znamienia: 3x średnica (znamię ~1/3
+// kadru), zaokrąglone do 5 mm, w granicach 15-120. Domyślny rozmiar dla UI.
+export function suggestFovMm(diameterMm) {
+  const value = 3 * diameterMm
+  if (!Number.isFinite(value) || value <= 0) return 40
+  const rounded = Math.round(value / 5) * 5
+  return Math.min(120, Math.max(15, rounded))
+}
+
 // Kadr HYBRYDOWY: kwadrat o stałym polu widzenia (fovMm) wokół znamienia.
 // Bok w px = fovMm * pxPerMm, więc jest niezależny od odległości zdjęcia
 // (px/mm to kompensuje), a realna skala kadru jest STAŁA — widać wzrost.

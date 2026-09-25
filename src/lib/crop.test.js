@@ -9,6 +9,7 @@ import {
   centeredCropBox,
   lesionCenterNorm,
   mmCenteredCropBox,
+  suggestFovMm,
 } from './crop'
 
 function makeMask(width, height, blob) {
@@ -184,5 +185,23 @@ describe('mmCenteredCropBox', () => {
 
   it('null bez danych', () => {
     expect(mmCenteredCropBox({ center: null, pxPerMm: 5, fovMm: 40, imgW: 400, imgH: 400 })).toBeNull()
+  })
+})
+
+
+describe('suggestFovMm', () => {
+  it('3x średnica, zaokrąglone do 5 mm', () => {
+    expect(suggestFovMm(10)).toBe(30)
+    expect(suggestFovMm(12)).toBe(35)
+  })
+
+  it('klampuje do 15-120', () => {
+    expect(suggestFovMm(2)).toBe(15)
+    expect(suggestFovMm(100)).toBe(120)
+  })
+
+  it('bez sensownego rozmiaru -> 40', () => {
+    expect(suggestFovMm(0)).toBe(40)
+    expect(suggestFovMm(NaN)).toBe(40)
   })
 })

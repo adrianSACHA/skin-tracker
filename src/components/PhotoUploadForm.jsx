@@ -4,10 +4,22 @@ import { supabase } from '../lib/supabase'
 import { uploadLesionPhoto } from '../lib/uploadPhoto'
 import { todayYMD } from '../lib/date'
 import { applyEdit, isIdentityEdit } from '../lib/editImage'
-import { mmCenteredCropBox, cropImageToBlob } from '../lib/crop'
+import { mmCenteredCropBox, cropImageToBlob, suggestFovMm } from '../lib/crop'
 
 // MediaPipe jest duży - ładujemy go leniwie, dopiero gdy otworzysz pomiar z obrysu.
 const LesionSegmenter = lazy(() => import('./LesionSegmenter'))
+
+// Zapamiętane (localStorage) pole widzenia kadru w mm - zeby nie wracało do 40.
+const FOV_KEY = 'skin-tracker:fov-mm'
+
+function loadFovMm() {
+  try {
+    const v = Number(localStorage.getItem(FOV_KEY))
+    return Number.isFinite(v) && v >= 15 && v <= 120 ? v : null
+  } catch {
+    return null
+  }
+}
 
 // Formularz nowego zdjęcia: edycja (obrót/flip/reset) + kompresja przed wysłaniem,
 // opcjonalny rozmiar w mm + krótki formularz ABCDE wypełniany świadomie.
@@ -35,7 +47,7 @@ export default function PhotoUploadForm({
   const [showSegmenter, setShowSegmenter] = useState(false)
   // Kadr hybrydowy (ticket 11): stałe pole widzenia (fovMm) wokół znamienia.
   const [cropParams, setCropParams] = useState(null) // { center, pxPerMm, imgW, imgH }
-  const [fovMm, setFovMm] = useState(40)
+  const [fovMm, setFovMm] = useState(() => loadFovMm() ?? 40)
   const [centerOnLesion, setCenterOnLesion] = useState(true)
   const [cropPreviewUrl, setCropPreviewUrl] = useState(null)
 
@@ -370,6 +382,8 @@ export default function PhotoUploadForm({
                   setCropParams(
                     lesionCenter ? { center: lesionCenter, pxPerMm, imgW, imgH } : null
                   )
+                  // A: domyślne pole widzenia dopasowane do znamienia (3x średnica).
+                  if (lesionCenter) setFovMm(loadFovMm() ?? suggestFovMm(sizeMm))
                   setShowSegmenter(false)
                 }}
                 onCancel={() => setShowSegmenter(false)}
@@ -402,7 +416,15 @@ export default function PhotoUploadForm({
                     max="120"
                     step="5"
                     value={fovMm}
-                    onChange={(e) => setFovMm(Number(e.target.value))}
+                    onChange={(e) => {
+                      const v = Number(e.target.value)
+                      setFovMm(v)
+                      try {
+                        localStorage.setItem(FOV_KEY, String(v))
+                      } catch {
+                        /* brak localStorage - ignorujemy */
+                      }
+                    }}
                     className="h-2 w-full accent-teal-700 dark:accent-teal-400"
                   />
                   {cropPreviewUrl ? (
