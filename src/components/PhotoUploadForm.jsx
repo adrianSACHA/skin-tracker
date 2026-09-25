@@ -1,9 +1,10 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { supabase } from '../lib/supabase'
 import { uploadLesionPhoto } from '../lib/uploadPhoto'
 import { todayYMD } from '../lib/date'
 import { applyEdit, isIdentityEdit } from '../lib/editImage'
+import { mmCenteredCropBox, cropImageToBlob } from '../lib/crop'
 
 // MediaPipe jest duży - ładujemy go leniwie, dopiero gdy otworzysz pomiar z obrysu.
 const LesionSegmenter = lazy(() => import('./LesionSegmenter'))
@@ -32,8 +33,11 @@ export default function PhotoUploadForm({
   const [evolutionNotes, setEvolutionNotes] = useState('')
   const [hasScaleReference, setHasScaleReference] = useState(false)
   const [showSegmenter, setShowSegmenter] = useState(false)
-  const [cropBox, setCropBox] = useState(null) // znormalizowany kadr z segmentatora (ticket 11)
+  // Kadr hybrydowy (ticket 11): stałe pole widzenia (fovMm) wokół znamienia.
+  const [cropParams, setCropParams] = useState(null) // { center, pxPerMm, imgW, imgH }
+  const [fovMm, setFovMm] = useState(40)
   const [centerOnLesion, setCenterOnLesion] = useState(true)
+  const [cropPreviewUrl, setCropPreviewUrl] = useState(null)
 
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
@@ -84,6 +88,35 @@ export default function PhotoUploadForm({
     }
   }, [originalFile, rotate, flipH, flipV])
 
+  // Kadr (mm) z aktualnego pola widzenia.
+  const cropBox = useMemo(
+    () => (cropParams ? mmCenteredCropBox({ ...cropParams, fovMm }) : null),
+    [cropParams, fovMm]
+  )
+
+  // Podglad kadru na zywo (aktualizuje sie przy suwaku).
+  useEffect(() => {
+    let active = true
+    let url = null
+    if (!workingFile || !cropBox || !centerOnLesion) {
+      setCropPreviewUrl(null)
+      return undefined
+    }
+    cropImageToBlob(workingFile, cropBox)
+      .then((blob) => {
+        if (!active) return
+        url = URL.createObjectURL(blob)
+        setCropPreviewUrl(url)
+      })
+      .catch(() => {
+        if (active) setCropPreviewUrl(null)
+      })
+    return () => {
+      active = false
+      if (url) URL.revokeObjectURL(url)
+    }
+  }, [workingFile, cropBox, centerOnLesion])
+
   const handleFile = (e) => {
     const selected = e.target.files?.[0]
     if (!selected) return
@@ -92,7 +125,7 @@ export default function PhotoUploadForm({
     setRotate(0)
     setFlipH(false)
     setFlipV(false)
-    setCropBox(null)
+    setCropParams(null)
     setInfo(null)
   }
 
@@ -255,7 +288,7 @@ export default function PhotoUploadForm({
             // Bez potwierdzonej skali pomiar z obrysu jest niedostępny (ticket 10).
             if (!e.target.checked) {
               setShowSegmenter(false)
-              setCropBox(null)
+              setCropParams(null)
             }
           }}
           className={`mt-0.5 ${checkboxClass}`}
@@ -332,25 +365,56 @@ export default function PhotoUploadForm({
             >
               <LesionSegmenter
                 imageUrl={previewUrl}
-                onApply={({ sizeMm, crop }) => {
+                onApply={({ sizeMm, lesionCenter, pxPerMm, imgW, imgH }) => {
                   setSizeMm(String(sizeMm))
-                  setCropBox(crop || null)
+                  setCropParams(
+                    lesionCenter ? { center: lesionCenter, pxPerMm, imgW, imgH } : null
+                  )
                   setShowSegmenter(false)
                 }}
                 onCancel={() => setShowSegmenter(false)}
               />
             </Suspense>
           ) : null}
-          {cropBox ? (
-            <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
-              <input
-                type="checkbox"
-                checked={centerOnLesion}
-                onChange={(e) => setCenterOnLesion(e.target.checked)}
-                className={checkboxClass}
-              />
-              Wyśrodkuj kadr na znamieniu (przytnij do znamienia)
-            </label>
+          {cropParams ? (
+            <div className="space-y-2 rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
+              <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+                <input
+                  type="checkbox"
+                  checked={centerOnLesion}
+                  onChange={(e) => setCenterOnLesion(e.target.checked)}
+                  className={checkboxClass}
+                />
+                Wyśrodkuj kadr na znamieniu
+              </label>
+              {centerOnLesion ? (
+                <>
+                  <label
+                    htmlFor="fov-mm"
+                    className="block text-sm text-slate-700 dark:text-slate-200"
+                  >
+                    Pole widzenia kadru: <strong>{fovMm} mm</strong>
+                  </label>
+                  <input
+                    id="fov-mm"
+                    type="range"
+                    min="15"
+                    max="120"
+                    step="5"
+                    value={fovMm}
+                    onChange={(e) => setFovMm(Number(e.target.value))}
+                    className="h-2 w-full accent-teal-700 dark:accent-teal-400"
+                  />
+                  {cropPreviewUrl ? (
+                    <img
+                      src={cropPreviewUrl}
+                      alt="Podgląd kadru"
+                      className="h-32 w-32 rounded-lg border border-slate-200 object-cover dark:border-slate-700"
+                    />
+                  ) : null}
+                </>
+              ) : null}
+            </div>
           ) : null}
         </div>
       ) : null}

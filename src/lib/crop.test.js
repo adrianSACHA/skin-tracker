@@ -7,6 +7,8 @@ import {
   normalizeBox,
   denormalizeBox,
   centeredCropBox,
+  lesionCenterNorm,
+  mmCenteredCropBox,
 } from './crop'
 
 function makeMask(width, height, blob) {
@@ -146,5 +148,41 @@ describe('centeredCropBox', () => {
     })
     expect(crop).not.toBeNull()
     expect(crop.w).toBeCloseTo(crop.h, 5)
+  })
+})
+
+
+describe('lesionCenterNorm', () => {
+  it('zwraca środek bounding boxa znamienia (znormalizowany)', () => {
+    const mask = makeMask(100, 100, { x: 40, y: 36, w: 20, h: 24 })
+    expect(lesionCenterNorm({ mask, imgW: 400, imgH: 400 })).toEqual({ x: 0.5, y: 0.48 })
+  })
+
+  it('null bez maski i bez obrysu', () => {
+    expect(lesionCenterNorm({ mask: null, points: [], imgW: 100, imgH: 100 })).toBeNull()
+  })
+})
+
+describe('mmCenteredCropBox', () => {
+  it('bok = fovMm * pxPerMm, wyśrodkowany', () => {
+    const crop = mmCenteredCropBox({ center: { x: 0.5, y: 0.5 }, pxPerMm: 5, fovMm: 40, imgW: 400, imgH: 400 })
+    expect(denormalizeBox(crop, 400, 400)).toEqual({ x: 100, y: 100, w: 200, h: 200 })
+  })
+
+  it('niezależny od odległości: stała realna skala kadru', () => {
+    const near = mmCenteredCropBox({ center: { x: 0.5, y: 0.5 }, pxPerMm: 5, fovMm: 40, imgW: 400, imgH: 400 })
+    const far = mmCenteredCropBox({ center: { x: 0.5, y: 0.5 }, pxPerMm: 2.5, fovMm: 40, imgW: 400, imgH: 400 })
+    expect(denormalizeBox(far, 400, 400).w).toBeCloseTo(denormalizeBox(near, 400, 400).w / 2, 5)
+  })
+
+  it('klampuje do granic obrazu', () => {
+    const crop = mmCenteredCropBox({ center: { x: 0.05, y: 0.05 }, pxPerMm: 5, fovMm: 40, imgW: 400, imgH: 400 })
+    const b = denormalizeBox(crop, 400, 400)
+    expect(b.x).toBeGreaterThanOrEqual(0)
+    expect(b.x + b.w).toBeLessThanOrEqual(400)
+  })
+
+  it('null bez danych', () => {
+    expect(mmCenteredCropBox({ center: null, pxPerMm: 5, fovMm: 40, imgW: 400, imgH: 400 })).toBeNull()
   })
 })

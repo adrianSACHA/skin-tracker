@@ -110,6 +110,32 @@ export function centeredCropBox({
   return normalizeBox(px, imgW, imgH)
 }
 
+// Środek bounding boxa znamienia (znormalizowany) — punkt kadrowania.
+export function lesionCenterNorm({ mask, points, imgW, imgH }) {
+  if (!imgW || !imgH) return null
+  let bbox = null
+  if (mask) bbox = bboxFromMaskInImage(mask, imgW, imgH)
+  if ((!bbox || bbox.w <= 0 || bbox.h <= 0) && points && points.length >= 3) {
+    bbox = bboxFromPoints(points, imgW, imgH)
+  }
+  if (!bbox || bbox.w <= 0 || bbox.h <= 0) return null
+  return { x: (bbox.x + bbox.w / 2) / imgW, y: (bbox.y + bbox.h / 2) / imgH }
+}
+
+// Kadr HYBRYDOWY: kwadrat o stałym polu widzenia (fovMm) wokół znamienia.
+// Bok w px = fovMm * pxPerMm, więc jest niezależny od odległości zdjęcia
+// (px/mm to kompensuje), a realna skala kadru jest STAŁA — widać wzrost.
+export function mmCenteredCropBox({ center, pxPerMm, fovMm, imgW, imgH }) {
+  if (!center || !pxPerMm || !fovMm || !imgW || !imgH) return null
+  const maxSide = Math.min(imgW, imgH)
+  const side = Math.max(1, Math.min(Math.round(fovMm * pxPerMm), maxSide))
+  const cx = center.x * imgW
+  const cy = center.y * imgH
+  const x = Math.max(0, Math.min(cx - side / 2, imgW - side))
+  const y = Math.max(0, Math.min(cy - side / 2, imgH - side))
+  return normalizeBox({ x, y, w: side, h: side }, imgW, imgH)
+}
+
 // --- DOM: wycięcie kadru z obrazu (po kompresji, orientacja już znormalizowana).
 function loadImage(url) {
   return new Promise((resolve, reject) => {

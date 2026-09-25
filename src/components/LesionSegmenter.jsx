@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FilesetResolver, InteractiveSegmenter } from '@mediapipe/tasks-vision'
-import { centeredCropBox } from '../lib/crop'
+import { lesionCenterNorm } from '../lib/crop'
 import { correctMaskPolarity } from '../lib/segmentMask'
 
 // UWAGA (zweryfikowane empirycznie na @mediapipe/tasks-vision 1.0.1):
@@ -429,10 +429,10 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
 
   const haveScale = Boolean(pxPerMm)
 
-  // Kadr centrujący (ticket 11): z maski AI albo z obrysu ręcznego (decyzja 05).
-  const cropBox = useMemo(
+  // Środek znamienia (znormalizowany) — wokół niego kadrujemy (ticket 11).
+  const lesionCenter = useMemo(
     () =>
-      centeredCropBox({
+      lesionCenterNorm({
         mask: method === 'manual' ? null : mask,
         points: method === 'manual' ? manualPoints : null,
         imgW: img.nw,
@@ -701,7 +701,10 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
               onClick={() =>
                 onApply({
                   sizeMm: Number(result.sizeMm.toFixed(1)),
-                  crop: cropBox,
+                  lesionCenter,
+                  pxPerMm,
+                  imgW: img.nw,
+                  imgH: img.nh,
                 })
               }
               className={BTN_PRIMARY}
