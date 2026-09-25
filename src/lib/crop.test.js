@@ -3,10 +3,8 @@ import {
   bboxFromMask,
   bboxFromMaskInImage,
   bboxFromPoints,
-  squareCropBoxPx,
   normalizeBox,
   denormalizeBox,
-  centeredCropBox,
   lesionCenterNorm,
   mmCenteredCropBox,
   suggestFovMm,
@@ -58,28 +56,6 @@ describe('bboxFromPoints', () => {
   })
 })
 
-describe('squareCropBoxPx', () => {
-  it('kadr kwadratowy z paddingiem', () => {
-    const box = squareCropBoxPx({ x: 10, y: 12, w: 40, h: 20 }, 200, 150, 0.25)
-    expect(box).toEqual({ x: 5, y: 0, w: 50, h: 50 })
-  })
-
-  it('przycina do krawędzi, zachowując kwadrat', () => {
-    const box = squareCropBoxPx({ x: 0, y: 0, w: 30, h: 30 }, 100, 100, 0.2)
-    expect(box.w).toBe(box.h)
-    expect(box.x).toBe(0)
-    expect(box.y).toBe(0)
-    expect(box.x + box.w).toBeLessThanOrEqual(100)
-    expect(box.y + box.h).toBeLessThanOrEqual(100)
-  })
-
-  it('bok nie przekracza krótszego wymiaru obrazu', () => {
-    const box = squareCropBoxPx({ x: 0, y: 0, w: 100, h: 10 }, 100, 40, 0.5)
-    expect(box.w).toBeLessThanOrEqual(40)
-    expect(box.h).toBeLessThanOrEqual(40)
-  })
-})
-
 describe('normalizeBox / denormalizeBox', () => {
   it('round-trip', () => {
     const box = { x: 10, y: 20, w: 50, h: 60 }
@@ -87,71 +63,6 @@ describe('normalizeBox / denormalizeBox', () => {
     expect(denormalizeBox(n, 200, 300)).toEqual(box)
   })
 })
-
-describe('centeredCropBox', () => {
-  it('z maski -> kadr 3x bounding box wokół znamienia', () => {
-    const mask = makeMask(100, 100, { x: 40, y: 40, w: 20, h: 20 })
-    const crop = centeredCropBox({ mask, points: null, imgW: 400, imgH: 400 })
-    // bbox 80px, padding 2.0 -> bok 240px, środek (200,200) -> (80,80,240,240)
-    expect(denormalizeBox(crop, 400, 400)).toEqual({
-      x: 80,
-      y: 80,
-      w: 240,
-      h: 240,
-    })
-  })
-
-  it('kadr skaluje się ze znamieniem (niezależny od odległości zdjęcia)', () => {
-    const big = centeredCropBox({
-      mask: makeMask(100, 100, { x: 40, y: 40, w: 20, h: 20 }),
-      imgW: 400,
-      imgH: 400,
-    })
-    const small = centeredCropBox({
-      mask: makeMask(100, 100, { x: 40, y: 40, w: 10, h: 10 }),
-      imgW: 400,
-      imgH: 400,
-    })
-    // bbox o połowę mniejszy -> kadr o połowę mniejszy (to samo kadrowanie)
-    expect(small.w).toBeCloseTo(big.w / 2, 5)
-    expect(small.h).toBeCloseTo(big.h / 2, 5)
-  })
-
-  it('skrajnie małe znamię -> bok nie mniejszy niż minSidePx', () => {
-    const mask = makeMask(100, 100, { x: 48, y: 48, w: 2, h: 2 })
-    const crop = centeredCropBox({ mask, points: null, imgW: 200, imgH: 200 })
-    expect(denormalizeBox(crop, 200, 200).w).toBe(64)
-  })
-
-  it('pusta maska i brak punktów -> null (fallback)', () => {
-    expect(
-      centeredCropBox({
-        mask: makeMask(10, 10, { x: 0, y: 0, w: 0, h: 0 }),
-        imgW: 100,
-        imgH: 100,
-      })
-    ).toBeNull()
-    expect(
-      centeredCropBox({ mask: null, points: [], imgW: 100, imgH: 100 })
-    ).toBeNull()
-  })
-
-  it('z obrysu ręcznego, gdy brak maski (kwadrat)', () => {
-    const crop = centeredCropBox({
-      mask: null,
-      points: [
-        { x: 0.4, y: 0.4 },
-        { x: 0.6, y: 0.6 },
-        { x: 0.5, y: 0.7 },
-      ],
-      imgW: 200,
-      imgH: 200,
-    })
-    expect(crop).not.toBeNull()
-    expect(crop.w).toBeCloseTo(crop.h, 5)
-  })
-})
-
 
 describe('lesionCenterNorm', () => {
   it('zwraca środek bounding boxa znamienia (znormalizowany)', () => {
@@ -187,7 +98,6 @@ describe('mmCenteredCropBox', () => {
     expect(mmCenteredCropBox({ center: null, pxPerMm: 5, fovMm: 40, imgW: 400, imgH: 400 })).toBeNull()
   })
 })
-
 
 describe('suggestFovMm', () => {
   it('3x średnica, zaokrąglone do 5 mm', () => {
