@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FilesetResolver, InteractiveSegmenter } from '@mediapipe/tasks-vision'
 import { centeredCropBox } from '../lib/crop'
+import { correctMaskPolarity } from '../lib/segmentMask'
 
 // UWAGA (zweryfikowane empirycznie na @mediapipe/tasks-vision 1.0.1):
 // - Nowe API `InteractiveSegmenter` + model `interactive_segmentation.task` (v2).
@@ -324,7 +325,15 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
       }
       const strokes = allPositives.map((p) => circleStroke(p.x, p.y))
       const m = seg.segment(strokes)
-      setMask({ data: m.getAsFloat32Array(), width: m.width, height: m.height })
+      // Model bywa zwraca maskę odwróconą (tło zamiast znamienia) - patrz lib/segmentMask.
+      const data = correctMaskPolarity(
+        m.getAsFloat32Array(),
+        m.width,
+        m.height,
+        allPositives,
+        THRESHOLD
+      )
+      setMask({ data, width: m.width, height: m.height })
     } catch (err) {
       setError(err?.message || 'Segmentacja nie powiodła się.')
     } finally {

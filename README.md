@@ -293,6 +293,8 @@ limitów Supabase i nie wymagają zmiany hostingu.
 > - **punkty negatywne** (`brushMode=2`) odwracają maskę w tym modelu, więc nie
 >   są wysyłane; „− usuń z obrysu" to **lokalna gumka** stosowana przed
 >   zliczeniem pikseli,
+> - model bywa zwraca maskę **odwróconą** (tło zamiast obiektu) — korygujemy
+>   polaryzację tak, by piksel kliknięcia należał do maski,
 > - kalibracja: 2 kliknięcia na końcach znanego odcinka (moneta / linijka)
 >   + jego długość w mm,
 > - kreator dwukrokowy: **skala (moneta / linijka) → auto-przejście → znamię**;
