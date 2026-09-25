@@ -1,5 +1,6 @@
 import imageCompression from 'browser-image-compression'
 import { supabase } from './supabase'
+import { cropImageToBlob } from './crop'
 
 export const PHOTOS_BUCKET = 'lesion-photos'
 
@@ -46,21 +47,24 @@ export async function getSignedUrls(paths, expiresInSeconds = 3600) {
 }
 
 // Upload zdjęcia znamienia. Ścieżka: {auth.uid()}/{person_id}/{lesion_id}/{plik}
-export async function uploadLesionPhoto({ file, personId, lesionId }) {
+// Opcjonalny `crop` (znormalizowany kadr z segmentatora, ticket 11) stosujemy PO
+// kompresji - wtedy orientacja EXIF jest już znormalizowana, więc kadr nie rotuje.
+export async function uploadLesionPhoto({ file, personId, lesionId, crop }) {
   const userId = await currentUserId()
   const compressed = await compressImage(file)
+  const finalBlob = crop ? await cropImageToBlob(compressed, crop) : compressed
   const path = `${userId}/${personId}/${lesionId}/${Date.now()}-${randomSuffix()}.webp`
 
   const { error } = await supabase.storage
     .from(PHOTOS_BUCKET)
-    .upload(path, compressed, {
+    .upload(path, finalBlob, {
       contentType: 'image/webp',
       cacheControl: '3600',
       upsert: false,
     })
   if (error) throw error
 
-  return { path, compressed }
+  return { path, compressed: finalBlob }
 }
 
 // Zdjęcie referencyjne mapy ciała. Ścieżka: {auth.uid()}/{person_id}/body-map/{view}.webp
