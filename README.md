@@ -64,7 +64,9 @@ adresu.*
     ├── context/ThemeContext.jsx     # tryb jasny/ciemny (+ zapis w localStorage)
     ├── lib
     │   ├── supabase.js              # klient Supabase
-    │   ├── uploadPhoto.js           # kompresja + upload + signed URL + usuwanie plików
+    │   ├── uploadPhoto.js           # kompresja + upload (+ kadr) + signed URL + usuwanie plików
+    │   ├── crop.js                  # kadr centrujący: bbox z maski/obrysu → kwadrat (ticket 11)
+    │   ├── editImage.js             # edycja zdjęcia: obrót/odbicia na canvas (ticket 08)
     │   ├── status.js                # statusy i kolory
     │   ├── date.js                  # helpery dat
     │   ├── ics.js                   # generator .ics (RRULE + alarm) i deep-linki
@@ -79,8 +81,8 @@ adresu.*
         ├── PersonSelector.jsx       # wybór osoby
         ├── BodyMap.jsx              # mapa ciała: zoom/pan + piny (dodaj/przesuń/edytuj)
         ├── LesionDetail.jsx         # szczegóły + porównanie + kalendarz + "Zarządzanie"
-        ├── LesionSegmenter.jsx      # pomiar z obrysu (MediaPipe, tylko geometria)
-        ├── PhotoUploadForm.jsx      # upload + ABCDE + pomiar z obrysu
+        ├── LesionSegmenter.jsx      # kreator pomiaru: skala → znamię (MediaPipe, geometria)
+        ├── PhotoUploadForm.jsx      # upload: edycja (obrót/odbicia) + kompresja + ABCDE
         ├── LesionsList.jsx          # lista znamion (statusy, sugerowana data kontroli)
         ├── Reminders.jsx            # "Kontrole": terminy, przesuwanie, przypomnienia
         ├── CalendarReminderButton.jsx  # eksport cyklicznego .ics / Google / Outlook
@@ -243,8 +245,11 @@ Postęp znajdziesz w zakładce **Actions** w repo.
 3. **Mapa ciała** — dodaj zdjęcie tła (przód/tył/boki), potem włącz
    „+ Dodaj znamię" i klikaj miejsca na zdjęciu, aby tworzyć piny.
 4. Kliknij pin → **szczegóły znamienia**:
-   - dodaj kolejne zdjęcia,
-   - porównaj dwa zdjęcia suwakiem przezroczystości,
+   - dodaj kolejne zdjęcia (przed zapisem możesz je **obrócić/odbić**),
+   - pomiar z obrysu prowadzi krok po kroku: **skala (moneta / linijka) →
+     znamię**; po skali możesz wyśrodkować kadr na znamieniu,
+   - porównaj dwa zdjęcia suwakiem przezroczystości (kadr znamienia,
+     wyśrodkowany),
    - obejrzyj trend rozmiaru (wykres) i historię ABCDE,
    - ustaw status,
    - „**Do kalendarza**" — cykliczne przypomnienie (`.ics` / Google / Outlook).
@@ -271,17 +276,17 @@ Postęp znajdziesz w zakładce **Actions** w repo.
 
 ---
 
-## Faza 2 (planowane, po potwierdzeniu że MVP działa)
+## Pomiar z obrysu (MediaPipe)
 
-Opcjonalny pomiar wspomagany segmentacją **MediaPipe Interactive Image
+Pomiar wspomagany segmentacją **MediaPipe Interactive Image
 Segmenter** (`@mediapipe/tasks-vision`, WASM, 100% lokalnie w przeglądarce) —
 **wyłącznie geometria** (obrys → powierzchnia/średnica w mm² po kalibracji
 skalą referencyjną). Model nie ocenia charakteru zmiany; ABCDE pozostaje
 wypełniane ręcznie. Model i runtime ładowane z Google CDN — nie obciążają
 limitów Supabase i nie wymagają zmiany hostingu.
 
-> **Status: zaimplementowane** (`src/components/LesionSegmenter.jsx`, wpięte w
-> `PhotoUploadForm` jako opcjonalny krok). Model `interactive_segmenter_v2`
+> **Status: zaimplementowane** (`src/components/LesionSegmenter.jsx`, otwierany
+> z `PhotoUploadForm` po potwierdzeniu skali w kadrze). Model `interactive_segmenter_v2`
 > (magic touch, int8) + WASM z CDN jsdelivr, 100% w przeglądarce.
 > Ustalenia z testów na `@mediapipe/tasks-vision@1.0.1`:
 > - klik na znamię zamieniany jest na mały **stroke** (model nie przyjmuje
@@ -289,9 +294,14 @@ limitów Supabase i nie wymagają zmiany hostingu.
 > - **punkty negatywne** (`brushMode=2`) odwracają maskę w tym modelu, więc nie
 >   są wysyłane; „− usuń z obrysu" to **lokalna gumka** stosowana przed
 >   zliczeniem pikseli,
-> - kalibracja: 2 kliknięcia na średnicy monety + jej średnica w mm,
+> - kalibracja: 2 kliknięcia na końcach znanego odcinka (moneta / linijka)
+>   + jego długość w mm,
+> - kreator dwukrokowy: **skala (moneta / linijka) → auto-przejście → znamię**;
+>   metoda „Automatycznie (AI) / Ręcznie (obrys)" w kroku 2,
 > - wynik (pole mm² → równoważna średnica) trafia do `size_mm`; bez zmian
->   schematu.
+>   schematu,
+> - opcjonalne **wyśrodkowanie kadru** na znamieniu (bbox z maski/obrysu)
+>   oraz **edycja zdjęcia** (obrót / odbicia) przed zapisem.
 
 ---
 
