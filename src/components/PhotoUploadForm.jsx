@@ -54,7 +54,8 @@ export default function PhotoUploadForm({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   const [info, setInfo] = useState(null)
-  const inputRef = useRef(null)
+  const inputRef = useRef(null) // aparat (capture)
+  const galleryInputRef = useRef(null) // wybór z plików
 
   const inputClass =
     'min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500'
@@ -220,20 +221,39 @@ export default function PhotoUploadForm({
 
       {/* Zdjęcie */}
       <div className="space-y-2">
-        <label
-          htmlFor="lesion-photo"
-          className="block text-sm font-medium text-slate-700 dark:text-slate-200"
-        >
+        <span className="block text-sm font-medium text-slate-700 dark:text-slate-200">
           Zdjęcie
-        </label>
+        </span>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500"
+          >
+            Zrób zdjęcie
+          </button>
+          <button
+            type="button"
+            onClick={() => galleryInputRef.current?.click()}
+            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          >
+            Wybierz z plików
+          </button>
+        </div>
         <input
-          id="lesion-photo"
           ref={inputRef}
           type="file"
           accept="image/*"
           capture="environment"
           onChange={handleFile}
-          className="block w-full text-sm text-slate-600 file:mr-3 file:min-h-[44px] file:rounded-lg file:border-0 file:bg-teal-700 file:px-4 file:font-medium file:text-white hover:file:bg-teal-800 dark:text-slate-300 dark:file:bg-teal-600 dark:hover:file:bg-teal-500"
+          className="hidden"
+        />
+        <input
+          ref={galleryInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFile}
+          className="hidden"
         />
         {previewUrl ? (
           <img

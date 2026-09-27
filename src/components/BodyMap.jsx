@@ -143,8 +143,10 @@ export default function BodyMap() {
   const [savingView, setSavingView] = useState(false)
   const [viewDeleteConfirm, setViewDeleteConfirm] = useState(false)
   const [deletingView, setDeletingView] = useState(false)
-  const fileInputRef = useRef(null)
-  const addInputRef = useRef(null)
+  const fileInputRef = useRef(null) // zmiana tła: wybór z plików
+  const cameraInputRef = useRef(null) // zmiana tła: aparat
+  const addInputRef = useRef(null) // dodawanie widoku: wybór z plików
+  const addCameraRef = useRef(null) // dodawanie widoku: aparat
   const pointerRef = useRef(null) // start wciśnięcia - rozróżnia klik od przesuwania
   const [scale, setScale] = useState(1) // aktualna skala zoomu tła
   const [selectedId, setSelectedId] = useState(null) // wybrany pin -> panel akcji
@@ -613,16 +615,19 @@ export default function BodyMap() {
   const addViewTarget =
     addViewKey === CUSTOM_AREA ? customAreaName.trim() : addViewKey
 
-  const startAddViewUpload = () => {
+  // `inputRef` wybiera źródło: aparat (capture) albo plik. Walidacja wspólna.
+  const startAddViewUpload = (inputRef) => {
     if (!addViewTarget) {
       setError('Podaj nazwę okolicy ciała.')
       return
     }
-    if (viewByKey[addViewTarget]) {
+    // Blokujemy tylko okolicę, która MA już zdjęcie tła. Wiersz bez zdjęcia
+    // (np. po „Usuń zdjęcie tła") tylko zaktualizujemy przy uploadzie.
+    if (viewByKey[addViewTarget]?.image_url) {
       setError('Taki widok już istnieje — wybierz inną okolicę.')
       return
     }
-    addInputRef.current?.click()
+    inputRef.current?.click()
   }
 
   return (
@@ -689,8 +694,15 @@ export default function BodyMap() {
               label="Więcej akcji widoku"
               items={[
                 {
-                  key: 'change-bg',
-                  label: uploadingRef ? 'Wysyłanie…' : 'Zmień zdjęcie tła',
+                  key: 'change-bg-camera',
+                  label: uploadingRef
+                    ? 'Wysyłanie…'
+                    : 'Zmień zdjęcie tła (aparat)',
+                  onSelect: () => cameraInputRef.current?.click(),
+                },
+                {
+                  key: 'change-bg-file',
+                  label: 'Zmień zdjęcie tła (plik)',
                   onSelect: () => fileInputRef.current?.click(),
                 },
                 ...(currentMap?.image_url
@@ -723,9 +735,25 @@ export default function BodyMap() {
             className="hidden"
           />
           <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={(e) => handleRefUpload(e, activeView)}
+            className="hidden"
+          />
+          <input
             ref={addInputRef}
             type="file"
             accept="image/*"
+            onChange={(e) => handleRefUpload(e, addViewTarget)}
+            className="hidden"
+          />
+          <input
+            ref={addCameraRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
             onChange={(e) => handleRefUpload(e, addViewTarget)}
             className="hidden"
           />
@@ -801,14 +829,24 @@ export default function BodyMap() {
             </div>
           ) : null}
 
-          <button
-            type="button"
-            onClick={startAddViewUpload}
-            disabled={uploadingRef || !addViewTarget}
-            className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
-          >
-            {uploadingRef ? 'Wysyłanie…' : 'Wgraj zdjęcie'}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => startAddViewUpload(addCameraRef)}
+              disabled={uploadingRef || !addViewTarget}
+              className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
+            >
+              {uploadingRef ? 'Wysyłanie…' : 'Zrób zdjęcie'}
+            </button>
+            <button
+              type="button"
+              onClick={() => startAddViewUpload(addInputRef)}
+              disabled={uploadingRef || !addViewTarget}
+              className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            >
+              Wybierz z plików
+            </button>
+          </div>
         </div>
       ) : null}
 
