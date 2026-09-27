@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   CartesianGrid,
@@ -74,6 +74,9 @@ export default function LesionDetail() {
   // tylko odczytujemy wartość, żeby nie było dwóch rozjeżdżających się pól.
   const [intervalWeeks] = useIntervalWeeks()
   const [leadDays, setLeadDays] = useState(7)
+  const [enlarge, setEnlarge] = useState(null) // powiększone zdjęcie (lightbox)
+  const compareRef = useRef(null)
+  const compareDragRef = useRef(false)
 
   const inputClass =
     'min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100'
@@ -84,6 +87,34 @@ export default function LesionDetail() {
     const idx = window.history.state?.idx
     if (typeof idx === 'number' && idx > 0) navigate(-1)
     else navigate(back.to)
+  }
+
+  // Przeciąganie uchwytu porównania (mobile: palcem, desktop: myszą).
+  const setCompareFromX = (clientX) => {
+    const box = compareRef.current
+    if (!box) return
+    const rect = box.getBoundingClientRect()
+    const pct = ((clientX - rect.left) / rect.width) * 100
+    setOpacity(Math.max(0, Math.min(100, Math.round(pct))))
+  }
+
+  const onCompareDown = (e) => {
+    compareDragRef.current = true
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId)
+    } catch {
+      /* brak pointer capture - ignorujemy */
+    }
+    setCompareFromX(e.clientX)
+  }
+
+  const onCompareMove = (e) => {
+    if (!compareDragRef.current) return
+    setCompareFromX(e.clientX)
+  }
+
+  const onCompareUp = () => {
+    compareDragRef.current = false
   }
 
   const load = async () => {
@@ -451,7 +482,14 @@ export default function LesionDetail() {
                 </div>
               </div>
 
-              <div className="relative mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-xl border border-slate-200 bg-black/5 dark:border-slate-800 dark:bg-black/40">
+              <div
+                ref={compareRef}
+                onPointerDown={onCompareDown}
+                onPointerMove={onCompareMove}
+                onPointerUp={onCompareUp}
+                onPointerCancel={onCompareUp}
+                className="relative mx-auto aspect-square w-full max-w-sm touch-none select-none overflow-hidden rounded-xl border border-slate-200 bg-black/5 dark:border-slate-800 dark:bg-black/40"
+              >
                 <SignedImage
                   path={photoA?.photo_url}
                   alt={`Zdjęcie ${photoA ? formatDate(photoA.taken_at) : 'A'}`}
@@ -461,8 +499,19 @@ export default function LesionDetail() {
                   path={photoB?.photo_url}
                   alt={`Zdjęcie ${photoB ? formatDate(photoB.taken_at) : 'B'}`}
                   className="absolute inset-0 h-full w-full object-cover"
-                  style={{ opacity: opacity / 100 }}
+                  style={{ clipPath: `inset(0 ${100 - opacity}% 0 0)` }}
                 />
+                {/* Uchwyt porównania (przeciągnij w poziomie). */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-y-0 flex w-0 -translate-x-1/2 items-center justify-center"
+                  style={{ left: `${opacity}%` }}
+                >
+                  <span className="absolute inset-y-0 w-0.5 bg-white/80" />
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-sm font-semibold text-slate-700 shadow">
+                    ⇄
+                  </span>
+                </div>
               </div>
 
               <div className="flex items-center gap-3">
@@ -476,7 +525,7 @@ export default function LesionDetail() {
                   value={opacity}
                   onChange={(e) => setOpacity(Number(e.target.value))}
                   className="h-2 flex-1 accent-teal-700 dark:accent-teal-400"
-                  aria-label="Suwak przezroczystości porównania"
+                  aria-label="Suwak porównania (pozycja)"
                 />
                 <span className="w-24 text-right text-xs text-slate-500 dark:text-slate-400">
                   {photoB ? formatDate(photoB.taken_at) : '—'}
@@ -500,10 +549,13 @@ export default function LesionDetail() {
                     <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
                     <XAxis
                       dataKey="date"
-                      tick={{ fontSize: 12, fill: tickFill }}
+                      tick={{ fontSize: 11, fill: tickFill }}
+                      minTickGap={16}
+                      interval="preserveStartEnd"
                     />
                     <YAxis
-                      tick={{ fontSize: 12, fill: tickFill }}
+                      tick={{ fontSize: 11, fill: tickFill }}
+                      width={40}
                       unit="mm"
                     />
                     <Tooltip contentStyle={tooltipStyle} />
@@ -542,11 +594,18 @@ export default function LesionDetail() {
                   key={photo.id}
                   className="flex gap-4 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"
                 >
-                  <SignedImage
-                    path={photo.photo_url}
-                    alt={`Zdjęcie z ${formatDate(photo.taken_at)}`}
-                    className="h-24 w-24 flex-shrink-0 rounded-lg object-cover"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setEnlarge(photo)}
+                    aria-label={`Powiększ zdjęcie z ${formatDate(photo.taken_at)}`}
+                    className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 sm:h-24 sm:w-24"
+                  >
+                    <SignedImage
+                      path={photo.photo_url}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  </button>
                   <div className="min-w-0 flex-1 space-y-1 text-sm">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-medium text-slate-800 dark:text-slate-100">
@@ -638,6 +697,30 @@ export default function LesionDetail() {
           if (!deleting) setConfirm(null)
         }}
       />
+
+      {/* Powiększenie zdjęcia z historii (lightbox, wygodne na telefonie). */}
+      {enlarge ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Powiększone zdjęcie"
+          onClick={() => setEnlarge(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+        >
+          <SignedImage
+            path={enlarge.photo_url}
+            alt={`Zdjęcie z ${formatDate(enlarge.taken_at)}`}
+            className="max-h-[85dvh] max-w-full rounded-lg object-contain"
+          />
+          <button
+            type="button"
+            onClick={() => setEnlarge(null)}
+            className="absolute right-4 top-4 min-h-[44px] rounded-lg bg-white/90 px-3 font-medium text-slate-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300"
+          >
+            Zamknij
+          </button>
+        </div>
+      ) : null}
     </div>
   )
 }
