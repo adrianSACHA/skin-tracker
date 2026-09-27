@@ -32,6 +32,8 @@ Brak — panel pinu jako bottom sheet wdrożony (ticket 05).
 | 05 | task | [Panel pinu jako bottom sheet (mobile)](issues/05-task-bottom-sheet.md) | 04 | resolved |
 | 06 | task | [Bottom sheet: swipe w dół + blokada tła](issues/06-task-sheet-swipe-lock.md) | 05 | resolved |
 | 07 | task | [Szczegóły znamienia: porównanie / wykres / historia na mobile](issues/07-task-detail-mobile.md) | — | resolved |
+| 08 | task | [„Do kalendarza": menu w kadrze na mobile](issues/08-task-kalendarz-menu-w-kadrze.md) | — | resolved |
+| 09 | task | [Porządki: rozjechane wcięcia w Lista/Kontrole](issues/09-task-porzadki-wciecia.md) | — | resolved |
 
 ## Frontier
 

@@ -54,6 +54,8 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 - **Szczegóły znamienia (mobile):** porównanie zdjęć przeciąganym uchwytem
   (suwak), czytelniejszy wykres (gęste daty się nie nakładają), powiększanie
   zdjęć z historii (lightbox) i responsywne miniatury.
+- **Mobile UX (Lista / Kontrole):** menu „Do kalendarza" trzyma się kadru
+  (nie wychodzi poza ekran), poprawione rozjechane wcięcia.
 - **Mobile UX:** nawigacja i nagłówek zawijają się (koniec z poziomym
   przewijaniem po dodaniu licznika); etykieta pinu zawija długie nazwy; modale
   mają ograniczoną wysokość i przewijanie; po kliknięciu pinu na telefonie widok

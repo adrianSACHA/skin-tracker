@@ -67,7 +67,7 @@ export default function LesionsList() {
 
   const clearStatuses = () => setListParams({ statuses: [], sort: sortBy })
 
-    const changeSort = (value) =>
+  const changeSort = (value) =>
     setListParams({ statuses: selectedStatuses, sort: value })
 
   return (
