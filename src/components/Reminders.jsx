@@ -11,6 +11,7 @@ import {
 import { useIntervalWeeks } from '../lib/interval'
 import { buildRows } from '../lib/lesionView'
 import StatusBadge from './StatusBadge'
+import LesionName from './LesionName'
 import CalendarReminderButton from './CalendarReminderButton'
 
 const SOON_DAYS = 30 // horyzont "wkrótce" w pasku podsumowania
@@ -74,7 +75,7 @@ export default function Reminders() {
         .maybeSingle(),
       supabase
         .from('lesions')
-        .select('*, lesion_photos(taken_at, size_mm)')
+        .select('*, lesion_photos(taken_at, size_mm), body_maps(view_name)')
         .eq('person_id', personId),
     ])
 
@@ -269,7 +270,11 @@ export default function Reminders() {
                     state={{ from: 'reminders' }}
                     className="text-base font-semibold text-slate-800 hover:text-teal-700 hover:underline dark:text-slate-100 dark:hover:text-teal-300"
                   >
-                    {lesion.label}
+                    <LesionName
+                      label={lesion.label}
+                      viewName={lesion.body_maps?.view_name}
+                      areaClassName="font-normal text-slate-400 dark:text-slate-500"
+                    />
                   </Link>
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
                     <StatusBadge status={lesion.status} />

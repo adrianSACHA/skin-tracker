@@ -12,6 +12,7 @@ import {
 import { STATUSES, statusMeta } from '../lib/status'
 import { readListParams, buildListParams } from '../lib/listParams'
 import StatusBadge from './StatusBadge'
+import LesionName from './LesionName'
 
 export default function LesionsList() {
   const { personId } = useParams()
@@ -32,7 +33,7 @@ export default function LesionsList() {
     setError(null)
     const { data, error: loadError } = await supabase
       .from('lesions')
-      .select('*, lesion_photos(taken_at, size_mm)')
+      .select('*, lesion_photos(taken_at, size_mm), body_maps(view_name)')
       .eq('person_id', personId)
 
     if (loadError) setError(loadError.message)
@@ -201,7 +202,11 @@ export default function LesionsList() {
                       state={{ from: 'list' }}
                       className="text-base font-semibold text-slate-800 hover:text-teal-700 hover:underline dark:text-slate-100 dark:hover:text-teal-300"
                     >
-                      {lesion.label}
+                      <LesionName
+                        label={lesion.label}
+                        viewName={lesion.body_maps?.view_name}
+                        areaClassName="font-normal text-slate-400 dark:text-slate-500"
+                      />
                     </Link>
                     <div className="mt-1.5 flex flex-wrap items-center gap-2">
                       <StatusBadge status={lesion.status} />

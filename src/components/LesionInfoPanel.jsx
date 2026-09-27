@@ -2,11 +2,13 @@ import { STATUSES, statusMeta } from '../lib/status'
 import { formatDate } from '../lib/date'
 import StatusBadge from './StatusBadge'
 import SignedImage from './SignedImage'
+import LesionName from './LesionName'
 
 // Panel informacyjny obok mapy ciała (desktop: kolumna sticky).
 // Stan domyślny = podpowiedź; po wybraniu pina = szczegóły + szybkie akcje.
 export default function LesionInfoPanel({
   lesion,
+  viewName,
   editForm,
   onEditFormChange,
   onSaveEdit,
@@ -45,7 +47,11 @@ export default function LesionInfoPanel({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <h2 className="truncate text-base font-semibold text-slate-800 dark:text-slate-100">
-            {lesion.label}
+            <LesionName
+              label={lesion.label}
+              viewName={viewName}
+              areaClassName="font-normal text-slate-400 dark:text-slate-500"
+            />
           </h2>
           <div className="mt-1">
             <StatusBadge status={lesion.status} />

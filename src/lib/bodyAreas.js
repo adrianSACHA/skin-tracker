@@ -83,6 +83,24 @@ export function nextLesionLabel(viewName, lesionsInView) {
   return `${prefix}-${max + 1}`
 }
 
+// Czy `label` to nazwa AUTOMATYCZNA dla okolicy (`Prefiks-N`)? Jeśli nie —
+// użytkownik nadpisał nazwę i warto pokazać okolicę osobno jako kontekst.
+export function isAutoNamed(label, viewName) {
+  const prefix = lesionPrefix(viewName)
+  if (!prefix) return false
+  return new RegExp(`^${escapeRegex(prefix)}-(\\d+)$`).test(
+    String(label || '').trim()
+  )
+}
+
+// Okolica do pokazania obok nazwy znamienia — tylko gdy nazwa została nadpisana
+// (auto-nazwa `Prefiks-N` już zawiera okolicę). Zwraca `null`, gdy nie pokazywać.
+export function areaContextFor(label, viewName) {
+  const area = areaLabel(viewName)
+  if (!area) return null
+  return isAutoNamed(label, viewName) ? null : area
+}
+
 function escapeRegex(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }

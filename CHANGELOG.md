@@ -24,6 +24,10 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
   spinnera; zdjęcie wstępnie wczytywane, więc treść pod mapą nie „skacze".
 - **Panel ustawień widoku** (z menu `⋯`) — zmiana nazwy okolicy oraz usunięcie
   widoku razem ze znamionami (z potwierdzeniem i liczbą znamion).
+- **Kontekst okolicy przy nadpisanej nazwie znamienia** — `Okolica · nazwa`
+  (np. `Tył · znamię przy łopatce`) na liście znamion, w Kontrolach, w panelu
+  pina i w szczegółach. Okolica brana dynamicznie z widoku; auto-nazwy
+  (`Tył-3`) bez zmian.
 
 ### Zmienione
 
@@ -49,6 +53,11 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
   wybieranego znamienia (zerowanie starego URL).
 - **Znikające „skakanie" treści** przy przełączaniu widoku mapy (preload zdjęcia
   + rezerwacja wysokości skeletona wg realnego stosunku boków).
+- **`body_maps.view_name`** — zdjęte ograniczenie do 6 starych kluczy
+  (`front`/`back`/`left`/`right`/`legs_front`/`legs_back`) w
+  `supabase/rls-setup.sql`. Wcześniej dodanie okolicy spoza tych 6 (np. `Kark`)
+  kończyło się błędem bazy. **Wymaga ponownego uruchomienia `supabase/rls-setup.sql`
+  w Supabase.**
 
 ### Uwaga
 

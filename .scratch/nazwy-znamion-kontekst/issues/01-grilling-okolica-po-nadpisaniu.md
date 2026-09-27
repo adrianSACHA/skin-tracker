@@ -1,7 +1,7 @@
 # 01 — Okolica po nadpisaniu nazwy znamienia
 
 Type: grilling
-Status: open
+Status: resolved
 Map: .scratch/nazwy-znamion-kontekst/map.md
 
 ## Pytanie
@@ -33,4 +33,14 @@ Jeśli **B**, to skąd brać okolicę:
 
 ## Answer
 
-_(uzupełniane przy rozwiązywaniu)_
+**Decyzja: B (tak) + B1 (dynamicznie).**
+
+Po nadpisaniu nazwy znamienia pokazujemy okolicę ciała obok nazwy, np.
+`Tył · znamię przy łopatce`. Okolicę bierzemy **dynamicznie** z widoku, na
+którym leży znamię (`lesions.body_map_id → body_maps.view_name`), bez zmian w
+schemacie. Dla auto-nazw (`Tył-3`) okolica jest już w nazwie, więc jej nie
+dublujemy — kontekst pokazujemy TYLKO, gdy nazwa została nadpisana.
+
+Wdrożone: `src/lib/bodyAreas.js` (`isAutoNamed`, `areaContextFor`),
+`src/components/LesionName.jsx` — użyty w `LesionsList`, `Reminders`,
+`LesionDetail`, `LesionInfoPanel`.

@@ -32,15 +32,12 @@ create table if not exists public.body_maps (
 create index if not exists body_maps_person_idx
   on public.body_maps (person_id);
 
--- Dozwolone widoki mapy ciała (idempotentnie - aktualizuje też istniejące instalacje).
+-- Widoki mapy ciała: view_name to klucz słownika okolic (np. 'kark') ALBO
+-- własna nazwa użytkownika (slug, np. 'plecy-prawa') — NIE ograniczamy do listy.
+-- Wystarczy niepusty tekst (idempotentnie - aktualizuje też istniejące instalacje).
 alter table public.body_maps drop constraint if exists body_maps_view_name_check;
 alter table public.body_maps add constraint body_maps_view_name_check
-  check (
-    view_name in (
-      'front', 'back', 'left', 'right',
-      'legs_front', 'legs_back'
-    )
-  );
+  check (length(btrim(view_name)) > 0);
 
 -- lesions: znamiona - pozycja w % względem zdjęcia (0-100).
 create table if not exists public.lesions (

@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import {
+  areaContextFor,
   areaLabel,
   areaOrder,
+  isAutoNamed,
   isPredefinedArea,
   lesionPrefix,
   nextLesionLabel,
@@ -113,5 +115,26 @@ describe('nextLesionLabel', () => {
 
   it('bez etykiety → pusty (brak prefiksu)', () => {
     expect(nextLesionLabel('', [])).toBe('')
+  })
+})
+
+describe('isAutoNamed / areaContextFor', () => {
+  it('auto-nazwa nie pokazuje okolicy osobno', () => {
+    expect(isAutoNamed('Tył-3', 'back')).toBe(true)
+    expect(areaContextFor('Tył-3', 'back')).toBe(null)
+  })
+
+  it('nadpisana nazwa → pokazuje okolicę', () => {
+    expect(isAutoNamed('znamię przy łopatce', 'back')).toBe(false)
+    expect(areaContextFor('znamię przy łopatce', 'back')).toBe('Tył')
+  })
+
+  it('bez widoku / bez okolicy → brak kontekstu', () => {
+    expect(areaContextFor('znamię', '')).toBe(null)
+    expect(areaContextFor('znamię', null)).toBe(null)
+  })
+
+  it('auto-nazwa innej okolicy w tym widoku to nazwa własna', () => {
+    expect(areaContextFor('Tył-3', 'front')).toBe('Przód')
   })
 })

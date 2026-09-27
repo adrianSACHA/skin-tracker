@@ -18,6 +18,7 @@ import { removeStorageFile } from '../lib/uploadPhoto'
 import { useTheme } from '../context/ThemeContext'
 import SignedImage from './SignedImage'
 import StatusBadge from './StatusBadge'
+import LesionName from './LesionName'
 import PhotoUploadForm from './PhotoUploadForm'
 import CalendarReminderButton from './CalendarReminderButton'
 import ConfirmDialog from './ConfirmDialog'
@@ -90,7 +91,11 @@ export default function LesionDetail() {
     setError(null)
 
     const [lesionRes, photosRes, personRes] = await Promise.all([
-      supabase.from('lesions').select('*').eq('id', lesionId).maybeSingle(),
+      supabase
+        .from('lesions')
+        .select('*, body_maps(view_name)')
+        .eq('id', lesionId)
+        .maybeSingle(),
       supabase
         .from('lesion_photos')
         .select('*')
@@ -299,7 +304,11 @@ export default function LesionDetail() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
-            {lesion.label}
+            <LesionName
+              label={lesion.label}
+              viewName={lesion.body_maps?.view_name}
+              areaClassName="font-normal text-slate-400 dark:text-slate-500"
+            />
           </h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <StatusBadge status={lesion.status} />

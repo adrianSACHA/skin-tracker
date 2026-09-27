@@ -96,6 +96,11 @@ Pięć pierwszych pytań z mgły rozstrzygnięto (patrz „Decisions so far" i t
 - Czy listy znamion pokazują prefiks + opis, czy tylko opis (jeśli nadpisany)?
   Dziś: pokazują zapisany `lesions.label` (prefiks tylko dopóki nie nadpisano).
 
+> **Rozstrzygnięte** w efforcie `nazwy-znamion-kontekst` (tickety 01–02):
+> pokazujemy okolicę obok nazwy (`Tył · znamię przy łopatce`), braną dynamicznie
+> z widoku znamienia; auto-nazwy bez zmian. Dotyczy listy, panelu pina i
+> szczegółów.
+
 ## Notes
 
 ### Dosłowny feedback użytkownika (do zachowania kontekstu)

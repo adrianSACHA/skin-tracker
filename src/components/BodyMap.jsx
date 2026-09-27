@@ -1205,6 +1205,12 @@ export default function BodyMap() {
         <div className="mt-4 lg:mt-0 lg:sticky lg:top-4">
           <LesionInfoPanel
             lesion={selectedLesion}
+            viewName={
+              selectedLesion
+                ? bodyMaps.find((m) => m.id === selectedLesion.body_map_id)
+                    ?.view_name
+                : null
+            }
             editForm={editForm}
             onEditFormChange={setEditForm}
             onSaveEdit={saveEdit}

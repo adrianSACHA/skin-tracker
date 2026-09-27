@@ -1,7 +1,7 @@
 # 02 — Lista: prefiks + opis czy sam opis
 
 Type: grilling
-Status: open
+Status: resolved
 Blocked by: 01
 Map: .scratch/nazwy-znamion-kontekst/map.md
 
@@ -28,4 +28,8 @@ nazwy nie nadpisano).
 
 ## Answer
 
-_(uzupełniane przy rozwiązywaniu)_
+**Decyzja: B — okolica + opis, spójnie wszędzie.**
+
+Lista (oraz panel pina i szczegóły) pokazują `Okolica · nazwa`, ale **tylko
+gdy nazwa została nadpisana**; auto-nazwy bez zmian. Zależne od ticketu 01 —
+zrealizowane razem z nim (wspólny `areaContextFor` przez `LesionName`).

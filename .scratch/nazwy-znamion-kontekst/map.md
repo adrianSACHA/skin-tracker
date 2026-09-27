@@ -19,6 +19,10 @@ Rozstrzygnąć dwie kwestie odłożone przy zamykaniu effortu
   używana wprost, bez doklejania prefiksu.
 - Prefiks jest **niezmienny** — zmiana nazwy widoku nie przepisuje
   `lesions.label` (ticket 02 tamtego effortu).
+- **Kontekst okolicy (01/02):** po nadpisaniu nazwy znamienia pokazujemy okolicę
+  obok (`Tył · znamię przy łopatce`), braną **dynamicznie** z widoku znamienia.
+  Auto-nazwy (`Tył-3`) bez zmian. Dotyczy listy, panelu pina i szczegółów.
+  → `issues/01-…`, `issues/02-…`
 
 ## Not yet specified (mgła)
 
@@ -33,9 +37,12 @@ Rozstrzygnięte przez tickety 01–02 poniżej.
 
 | #  | Type     | Tytuł                                                             | Blocked by | Status |
 | -- | -------- | ----------------------------------------------------------------- | ---------- | ------ |
-| 01 | grilling | [Okolica po nadpisaniu nazwy znamienia](issues/01-grilling-okolica-po-nadpisaniu.md) | — | open |
-| 02 | grilling | [Lista: prefiks + opis czy sam opis](issues/02-grilling-lista-prefiks.md) | 01 | open |
+| 01 | grilling | [Okolica po nadpisaniu nazwy znamienia](issues/01-grilling-okolica-po-nadpisaniu.md) | — | resolved |
+| 02 | grilling | [Lista: prefiks + opis czy sam opis](issues/02-grilling-lista-prefiks.md) | 01 | resolved |
 
 ## Frontier
 
-Pierwszy otwarty: **01**. Potem **02** (zależny od decyzji z 01).
+Brak — oba tickety `resolved`. Wdrożone w `src/lib/bodyAreas.js`,
+`src/components/LesionName.jsx` (+ `LesionsList`, `Reminders`,
+`LesionDetail`, `LesionInfoPanel`) oraz poprawka constraintu w
+`supabase/rls-setup.sql`.
