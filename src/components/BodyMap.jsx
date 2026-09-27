@@ -188,6 +188,7 @@ export default function BodyMap() {
   const [savingView, setSavingView] = useState(false)
   const [viewDeleteConfirm, setViewDeleteConfirm] = useState(false)
   const [deletingView, setDeletingView] = useState(false)
+  const [sheetDragY, setSheetDragY] = useState(0) // swipe w dół bottom sheetu
   const fileInputRef = useRef(null) // zmiana tła: wybór z plików
   const cameraInputRef = useRef(null) // zmiana tła: aparat
   const addInputRef = useRef(null) // dodawanie widoku: wybór z plików
@@ -202,6 +203,7 @@ export default function BodyMap() {
   const [drag, setDrag] = useState(null) // { id, x, y } podczas przeciągania
   const [savingEdit, setSavingEdit] = useState(false)
   const contentDivRef = useRef(null)
+  const sheetDragRef = useRef(null)
 
   const load = async () => {
     setLoading(true)
@@ -553,6 +555,48 @@ export default function BodyMap() {
     setSelectedId(null)
     setEditForm(null)
     setMoveModeId(null)
+  }
+
+  // Bottom sheet (tylko mobile): blokada przewijania tła pod arkuszem.
+  useEffect(() => {
+    if (!selectedLesion) return undefined
+    const mq = window.matchMedia('(max-width: 1023px)')
+    const apply = () => {
+      document.body.style.overflow = mq.matches ? 'hidden' : ''
+    }
+    apply()
+    mq.addEventListener('change', apply)
+    return () => {
+      mq.removeEventListener('change', apply)
+      document.body.style.overflow = ''
+    }
+  }, [selectedLesion])
+
+  // Swipe w dół zamyka arkusz (chwytamy za uchwyt). Poza mobile nieaktywne.
+  const onSheetPointerDown = (e) => {
+    if (window.matchMedia('(min-width: 1024px)').matches) return
+    sheetDragRef.current = { startY: e.clientY, dy: 0 }
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId)
+    } catch {
+      /* brak pointer capture - ignorujemy */
+    }
+  }
+
+  const onSheetPointerMove = (e) => {
+    const d = sheetDragRef.current
+    if (!d) return
+    d.dy = Math.max(0, e.clientY - d.startY)
+    setSheetDragY(d.dy)
+  }
+
+  const onSheetPointerUp = () => {
+    const d = sheetDragRef.current
+    if (!d) return
+    sheetDragRef.current = null
+    const dy = d.dy || 0
+    setSheetDragY(0)
+    if (dy > 110) closePanel()
   }
 
   const openPanel = (lesion) => {
@@ -1213,12 +1257,31 @@ export default function BodyMap() {
           <div
             className={
               selectedLesion
-                ? 'fixed bottom-0 left-0 right-0 z-50 max-h-[85dvh] overflow-y-auto overscroll-contain rounded-t-2xl border-t border-slate-200 bg-white p-4 shadow-2xl dark:border-slate-800 dark:bg-slate-900 lg:static lg:z-auto lg:max-h-none lg:overflow-visible lg:rounded-xl lg:border lg:border-slate-200 lg:bg-white lg:p-4 lg:shadow-none'
+                ? 'fixed bottom-0 left-0 right-0 z-50 max-h-[85dvh] overflow-y-auto overscroll-contain rounded-t-2xl border-t border-slate-200 bg-white p-4 shadow-2xl transition-transform duration-200 ease-out dark:border-slate-800 dark:bg-slate-900 lg:static lg:z-auto lg:max-h-none lg:overflow-visible lg:rounded-xl lg:border lg:border-slate-200 lg:bg-white lg:p-4 lg:shadow-none'
                 : 'mt-4 rounded-xl border border-dashed border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 lg:mt-0'
+            }
+            style={
+              selectedLesion
+                ? {
+                    transform: sheetDragY
+                      ? `translateY(${sheetDragY}px)`
+                      : undefined,
+                    transition: sheetDragY ? 'none' : undefined,
+                  }
+                : undefined
             }
           >
             {selectedLesion ? (
-              <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-slate-300 lg:hidden dark:bg-slate-600" />
+              <div
+                onPointerDown={onSheetPointerDown}
+                onPointerMove={onSheetPointerMove}
+                onPointerUp={onSheetPointerUp}
+                onPointerCancel={onSheetPointerUp}
+                aria-hidden="true"
+                className="mx-auto mb-3 flex h-6 w-full cursor-grab touch-none items-center justify-center lg:hidden"
+              >
+                <span className="h-1.5 w-12 rounded-full bg-slate-300 dark:bg-slate-600" />
+              </div>
             ) : null}
           <LesionInfoPanel
             lesion={selectedLesion}

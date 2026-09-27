@@ -30,6 +30,7 @@ Brak — panel pinu jako bottom sheet wdrożony (ticket 05).
 | 03 | task | [Modale: max-wysokość + przewijanie](issues/03-task-modale-scroll.md) | — | resolved |
 | 04 | task | [Panel pinu: przewinięcie na mobile](issues/04-task-panel-scroll.md) | — | resolved |
 | 05 | task | [Panel pinu jako bottom sheet (mobile)](issues/05-task-bottom-sheet.md) | 04 | resolved |
+| 06 | task | [Bottom sheet: swipe w dół + blokada tła](issues/06-task-sheet-swipe-lock.md) | 05 | resolved |
 
 ## Frontier
 
