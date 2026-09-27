@@ -275,6 +275,43 @@ Postęp znajdziesz w zakładce **Actions** w repo.
 
 ---
 
+## Przypomnienia w tle (Web Push)
+
+Poza plikiem `.ics` i powiadomieniem „przy otwarciu" aplikacja umie wysyłać
+**prawdziwe powiadomienia w tle** (gdy aplikacja jest zamknięta). Nie wymaga to
+własnego serwera ani płatnych funkcji Supabase — nadawcą jest **GitHub Actions**
+(zero kosztów; powiadomienia idą przez darmową usługę push przeglądarki).
+
+Jak to działa:
+
+- w aplikacji: **Kontrole → „Powiadomienia w tle"** (zgoda + zapis subskrypcji do
+  tabeli `push_subscriptions`),
+- w repo: `.github/workflows/notify.yml` raz dziennie liczy terminy i wysyła push
+  (`node scripts/send-reminders.mjs`, biblioteka `web-push`).
+
+Konfiguracja jednorazowa:
+
+1. Wygeneruj klucze VAPID:
+
+   ```bash
+   npx web-push generate-vapid-keys
+   ```
+
+2. **Sekrety repo** (Settings → Secrets and variables → Actions):
+   - `VITE_VAPID_PUBLIC_KEY` — klucz publiczny (trafia też do builda frontendu),
+   - `VAPID_PUBLIC_KEY` — ten sam klucz publiczny (dla skryptu),
+   - `VAPID_PRIVATE_KEY` — klucz prywatny (**tylko jako sekret**),
+   - `VAPID_SUBJECT` — np. `mailto:twoj@email`,
+   - `SUPABASE_SERVICE_ROLE_KEY` — klucz serwisowy Supabase (**nie do frontendu**).
+3. Uruchom ponownie `supabase/rls-setup.sql` (sekcja 8: `interval_weeks`,
+   `last_reminded_at`, `push_subscriptions`).
+4. W aplikacji włącz „Powiadomienia w tle" (Kontrole).
+
+Interwał kontroli jest synchronizowany do bazy (`monitored_persons.interval_weeks`),
+żeby nadawca policzył termin serwerowo. Uwaga: GitHub wyłącza zaplanowane workflow
+po ~60 dniach bezczynności repo — wystarczy wtedy uruchomić je ręcznie (Actions →
+„Powiadomienia o kontrolach" → Run workflow).
+
 ## Pomiar z obrysu (MediaPipe)
 
 Pomiar wspomagany segmentacją **MediaPipe Interactive Image

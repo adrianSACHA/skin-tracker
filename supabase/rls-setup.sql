@@ -289,3 +289,50 @@ alter table public.monitored_persons
 
 alter table public.lesions
   add column if not exists next_check_at date;
+
+-- ============================================================================
+-- 8. PRZYPOMNIENIA WEB PUSH (wysyłka przez GitHub Actions - bez własnego serwera)
+--    interval_weeks      - interwał kontroli per osoba (serwerowy - nadawca liczy
+--                          z niego termin dla znamion bez "next_check_at").
+--    last_reminded_at    - data ostatniego przypomnienia o znamieniu (dedup).
+--    push_subscriptions  - subskrypcje Web Push przeglądarki (właściciel konta).
+-- ============================================================================
+alter table public.monitored_persons
+  add column if not exists interval_weeks integer not null default 6;
+
+alter table public.monitored_persons
+  drop constraint if exists monitored_persons_interval_weeks_check;
+alter table public.monitored_persons
+  add constraint monitored_persons_interval_weeks_check
+  check (interval_weeks between 1 and 52);
+
+alter table public.lesions
+  add column if not exists last_reminded_at date;
+
+create table if not exists public.push_subscriptions (
+  id            uuid primary key default gen_random_uuid(),
+  owner_user_id uuid not null references auth.users (id) on delete cascade,
+  endpoint      text not null unique,
+  p256dh        text not null,
+  auth          text not null,
+  created_at    timestamptz not null default now()
+);
+create index if not exists push_subscriptions_owner_idx
+  on public.push_subscriptions (owner_user_id);
+
+alter table public.push_subscriptions enable row level security;
+
+drop policy if exists push_subscriptions_select_own on public.push_subscriptions;
+drop policy if exists push_subscriptions_insert_own on public.push_subscriptions;
+drop policy if exists push_subscriptions_update_own on public.push_subscriptions;
+drop policy if exists push_subscriptions_delete_own on public.push_subscriptions;
+
+create policy push_subscriptions_select_own on public.push_subscriptions
+  for select using (owner_user_id = auth.uid());
+create policy push_subscriptions_insert_own on public.push_subscriptions
+  for insert with check (owner_user_id = auth.uid());
+create policy push_subscriptions_update_own on public.push_subscriptions
+  for update using (owner_user_id = auth.uid())
+  with check (owner_user_id = auth.uid());
+create policy push_subscriptions_delete_own on public.push_subscriptions
+  for delete using (owner_user_id = auth.uid());

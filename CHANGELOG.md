@@ -31,6 +31,11 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 - **Przypomnienia in-app (wariant lekki)** — licznik zaległych/wkrótce kontroli
   przy „Kontrole" w nawigacji oraz opcjonalne powiadomienie przeglądarki przy
   otwarciu aplikacji (za zgodą, max raz dziennie). `.ics` do kalendarza zostaje.
+- **Powiadomienia w tle (Web Push)** — prawdziwy push, gdy aplikacja zamknięta.
+  Nadawcą jest GitHub Actions (cron + `scripts/send-reminders.mjs`), bez własnego
+  serwera i bez płatnych funkcji; subskrypcja i interwał w Supabase. Włączanie:
+  Kontrole → „Powiadomienia w tle". Konfiguracja: sekcja „Przypomnienia w tle" w
+  README.
 
 ### Zmienione
 

@@ -7,7 +7,7 @@ import { todayYMD } from './date'
 // Liczba zaległych i „wkrótce" (w ciągu 30 dni) kontroli danej osoby — do
 // znacznika przy „Kontrole" w nawigacji i lekkiego powiadomienia.
 export function useDueReminders(personId) {
-  const [intervalWeeks] = useIntervalWeeks()
+  const [intervalWeeks] = useIntervalWeeks(personId)
   const [counts, setCounts] = useState({ overdue: 0, soon: 0, ready: false })
 
   useEffect(() => {

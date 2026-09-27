@@ -72,7 +72,7 @@ export default function LesionDetail() {
   const [opacity, setOpacity] = useState(50)
   // Interwał kontroli jest ustawiany w JEDNYM miejscu (lista znamion) - tutaj
   // tylko odczytujemy wartość, żeby nie było dwóch rozjeżdżających się pól.
-  const [intervalWeeks] = useIntervalWeeks()
+  const [intervalWeeks] = useIntervalWeeks(personId)
   const [leadDays, setLeadDays] = useState(7)
   const [enlarge, setEnlarge] = useState(null) // powiększone zdjęcie (lightbox)
   const compareRef = useRef(null)

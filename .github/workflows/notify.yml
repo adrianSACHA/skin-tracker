@@ -1,0 +1,41 @@
+name: Powiadomienia o kontrolach
+
+# Wysyła przypomnienia Web Push raz dziennie (i na żądanie z zakładki Actions).
+# Nie wymaga płatnych funkcji — nadawcą jest GitHub Actions.
+#
+# Wymagane sekrety repo (Settings -> Secrets and variables -> Actions):
+#   SUPABASE_SERVICE_ROLE_KEY  (klucz serwisowy Supabase — NIE do frontendu!)
+#   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY
+#   VAPID_SUBJECT              (np. mailto:twoj@email)
+# oraz istniejący VITE_SUPABASE_URL.
+
+on:
+  schedule:
+    # Codziennie 06:00 UTC (= 07:00/08:00 czasu PL w zależności od DST).
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Send reminders
+        run: node scripts/send-reminders.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}

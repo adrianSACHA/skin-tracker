@@ -16,6 +16,12 @@ import {
   requestNotificationPermission,
   setNotifyOnOpenEnabled,
 } from '../lib/reminderNotify'
+import {
+  disablePush,
+  enablePush,
+  getPushSubscription,
+  pushConfigured,
+} from '../lib/push'
 import StatusBadge from './StatusBadge'
 import LesionName from './LesionName'
 import CalendarReminderButton from './CalendarReminderButton'
@@ -59,7 +65,7 @@ function SnoozeControl({ defaultWeeks, busy, onSnooze }) {
 export default function Reminders() {
   const { personId } = useParams()
   const navigate = useNavigate()
-  const [intervalWeeks] = useIntervalWeeks()
+  const [intervalWeeks] = useIntervalWeeks(personId)
 
   const [person, setPerson] = useState(null)
   const [lesions, setLesions] = useState([])
@@ -72,6 +78,7 @@ export default function Reminders() {
   const [notifyOnOpen, setNotifyOnOpen] = useState(() =>
     isNotifyOnOpenEnabled()
   )
+  const [pushOn, setPushOn] = useState(false)
 
   const load = async () => {
     setLoading(true)
@@ -103,6 +110,17 @@ export default function Reminders() {
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [personId])
+
+  // Czy push w tle jest już włączony na tym urządzeniu?
+  useEffect(() => {
+    let active = true
+    getPushSubscription().then((sub) => {
+      if (active) setPushOn(Boolean(sub))
+    })
+    return () => {
+      active = false
+    }
+  }, [])
 
   const rows = useMemo(() => {
     const built = buildRows(lesions, { intervalWeeks, today: todayYMD() })
@@ -167,6 +185,30 @@ export default function Reminders() {
     setNotifyOnOpenEnabled(true)
     setNotifyOnOpen(true)
     toast.success('Włączono powiadomienie przy otwarciu')
+  }
+
+  const togglePush = async (e) => {
+    const on = e.target.checked
+    if (!on) {
+      setPushOn(false)
+      await disablePush()
+      toast.success('Wyłączono powiadomienia w tle')
+      return
+    }
+    const result = await enablePush()
+    if (result !== 'granted') {
+      setPushOn(false)
+      toast.error(
+        result === 'unsupported'
+          ? 'Ta przeglądarka nie wspiera powiadomień w tle.'
+          : result === 'unconfigured'
+            ? 'Powiadomienia nie są skonfigurowane (brak klucza VAPID).'
+            : 'Brak zgody na powiadomienia.'
+      )
+      return
+    }
+    setPushOn(true)
+    toast.success('Włączono powiadomienia w tle')
   }
 
   const snooze = async (lesion, weeks) => {
@@ -417,6 +459,18 @@ export default function Reminders() {
               className="h-5 w-5 rounded border-slate-300 text-teal-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-600 dark:bg-slate-800"
             />
             <span>Powiadom przy otwarciu, gdy są zaległe kontrole</span>
+          </label>
+        ) : null}
+
+        {pushConfigured() ? (
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={pushOn}
+              onChange={togglePush}
+              className="h-5 w-5 rounded border-slate-300 text-teal-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-600 dark:bg-slate-800"
+            />
+            <span>Powiadomienia w tle (gdy aplikacja zamknięta)</span>
           </label>
         ) : null}
       </div>

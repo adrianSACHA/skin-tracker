@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { HashRouter } from 'react-router-dom'
 import App from './App.jsx'
 import { ThemeProvider } from './context/ThemeContext.jsx'
+import { registerServiceWorker } from './lib/push'
 import './index.css'
 
 // HashRouter: na GitHub Pages (bez backendu) nie wymaga żadnych przekierowań
@@ -16,3 +17,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </ThemeProvider>
   </React.StrictMode>
 )
+
+// Service worker (obsługa Web Push). Rejestracja nie blokuje startu aplikacji.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    registerServiceWorker()
+  })
+}

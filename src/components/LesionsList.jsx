@@ -20,7 +20,7 @@ export default function LesionsList() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchParams, setSearchParams] = useSearchParams()
-  const [intervalWeeks, setIntervalWeeks] = useIntervalWeeks()
+  const [intervalWeeks, setIntervalWeeks] = useIntervalWeeks(personId)
 
   // Filtr i sortowanie żyją w URL (HashRouter) - przetrwają odświeżenie i powrót.
   const { statuses: selectedStatuses, sort: sortBy } = useMemo(
