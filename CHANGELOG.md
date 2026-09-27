@@ -66,6 +66,8 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
   zdjęć z historii (lightbox) i responsywne miniatury.
 - **Mobile UX (Lista / Kontrole):** menu „Do kalendarza" trzyma się kadru
   (nie wychodzi poza ekran), poprawione rozjechane wcięcia.
+- **Modale jako bottom sheet na telefonie** — potwierdzenia i „Ustawienia widoku"
+  wysuwają się od dołu (spójnie z panelem pinu); na desktopie bez zmian.
 - **Mobile UX:** nawigacja i nagłówek zawijają się (koniec z poziomym
   przewijaniem po dodaniu licznika); etykieta pinu zawija długie nazwy; modale
   mają ograniczoną wysokość i przewijanie; po kliknięciu pinu na telefonie widok

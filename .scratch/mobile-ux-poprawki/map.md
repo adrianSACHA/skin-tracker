@@ -41,10 +41,11 @@ Brak.
 | 09 | task | [Porządki: rozjechane wcięcia w Lista/Kontrole](issues/09-task-porzadki-wciecia.md) | — | resolved |
 | 10 | task | [Przycisk „Zainstaluj" (PWA)](issues/10-task-install-button.md) | — | resolved |
 | 11 | task | [Instalacja na iOS (instrukcja)](issues/11-task-ios-install.md) | 10 | resolved |
+| 12 | task | [Modale jako bottom sheet na mobile](issues/12-task-modale-bottom-sheet.md) | — | resolved |
 
 ## Status
 
-**Domknięty** (2026-09-27) — wszystkie 11 ticketów `resolved`.
+**Domknięty** (2026-09-27) — wszystkie 12 ticketów `resolved`.
 
 ## Frontier
 

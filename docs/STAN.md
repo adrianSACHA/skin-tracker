@@ -55,6 +55,6 @@ osób („Ja", „Syn").
 
 ## Otwarte / do rozważenia
 
-- Ujednolicenie paneli (bottom sheet) w pozostałych widokach.
+- Wyszukiwanie znamion po nazwie (na liście).
 - Web Push dla wielu urządzeń (deduplikacja subskrypcji).
 - Dalsze drobiazgi UX (przegląd pozostałych widoków na telefonie).

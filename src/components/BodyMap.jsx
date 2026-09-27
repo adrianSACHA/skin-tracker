@@ -1405,14 +1405,14 @@ export default function BodyMap() {
         <div
           role="presentation"
           onClick={closeViewSettings}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center sm:p-4"
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="view-settings-title"
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[calc(100dvh-2rem)] w-full max-w-md space-y-4 overflow-y-auto rounded-xl border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-700 dark:bg-slate-900"
+            className="max-h-[calc(100dvh-2rem)] w-full max-w-md space-y-4 overflow-y-auto rounded-t-2xl border border-slate-200 bg-white p-5 shadow-xl sm:rounded-xl dark:border-slate-700 dark:bg-slate-900"
           >
             <div className="flex items-start justify-between gap-2">
               <h2
