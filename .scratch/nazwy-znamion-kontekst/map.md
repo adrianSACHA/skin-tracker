@@ -1,0 +1,41 @@
+# Wayfinder: Kontekst okolicy w nazwie znamienia
+
+Effort: `.scratch/nazwy-znamion-kontekst/`
+Tickets: `.scratch/nazwy-znamion-kontekst/issues/`
+
+## Destination
+
+Rozstrzygnąć dwie kwestie odłożone przy zamykaniu effortu
+`mapa-widoki-znamiona` (sekcja „Not yet specified"):
+
+- Czy po **ręcznym nadpisaniu** nazwy znamienia pokazywać jeszcze okolicę ciała
+  (kontekst, gdzie to jest).
+- Jak pokazywać nazwę na **liście znamion** (prefiks + opis czy sam opis).
+
+## Decisions so far
+
+- Pochodzi z `mapa-widoki-znamiona`: nazwy znamion auto-generowane jako
+  `Prefiks-N` (np. `Tył-3`), użytkownik może nadpisać. Dziś nadpisana nazwa jest
+  używana wprost, bez doklejania prefiksu.
+- Prefiks jest **niezmienny** — zmiana nazwy widoku nie przepisuje
+  `lesions.label` (ticket 02 tamtego effortu).
+
+## Not yet specified (mgła)
+
+Rozstrzygnięte przez tickety 01–02 poniżej.
+
+## Out of scope
+
+- Zmiana schematu Supabase (bez nowych pól/tabel — ewentualny kontekst liczymy
+  z istniejącego `lesions.body_map_id → body_maps.view_name`).
+
+## Tickets
+
+| #  | Type     | Tytuł                                                             | Blocked by | Status |
+| -- | -------- | ----------------------------------------------------------------- | ---------- | ------ |
+| 01 | grilling | [Okolica po nadpisaniu nazwy znamienia](issues/01-grilling-okolica-po-nadpisaniu.md) | — | open |
+| 02 | grilling | [Lista: prefiks + opis czy sam opis](issues/02-grilling-lista-prefiks.md) | 01 | open |
+
+## Frontier
+
+Pierwszy otwarty: **01**. Potem **02** (zależny od decyzji z 01).
