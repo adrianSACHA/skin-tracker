@@ -32,7 +32,7 @@ osób („Ja", „Syn").
 | **Znamię** | zdjęcia z edycją (obrót / odbicia) i kompresją; pomiar z obrysu (MediaPipe, geometria); notatki ABCDE; status; porównanie przeciąganym suwakiem; wykres rozmiaru; powiększanie zdjęć (lightbox) |
 | **Lista znamion** | filtr po statusie + sortowanie po terminie kontroli; stan w URL |
 | **Kontrole** | terminy, przesuwanie, ustawienia; **3 poziomy przypomnień**: `.ics` (kalendarz), in‑app (licznik + powiadomienie przy otwarciu), **Web Push w tle** |
-| **PWA** | manifest + ikony, przycisk **„Zainstaluj"**, service worker (obsługa push) |
+| **PWA** | manifest + ikony, przycisk **„Zainstaluj"** (Android: prompt; iOS: instrukcja), service worker (obsługa push) |
 
 ## Automatyzacja (GitHub)
 
@@ -55,7 +55,6 @@ osób („Ja", „Syn").
 
 ## Otwarte / do rozważenia
 
-- Instrukcja instalacji dla **iOS** (Safari nie wspiera `beforeinstallprompt`).
-- Bottom sheet / ujednolicenie paneli w pozostałych widokach.
+- Ujednolicenie paneli (bottom sheet) w pozostałych widokach.
 - Web Push dla wielu urządzeń (deduplikacja subskrypcji).
 - Dalsze drobiazgi UX (przegląd pozostałych widoków na telefonie).

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { usePerson } from '../context/PersonContext'
@@ -20,7 +20,8 @@ export default function Layout({ children }) {
   const { person, setPerson } = usePerson()
   const navigate = useNavigate()
   const due = useDueReminders(person?.id)
-  const { canInstall, promptInstall } = useInstallPrompt()
+  const { canInstall, iosHint, promptInstall } = useInstallPrompt()
+  const [showInstallTip, setShowInstallTip] = useState(false)
 
   // Lekkie przypomnienie: jedno powiadomienie dziennie, gdy są zaległe kontrole
   // (tylko przy otwartej aplikacji; bez Web Push).
@@ -53,10 +54,13 @@ export default function Layout({ children }) {
                 </strong>
               </span>
             ) : null}
-            {canInstall ? (
+            {canInstall || iosHint ? (
               <button
                 type="button"
-                onClick={promptInstall}
+                onClick={() => {
+                  if (canInstall) promptInstall()
+                  else setShowInstallTip((v) => !v)
+                }}
                 className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-teal-200 bg-teal-50 px-2.5 text-sm font-medium text-teal-800 transition-colors hover:bg-teal-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-teal-800 dark:bg-teal-950/50 dark:text-teal-200 dark:hover:bg-teal-900/60"
                 title="Dodaj aplikację do ekranu początkowego"
               >
@@ -83,6 +87,25 @@ export default function Layout({ children }) {
             </button>
           </div>
         </div>
+
+        {showInstallTip ? (
+          <div className="mx-auto max-w-4xl px-4 pb-3 lg:max-w-6xl">
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-teal-900 dark:border-teal-800 dark:bg-teal-950/40 dark:text-teal-100">
+              <span>
+                Aby zainstalować na iPhone/iPad: dotknij{' '}
+                <strong>Udostępnij</strong> (□↑), a potem{' '}
+                <strong>„Dodaj do ekranu początkowego"</strong>.
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowInstallTip(false)}
+                className="min-h-[44px] rounded-md px-3 font-medium text-teal-800 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-200"
+              >
+                Zamknij
+              </button>
+            </div>
+          </div>
+        ) : null}
 
         {person ? (
           <nav className="mx-auto flex max-w-4xl flex-wrap gap-2 px-4 pb-2 lg:max-w-6xl">

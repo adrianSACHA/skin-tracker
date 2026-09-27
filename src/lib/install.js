@@ -9,6 +9,17 @@ export function isStandalone() {
   )
 }
 
+// iOS/iPadOS (Safari) nie wspiera `beforeinstallprompt` — instalacja ręczna
+// przez „Udostępnij -> Dodaj do ekranu początkowego".
+export function isIos() {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent || ''
+  const iOS = /iPad|iPhone|iPod/.test(ua)
+  const iPadOs =
+    navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1
+  return iOS || iPadOs
+}
+
 // Przechwytuje `beforeinstallprompt`, żeby pokazać WŁASNY przycisk „Zainstaluj".
 // Natywny prompt Chrome pojawia się raz i po odrzuceniu trudno go przywołać —
 // trzymając zdarzenie w stanie, dajemy stały dostęp (dopóki apka nie jest
@@ -45,5 +56,10 @@ export function useInstallPrompt() {
     setDeferred(null)
   }
 
-  return { canInstall: Boolean(deferred) && !installed, promptInstall }
+  return {
+    canInstall: Boolean(deferred) && !installed,
+    // iOS nie da się „wypromtować" — pokazujemy tylko instrukcję.
+    iosHint: isIos() && !installed,
+    promptInstall,
+  }
 }

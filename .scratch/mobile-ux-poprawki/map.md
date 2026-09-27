@@ -20,8 +20,7 @@ ekran, panel pinu poza widokiem.
 
 ## Not yet specified (mgła)
 
-Brak. (Do rozważenia w przyszłości: instrukcja instalacji dla iOS — Safari nie
-wspiera `beforeinstallprompt`.)
+Brak.
 
 ## Out of scope
 
@@ -41,10 +40,11 @@ wspiera `beforeinstallprompt`.)
 | 08 | task | [„Do kalendarza": menu w kadrze na mobile](issues/08-task-kalendarz-menu-w-kadrze.md) | — | resolved |
 | 09 | task | [Porządki: rozjechane wcięcia w Lista/Kontrole](issues/09-task-porzadki-wciecia.md) | — | resolved |
 | 10 | task | [Przycisk „Zainstaluj" (PWA)](issues/10-task-install-button.md) | — | resolved |
+| 11 | task | [Instalacja na iOS (instrukcja)](issues/11-task-ios-install.md) | 10 | resolved |
 
 ## Status
 
-**Domknięty** (2026-09-27) — wszystkie 10 ticketów `resolved`.
+**Domknięty** (2026-09-27) — wszystkie 11 ticketów `resolved`.
 
 ## Frontier
 

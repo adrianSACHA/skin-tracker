@@ -34,7 +34,8 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 - **Przycisk „Zainstaluj" (PWA)** — dodanie aplikacji do ekranu początkowego
   w każdej chwili (przechwycony `beforeinstallprompt`, przycisk w nagłówku);
   ukryty, gdy aplikacja jest już zainstalowana. Service worker dostał handler
-  `fetch` (wymóg instalowalności PWA).
+  `fetch` (wymóg instalowalności PWA). Na iOS/iPadzie (Safari) przycisk pokazuje
+  instrukcję „Udostępnij → Dodaj do ekranu początkowego".
 - **Powiadomienia w tle (Web Push)** — prawdziwy push, gdy aplikacja zamknięta.
   Nadawcą jest GitHub Actions (cron + `scripts/send-reminders.mjs`), bez własnego
   serwera i bez płatnych funkcji; subskrypcja i interwał w Supabase. Włączanie:
