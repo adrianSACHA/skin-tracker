@@ -1,7 +1,7 @@
 # 06 — Lista: „zaległe" liczone z `Terminu kontroli`, nie z wieku zdjęcia
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Blocked by: brak
 Spec: .scratch/lesion-list-filters/spec.md
 

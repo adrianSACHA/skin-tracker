@@ -1,7 +1,7 @@
 # 01 — Ujednolicić UI i README z glosariuszem
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 
 ## Kontekst
 

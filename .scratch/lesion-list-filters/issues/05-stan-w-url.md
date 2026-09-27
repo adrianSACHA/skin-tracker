@@ -1,7 +1,7 @@
 # 05 — Stan filtra i sortowania w URL
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Blocked by: 03, 04
 Spec: .scratch/lesion-list-filters/spec.md
 

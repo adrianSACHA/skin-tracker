@@ -1,6 +1,6 @@
 # Spec: Filtr i sortowanie listy znamion
 
-Status: ready-for-agent
+Status: resolved
 
 ## Problem
 

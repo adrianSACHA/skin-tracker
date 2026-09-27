@@ -1,7 +1,7 @@
 # 03 — Filtr po `Status`
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Blocked by: 01
 Spec: .scratch/lesion-list-filters/spec.md
 

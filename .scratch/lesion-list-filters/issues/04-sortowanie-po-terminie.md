@@ -1,7 +1,7 @@
 # 04 — Sortowanie po `Terminie kontroli`
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Blocked by: 01, 02
 Spec: .scratch/lesion-list-filters/spec.md
 

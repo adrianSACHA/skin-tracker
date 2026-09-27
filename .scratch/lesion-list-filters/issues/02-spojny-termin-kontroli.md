@@ -1,7 +1,7 @@
 # 02 — Spójny `Termin kontroli` w Liście znamion
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Blocked by: 01
 Spec: .scratch/lesion-list-filters/spec.md
 

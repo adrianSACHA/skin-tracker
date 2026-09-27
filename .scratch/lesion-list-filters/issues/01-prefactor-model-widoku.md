@@ -1,7 +1,7 @@
 # 01 — Prefactor: model widoku listy + testy
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Blocked by: brak
 Spec: .scratch/lesion-list-filters/spec.md
 
