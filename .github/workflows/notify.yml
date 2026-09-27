@@ -11,8 +11,8 @@ name: Powiadomienia o kontrolach
 
 on:
   schedule:
-    # Codziennie 06:00 UTC (= 07:00/08:00 czasu PL w zależności od DST).
-    - cron: '0 6 * * *'
+    # Codziennie 08:00 UTC (= 09:00 zimą / 10:00 latem, czasu PL).
+    - cron: '0 8 * * *'
   workflow_dispatch:
 
 permissions:

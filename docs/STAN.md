@@ -38,7 +38,8 @@ osób („Ja", „Syn").
 
 - **Deploy:** każdy push na `main` → build + publikacja na GitHub Pages.
 - **Przypomnienia:** workflow „Powiadomienia o kontrolach" — cron codziennie
-  06:00 UTC (+ ręczne „Run workflow"). Nadawcą jest GitHub Actions (koszt 0).
+  08:00 UTC (09:00 zimą / 10:00 latem, czasu PL) (+ ręczne „Run workflow").
+  Nadawcą jest GitHub Actions (koszt 0).
   ⚠️ GitHub wyłącza zaplanowane workflow po ~60 dniach bezczynności repo — wtedy
   uruchom go raz ręcznie.
 
