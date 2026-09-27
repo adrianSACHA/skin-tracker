@@ -114,6 +114,18 @@ function OverflowMenu({ label, items }) {
   )
 }
 
+// Wczytaj zdjęcie z góry (poza DOM), żeby poznać jego wymiary i zarezerwować
+// miejsce — inaczej treść pod mapą „skacze", gdy zdjęcie doładuje się po
+// skeletonie. URL jest cache'owany, więc realny <img> pojawi się od razu.
+function preloadImage(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight })
+    img.onerror = () => reject(new Error('Nie udało się wczytać zdjęcia.'))
+    img.src = url
+  })
+}
+
 export default function BodyMap() {
   const { personId } = useParams()
   const { setPerson } = usePerson()
@@ -131,6 +143,9 @@ export default function BodyMap() {
   const [savingPin, setSavingPin] = useState(false)
 
   const [refState, setRefState] = useState({ view: null, url: null })
+  // Zapamiętany stosunek boków zdjęcia (do wysokości skeletona) — kolumny ciała
+  // zwykle mają ten sam format, więc kolejne przełączenia nie „skaczą".
+  const lastAspectRef = useRef('3 / 4')
   const [uploadingRef, setUploadingRef] = useState(false)
   const [deletingRef, setDeletingRef] = useState(false)
   const [refConfirm, setRefConfirm] = useState(false)
@@ -229,23 +244,31 @@ export default function BodyMap() {
     [lesions, currentMap]
   )
 
-  // Rozwiąż signed URL zdjęcia referencyjnego dla aktywnego widoku.
-  // `refState.view` mówi, dla jakiego widoku rozwiązano URL — dzięki temu przy
-  // zmianie zakładki pokazujemy wskaźnik ładowania, a nie zdjęcie innego widoku.
+  // Rozwiąż signed URL zdjęcia referencyjnego i WSTĘPNIE je wczytaj (poza DOM),
+  // żeby poznać wymiary. `refState.view` mówi, dla jakiego widoku rozwiązano
+  // URL — dzięki temu przy zmianie zakładki widzimy skeleton (a nie zdjęcie
+  // innego widoku) aż nowe zdjęcie faktycznie się wczyta.
   useEffect(() => {
     let active = true
     const view = activeView
-    if (currentMap?.image_url) {
-      getSignedUrl(currentMap.image_url)
-        .then((url) => {
-          if (active) setRefState({ view, url })
-        })
-        .catch(() => {
-          if (active) setRefState({ view, url: null })
-        })
-    } else {
-      setRefState({ view, url: null })
+
+    async function resolve() {
+      if (!currentMap?.image_url) {
+        if (active) setRefState({ view, url: null })
+        return
+      }
+      try {
+        const url = await getSignedUrl(currentMap.image_url)
+        const dims = await preloadImage(url).catch(() => ({}))
+        if (!active) return
+        if (dims.w && dims.h) lastAspectRef.current = `${dims.w} / ${dims.h}`
+        setRefState({ view, url })
+      } catch {
+        if (active) setRefState({ view, url: null })
+      }
     }
+
+    resolve()
     return () => {
       active = false
     }
@@ -939,7 +962,10 @@ export default function BodyMap() {
               </div>
             </div>
             {/* Zdjęcie referencyjne + piny */}
-            <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-800">
+            <div
+              className="relative w-full overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-800"
+              style={{ aspectRatio: lastAspectRef.current }}
+            >
               <div className="absolute left-[30%] top-[25%] h-4 w-4 rounded-full bg-slate-300 dark:bg-slate-700" />
               <div className="absolute left-[64%] top-[52%] h-4 w-4 rounded-full bg-slate-300 dark:bg-slate-700" />
               <div className="absolute left-[44%] top-[74%] h-4 w-4 rounded-full bg-slate-300 dark:bg-slate-700" />
