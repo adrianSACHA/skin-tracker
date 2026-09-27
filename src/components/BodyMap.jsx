@@ -923,34 +923,28 @@ export default function BodyMap() {
         <div className="lg:mx-auto lg:w-full lg:max-w-[700px]">
       {/* Obszar mapy */}
       {refLoading ? (
-        <div
-          role="status"
-          aria-live="polite"
-          className="flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-16 dark:border-slate-800 dark:bg-slate-900"
-        >
-          <span className="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-            <svg
-              className="h-5 w-5 animate-spin text-teal-700 dark:text-teal-300"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              />
-            </svg>
+        <div role="status" aria-live="polite" className="space-y-3">
+          <span className="sr-only">
             Wczytywanie widoku „{currentViewLabel}”…
           </span>
+          <div className="animate-pulse rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+            {/* Pasek narzędzi mapy */}
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <div className="h-4 w-44 rounded bg-slate-200 dark:bg-slate-800" />
+              <div className="flex items-center gap-1">
+                <div className="h-11 w-11 rounded-lg bg-slate-200 dark:bg-slate-800" />
+                <div className="h-11 w-12 rounded bg-slate-200 dark:bg-slate-800" />
+                <div className="h-11 w-11 rounded-lg bg-slate-200 dark:bg-slate-800" />
+                <div className="h-11 w-20 rounded-lg bg-slate-200 dark:bg-slate-800" />
+              </div>
+            </div>
+            {/* Zdjęcie referencyjne + piny */}
+            <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-800">
+              <div className="absolute left-[30%] top-[25%] h-4 w-4 rounded-full bg-slate-300 dark:bg-slate-700" />
+              <div className="absolute left-[64%] top-[52%] h-4 w-4 rounded-full bg-slate-300 dark:bg-slate-700" />
+              <div className="absolute left-[44%] top-[74%] h-4 w-4 rounded-full bg-slate-300 dark:bg-slate-700" />
+            </div>
+          </div>
         </div>
       ) : !refUrl ? (
         <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-10 text-center dark:border-slate-700 dark:bg-slate-900">
