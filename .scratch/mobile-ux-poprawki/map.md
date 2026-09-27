@@ -11,11 +11,17 @@ ekran, panel pinu poza widokiem.
 
 ## Decisions so far
 
-- Wszystkie cztery poprawki wdrożone w jednym kroku (bez zmian backendu).
+- Dopracowanie mobile w 10 krokach (bez zmian backendu): zawijanie nawigacji;
+  etykiety (tooltip pinu); modale (ograniczona wysokość + przewijanie); panel
+  pinu jako **bottom sheet** (przewijanie + swipe w dół + blokada tła);
+  przewijanie do panelu; szczegóły znamienia (porównanie przeciąganym suwakiem,
+  czytelniejszy wykres, lightbox historii); menu „Do kalendarza" w kadrze;
+  porządki wcięć; przycisk **„Zainstaluj"** (PWA).
 
 ## Not yet specified (mgła)
 
-Brak — panel pinu jako bottom sheet wdrożony (ticket 05).
+Brak. (Do rozważenia w przyszłości: instrukcja instalacji dla iOS — Safari nie
+wspiera `beforeinstallprompt`.)
 
 ## Out of scope
 
@@ -35,6 +41,10 @@ Brak — panel pinu jako bottom sheet wdrożony (ticket 05).
 | 08 | task | [„Do kalendarza": menu w kadrze na mobile](issues/08-task-kalendarz-menu-w-kadrze.md) | — | resolved |
 | 09 | task | [Porządki: rozjechane wcięcia w Lista/Kontrole](issues/09-task-porzadki-wciecia.md) | — | resolved |
 | 10 | task | [Przycisk „Zainstaluj" (PWA)](issues/10-task-install-button.md) | — | resolved |
+
+## Status
+
+**Domknięty** (2026-09-27) — wszystkie 10 ticketów `resolved`.
 
 ## Frontier
 
