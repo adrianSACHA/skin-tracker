@@ -646,6 +646,13 @@ export default function BodyMap() {
   if (showAddView) {
     return (
       <div className="space-y-4">
+        <button
+          type="button"
+          onClick={() => setShowAddView(false)}
+          className="inline-flex items-center text-sm font-medium text-teal-700 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-300"
+        >
+          ← Mapa ciała
+        </button>
         <div>
           <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
             Dodaj widok{person ? ` — ${person.display_name}` : ''}
@@ -761,6 +768,41 @@ export default function BodyMap() {
 
   return (
     <div className="space-y-4">
+      {/* Strefa widoków: zakładki + „+ Dodaj widok".
+          To osobna strefa od akcji znamion („+ Dodaj znamię" jest przy mapie). */}
+      <div className="flex flex-wrap items-center gap-2">
+        {availableViews.map((v) => (
+          <button
+            key={v.key}
+            type="button"
+            onClick={() => {
+              setView(v.key)
+              setPending(null)
+              setAddMode(false)
+            }}
+            className={[
+              'min-h-[44px] rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
+              activeView === v.key
+                ? 'bg-teal-700 text-white dark:bg-teal-600'
+                : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800',
+            ].join(' ')}
+          >
+            {v.label}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={openAddView}
+          className={
+            hasViews
+              ? 'min-h-[44px] rounded-full border border-dashed border-slate-300 px-4 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
+              : 'min-h-[52px] rounded-lg bg-teal-700 px-5 text-base font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500'
+          }
+        >
+          + Dodaj widok
+        </button>
+      </div>
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
@@ -851,41 +893,6 @@ export default function BodyMap() {
             className="hidden"
           />
         </div>
-      </div>
-
-      {/* Strefa widoków: zakładki + „+ Dodaj widok".
-          To osobna strefa od akcji znamion („+ Dodaj znamię" jest przy mapie). */}
-      <div className="flex flex-wrap items-center gap-2">
-        {availableViews.map((v) => (
-          <button
-            key={v.key}
-            type="button"
-            onClick={() => {
-              setView(v.key)
-              setPending(null)
-              setAddMode(false)
-            }}
-            className={[
-              'min-h-[44px] rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
-              activeView === v.key
-                ? 'bg-teal-700 text-white dark:bg-teal-600'
-                : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800',
-            ].join(' ')}
-          >
-            {v.label}
-          </button>
-        ))}
-        <button
-          type="button"
-          onClick={openAddView}
-          className={
-            hasViews
-              ? 'min-h-[44px] rounded-full border border-dashed border-slate-300 px-4 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
-              : 'min-h-[52px] rounded-lg bg-teal-700 px-5 text-base font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500'
-          }
-        >
-          + Dodaj widok
-        </button>
       </div>
 
       {error ? (
