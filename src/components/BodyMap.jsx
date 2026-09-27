@@ -202,7 +202,6 @@ export default function BodyMap() {
   const [drag, setDrag] = useState(null) // { id, x, y } podczas przeciągania
   const [savingEdit, setSavingEdit] = useState(false)
   const contentDivRef = useRef(null)
-  const panelRef = useRef(null) // panel pina (mobile: przewijamy do niego)
 
   const load = async () => {
     setLoading(true)
@@ -314,15 +313,6 @@ export default function BodyMap() {
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [showViewSettings])
-
-  // Na wąskim ekranie panel pinu jest POD mapą — po wybraniu pinu przewiń do
-  // niego, żeby od razu było widać szczegóły (na desktopie panel jest z boku).
-  useEffect(() => {
-    if (!selectedId) return undefined
-    if (!window.matchMedia('(max-width: 1023px)').matches) return undefined
-    panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    return undefined
-  }, [selectedId])
 
   // Zapamiętaj start wciśnięcia, żeby odróżnić klik od przesuwania zdjęcia.
   const handlePointerDown = (e) => {
@@ -1211,8 +1201,25 @@ export default function BodyMap() {
 
           </div>
 
-        {/* Prawa kolumna: panel informacyjny (sticky na desktopie) */}
-        <div ref={panelRef} className="mt-4 lg:mt-0 lg:sticky lg:top-4">
+        {/* Panel pina: desktop = kolumna z boku (sticky); mobile = bottom sheet. */}
+        <div className="lg:sticky lg:top-4">
+          {selectedLesion ? (
+            <div
+              role="presentation"
+              onClick={closePanel}
+              className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+            />
+          ) : null}
+          <div
+            className={
+              selectedLesion
+                ? 'fixed bottom-0 left-0 right-0 z-50 max-h-[85dvh] overflow-y-auto overscroll-contain rounded-t-2xl border-t border-slate-200 bg-white p-4 shadow-2xl dark:border-slate-800 dark:bg-slate-900 lg:static lg:z-auto lg:max-h-none lg:overflow-visible lg:rounded-xl lg:border lg:border-slate-200 lg:bg-white lg:p-4 lg:shadow-none'
+                : 'mt-4 rounded-xl border border-dashed border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 lg:mt-0'
+            }
+          >
+            {selectedLesion ? (
+              <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-slate-300 lg:hidden dark:bg-slate-600" />
+            ) : null}
           <LesionInfoPanel
             lesion={selectedLesion}
             viewName={
@@ -1243,6 +1250,7 @@ export default function BodyMap() {
             }
             onClose={closePanel}
           />
+          </div>
         </div>
 
       {/* Formularz nowego pinu */}

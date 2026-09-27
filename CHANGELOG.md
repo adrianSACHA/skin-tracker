@@ -47,6 +47,8 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 - **Kontrole:** ustawienia („Przypomnij", interwał) na dole widoku; badge'y
   `Zaległe`/`W ciągu 30 dni` wyszarzone przy zera; „Zobacz kontrolę →";
   badge „data ręcznie przesunięta".
+- **Panel pina jako bottom sheet na telefonie** — wysuwany od dołu arkusz z
+  przyciemnionym tłem i uchwytem (desktop bez zmian: kolumna z boku).
 - **Mobile UX:** nawigacja i nagłówek zawijają się (koniec z poziomym
   przewijaniem po dodaniu licznika); etykieta pinu zawija długie nazwy; modale
   mają ograniczoną wysokość i przewijanie; po kliknięciu pinu na telefonie widok

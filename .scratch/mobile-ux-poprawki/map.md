@@ -15,8 +15,7 @@ ekran, panel pinu poza widokiem.
 
 ## Not yet specified (mgła)
 
-- Panel pinu jako **bottom sheet** na mobile (osobna, większa zmiana) — do
-  rozważenia przy okazji.
+Brak — panel pinu jako bottom sheet wdrożony (ticket 05).
 
 ## Out of scope
 
@@ -30,6 +29,7 @@ ekran, panel pinu poza widokiem.
 | 02 | task | [Tooltip pinu: długie nazwy zawijają](issues/02-task-tooltip-wrap.md) | — | resolved |
 | 03 | task | [Modale: max-wysokość + przewijanie](issues/03-task-modale-scroll.md) | — | resolved |
 | 04 | task | [Panel pinu: przewinięcie na mobile](issues/04-task-panel-scroll.md) | — | resolved |
+| 05 | task | [Panel pinu jako bottom sheet (mobile)](issues/05-task-bottom-sheet.md) | 04 | resolved |
 
 ## Frontier
 
