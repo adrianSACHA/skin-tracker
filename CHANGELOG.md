@@ -47,6 +47,10 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 - **Kontrole:** ustawienia („Przypomnij", interwał) na dole widoku; badge'y
   `Zaległe`/`W ciągu 30 dni` wyszarzone przy zera; „Zobacz kontrolę →";
   badge „data ręcznie przesunięta".
+- **Mobile UX:** nawigacja i nagłówek zawijają się (koniec z poziomym
+  przewijaniem po dodaniu licznika); etykieta pinu zawija długie nazwy; modale
+  mają ograniczoną wysokość i przewijanie; po kliknięciu pinu na telefonie widok
+  przewija się do panelu szczegółów.
 
 ### Naprawione
 

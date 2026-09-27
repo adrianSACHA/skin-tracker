@@ -202,6 +202,7 @@ export default function BodyMap() {
   const [drag, setDrag] = useState(null) // { id, x, y } podczas przeciągania
   const [savingEdit, setSavingEdit] = useState(false)
   const contentDivRef = useRef(null)
+  const panelRef = useRef(null) // panel pina (mobile: przewijamy do niego)
 
   const load = async () => {
     setLoading(true)
@@ -313,6 +314,15 @@ export default function BodyMap() {
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [showViewSettings])
+
+  // Na wąskim ekranie panel pinu jest POD mapą — po wybraniu pinu przewiń do
+  // niego, żeby od razu było widać szczegóły (na desktopie panel jest z boku).
+  useEffect(() => {
+    if (!selectedId) return undefined
+    if (!window.matchMedia('(max-width: 1023px)').matches) return undefined
+    panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    return undefined
+  }, [selectedId])
 
   // Zapamiętaj start wciśnięcia, żeby odróżnić klik od przesuwania zdjęcia.
   const handlePointerDown = (e) => {
@@ -1162,7 +1172,7 @@ export default function BodyMap() {
                           >
                             <span
                               className={[
-                                'pin-tip absolute bottom-full mb-3 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white shadow-lg dark:bg-slate-100 dark:text-slate-900',
+                                'pin-tip absolute bottom-full mb-3 w-max max-w-[10rem] break-words rounded-md bg-slate-900 px-2 py-1 text-center text-xs font-medium text-white shadow-lg dark:bg-slate-100 dark:text-slate-900',
                                 // Przy krawędziach wyrównaj etykietę do pinu, żeby
                                 // nie wychodziła poza mapę (była ucinana).
                                 (dragging ? drag.x : lesion.pos_x) < 20
@@ -1202,7 +1212,7 @@ export default function BodyMap() {
           </div>
 
         {/* Prawa kolumna: panel informacyjny (sticky na desktopie) */}
-        <div className="mt-4 lg:mt-0 lg:sticky lg:top-4">
+        <div ref={panelRef} className="mt-4 lg:mt-0 lg:sticky lg:top-4">
           <LesionInfoPanel
             lesion={selectedLesion}
             viewName={
@@ -1331,7 +1341,7 @@ export default function BodyMap() {
             aria-modal="true"
             aria-labelledby="view-settings-title"
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-700 dark:bg-slate-900"
+            className="max-h-[calc(100dvh-2rem)] w-full max-w-md space-y-4 overflow-y-auto rounded-xl border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-700 dark:bg-slate-900"
           >
             <div className="flex items-start justify-between gap-2">
               <h2

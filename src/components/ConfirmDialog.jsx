@@ -39,7 +39,7 @@ export default function ConfirmDialog({
         aria-labelledby="confirm-title"
         aria-describedby={description ? 'confirm-desc' : undefined}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-700 dark:bg-slate-900"
+        className="max-h-[calc(100dvh-2rem)] w-full max-w-md space-y-4 overflow-y-auto rounded-xl border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-700 dark:bg-slate-900"
       >
         <h2
           id="confirm-title"
