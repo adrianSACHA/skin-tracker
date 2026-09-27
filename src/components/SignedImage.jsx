@@ -22,6 +22,9 @@ export default function SignedImage({
       return undefined
     }
 
+    // Zerujemy poprzedni URL, żeby nie pokazać zdjęcia INNEGO znamienia,
+    // gdy zmienia się `path` (wcześniej stary obraz był widoczny chwilę).
+    setUrl(null)
     setStatus('loading')
     getSignedUrl(path)
       .then((signed) => {
