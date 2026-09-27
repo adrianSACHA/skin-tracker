@@ -4,6 +4,10 @@
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()))
 
+// Minimalny handler fetch — Chrome wymaga go, by uznać aplikację za
+// instalowalną (PWA). Nic nie przechwytujemy: ruch idzie normalnie do sieci.
+self.addEventListener('fetch', () => {})
+
 self.addEventListener('push', (event) => {
   let data = {}
   try {

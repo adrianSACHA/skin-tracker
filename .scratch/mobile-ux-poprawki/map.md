@@ -34,6 +34,7 @@ Brak — panel pinu jako bottom sheet wdrożony (ticket 05).
 | 07 | task | [Szczegóły znamienia: porównanie / wykres / historia na mobile](issues/07-task-detail-mobile.md) | — | resolved |
 | 08 | task | [„Do kalendarza": menu w kadrze na mobile](issues/08-task-kalendarz-menu-w-kadrze.md) | — | resolved |
 | 09 | task | [Porządki: rozjechane wcięcia w Lista/Kontrole](issues/09-task-porzadki-wciecia.md) | — | resolved |
+| 10 | task | [Przycisk „Zainstaluj" (PWA)](issues/10-task-install-button.md) | — | resolved |
 
 ## Frontier
 

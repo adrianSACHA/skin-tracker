@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { usePerson } from '../context/PersonContext'
 import { useDueReminders } from '../lib/useDueReminders'
+import { useInstallPrompt } from '../lib/install'
 import { notifyOverdueOnce } from '../lib/reminderNotify'
 import ThemeToggle from './ThemeToggle'
 
@@ -19,6 +20,7 @@ export default function Layout({ children }) {
   const { person, setPerson } = usePerson()
   const navigate = useNavigate()
   const due = useDueReminders(person?.id)
+  const { canInstall, promptInstall } = useInstallPrompt()
 
   // Lekkie przypomnienie: jedno powiadomienie dziennie, gdy są zaległe kontrole
   // (tylko przy otwartej aplikacji; bez Web Push).
@@ -50,6 +52,26 @@ export default function Layout({ children }) {
                   {person.display_name}
                 </strong>
               </span>
+            ) : null}
+            {canInstall ? (
+              <button
+                type="button"
+                onClick={promptInstall}
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-teal-200 bg-teal-50 px-2.5 text-sm font-medium text-teal-800 transition-colors hover:bg-teal-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-teal-800 dark:bg-teal-950/50 dark:text-teal-200 dark:hover:bg-teal-900/60"
+                title="Dodaj aplikację do ekranu początkowego"
+              >
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="h-4 w-4"
+                >
+                  <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
+                </svg>
+                Zainstaluj
+              </button>
             ) : null}
             <ThemeToggle />
             <button
