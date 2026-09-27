@@ -212,7 +212,7 @@ export default function LesionsList() {
                   </div>
                 </div>
                 <div className="text-sm text-slate-600 dark:text-slate-300">
-                                    Sugerowana następna kontrola:{' '}
+                  Sugerowana następna kontrola:{' '}
                   <strong
                     className={
                       overdue
@@ -230,7 +230,7 @@ export default function LesionsList() {
                 </div>
 
                 <Link
-                                    to={`/person/${personId}/reminders`}
+                  to={`/person/${personId}/reminders`}
                   className="self-start text-sm font-medium text-teal-700 hover:underline dark:text-teal-300"
                 >
                   Zobacz kontrolę →

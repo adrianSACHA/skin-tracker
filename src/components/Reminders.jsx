@@ -273,7 +273,7 @@ export default function Reminders() {
                   </Link>
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
                     <StatusBadge status={lesion.status} />
-                                        <span className="text-sm text-slate-500 dark:text-slate-400">
+                    <span className="text-sm text-slate-500 dark:text-slate-400">
                       Ostatnie zdjęcie: {formatDate(last)}
                     </span>
                     {snoozed ? (

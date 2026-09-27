@@ -986,7 +986,7 @@ export default function BodyMap() {
                             style={{
                               left: `${dragging ? drag.x : lesion.pos_x}%`,
                               top: `${dragging ? drag.y : lesion.pos_y}%`,
-                                                            transform: `translate(-50%, -50%) scale(${inv})`,
+                              transform: `translate(-50%, -50%) scale(${inv})`,
                             }}
                           >
                             <span className="pin-tip absolute bottom-full left-1/2 mb-3 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white shadow-lg dark:bg-slate-100 dark:text-slate-900">
