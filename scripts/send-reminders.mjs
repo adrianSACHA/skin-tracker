@@ -20,7 +20,16 @@ const {
   VAPID_PUBLIC_KEY,
   VAPID_PRIVATE_KEY,
 } = process.env
-const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'mailto:admin@example.com'
+
+// web-push wymaga, by "subject" był URL-em (mailto: albo https://). Bierzemy go
+// z sekretu VAPID_SUBJECT, ale nie wywalamy wysyłki, gdy format jest zły.
+function resolveVapidSubject() {
+  const raw = (process.env.VAPID_SUBJECT || '').trim()
+  if (/^mailto:.+@.+/.test(raw) || /^https?:\/\/.+/.test(raw)) return raw
+  if (raw.includes('@')) return `mailto:${raw}` // sam e-mail -> dokładamy mailto:
+  return 'https://example.com'
+}
+const VAPID_SUBJECT = resolveVapidSubject()
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
   console.error(
