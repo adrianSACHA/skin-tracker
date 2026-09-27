@@ -40,8 +40,26 @@ function ZoomScaleWatcher({ onChange }) {
 // poza, fokus wraca do przycisku-triggera.
 function OverflowMenu({ label, items }) {
   const [open, setOpen] = useState(false)
+  // Pozycja liczona w JS i przypięta do VIEWPORTU (fixed). Na wąskich ekranach
+  // przyciski w nagłówku zawijają się w lewo, więc menu „na sztywno" do przycisku
+  // (absolute right-0) wychodziło poza lewą krawędź ekranu.
+  const [pos, setPos] = useState(null)
   const wrapRef = useRef(null)
   const btnRef = useRef(null)
+
+  const MENU_WIDTH = 240
+
+  const place = () => {
+    const rect = btnRef.current?.getBoundingClientRect()
+    if (!rect) return
+    const margin = 8
+    const width = Math.min(MENU_WIDTH, window.innerWidth - margin * 2)
+    const left = Math.max(
+      margin,
+      Math.min(rect.right - width, window.innerWidth - width - margin)
+    )
+    setPos({ left, top: rect.bottom + 4, width })
+  }
 
   useEffect(() => {
     if (!open) return undefined
@@ -54,11 +72,14 @@ function OverflowMenu({ label, items }) {
         btnRef.current?.focus()
       }
     }
+    const onResize = () => place()
     document.addEventListener('mousedown', onPointerDown)
     document.addEventListener('keydown', onKey)
+    window.addEventListener('resize', onResize)
     return () => {
       document.removeEventListener('mousedown', onPointerDown)
       document.removeEventListener('keydown', onKey)
+      window.removeEventListener('resize', onResize)
     }
   }, [open])
 
@@ -71,15 +92,24 @@ function OverflowMenu({ label, items }) {
         aria-expanded={open}
         aria-label={label}
         title={label}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          if (!open) place()
+          setOpen((v) => !v)
+        }}
         className="flex h-11 w-11 items-center justify-center rounded-lg border border-slate-300 bg-white text-xl leading-none text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
       >
         ⋯
       </button>
-      {open ? (
+      {open && pos ? (
         <div
           role="menu"
-          className="absolute right-0 z-20 mt-1 w-60 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800"
+          style={{
+            position: 'fixed',
+            left: pos.left,
+            top: pos.top,
+            width: pos.width,
+          }}
+          className="z-20 max-h-[70vh] overflow-y-auto overscroll-contain rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800"
         >
           {items.map((item) =>
             item.separator ? (
