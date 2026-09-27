@@ -1,6 +1,7 @@
 import imageCompression from 'browser-image-compression'
 import { supabase } from './supabase'
 import { cropImageToBlob } from './crop'
+import { slugify } from './bodyAreas'
 
 export const PHOTOS_BUCKET = 'lesion-photos'
 
@@ -72,7 +73,8 @@ export async function uploadLesionPhoto({ file, personId, lesionId, crop }) {
 export async function uploadBodyMapImage({ file, personId, view }) {
   const userId = await currentUserId()
   const compressed = await compressImage(file)
-  const path = `${userId}/${personId}/body-map/${view}.webp`
+  // Klucz widoku może być własną nazwą (ze spacjami/znakami) → slug dla ścieżki.
+  const path = `${userId}/${personId}/body-map/${slugify(view)}.webp`
 
   const { error } = await supabase.storage
     .from(PHOTOS_BUCKET)

@@ -66,26 +66,25 @@ export default function LesionsList() {
 
   const clearStatuses = () => setListParams({ statuses: [], sort: sortBy })
 
-  const changeSort = (value) =>
+    const changeSort = (value) =>
     setListParams({ statuses: selectedStatuses, sort: value })
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
-            Lista znamion
-          </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Filtruj po statusie i sprawdzaj sugerowaną datę następnej kontroli.
-          </p>
-        </div>
+      <div>
+        {/* Breadcrumb nad tytułem (pkt z przeglądu Kontrole/Lista/Mapa). */}
         <Link
           to={`/person/${personId}`}
-          className="text-sm font-medium text-teal-700 hover:underline dark:text-teal-300"
+          className="inline-flex items-center text-sm font-medium text-teal-700 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-300"
         >
           ← Mapa ciała
         </Link>
+        <h1 className="mt-1 text-xl font-semibold text-slate-800 dark:text-slate-100">
+          Lista znamion
+        </h1>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Filtruj po statusie i sprawdzaj sugerowaną datę następnej kontroli.
+        </p>
       </div>
 
       {error ? (
@@ -212,9 +211,8 @@ export default function LesionsList() {
                     </div>
                   </div>
                 </div>
-
                 <div className="text-sm text-slate-600 dark:text-slate-300">
-                  Sugerowana następna kontrola:{' '}
+                                    Sugerowana następna kontrola:{' '}
                   <strong
                     className={
                       overdue
@@ -232,10 +230,10 @@ export default function LesionsList() {
                 </div>
 
                 <Link
-                  to={`/person/${personId}/reminders`}
+                                    to={`/person/${personId}/reminders`}
                   className="self-start text-sm font-medium text-teal-700 hover:underline dark:text-teal-300"
                 >
-                  Przejdź do kontroli →
+                  Zobacz kontrolę →
                 </Link>
               </li>
             )

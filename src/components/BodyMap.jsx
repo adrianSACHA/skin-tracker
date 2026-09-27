@@ -13,18 +13,18 @@ import {
   uploadBodyMapImage,
 } from '../lib/uploadPhoto'
 import { STATUSES, statusMeta } from '../lib/status'
+import {
+  BODY_AREAS,
+  CUSTOM_AREA,
+  areaLabel,
+  areaOrder,
+  isPredefinedArea,
+  nextLesionLabel,
+  slugify,
+} from '../lib/bodyAreas'
 import { usePerson } from '../context/PersonContext'
 import LesionInfoPanel from './LesionInfoPanel'
 import ConfirmDialog from './ConfirmDialog'
-
-const VIEWS = [
-  { key: 'front', label: 'Przód' },
-  { key: 'back', label: 'Tył' },
-  { key: 'left', label: 'Bok lewy' },
-  { key: 'right', label: 'Bok prawy' },
-  { key: 'legs_front', label: 'Nogi — przód' },
-  { key: 'legs_back', label: 'Nogi — tył' },
-]
 
 // Subskrybuje zmiany transformu (zoom). Render-prop nie odświeża się sam,
 // a potrzebujemy aktualnej skali do przeciwskali pinów i wskaźnika %.
@@ -33,6 +33,85 @@ function ZoomScaleWatcher({ onChange }) {
     onChange(ref.state.scale)
   })
   return null
+}
+
+// Menu „⋯" w nagłówku widoku mapy (akcje tła + ustawienia widoku).
+// Własna implementacja (brak biblioteki menu): zamyka się na Escape i klik
+// poza, fokus wraca do przycisku-triggera.
+function OverflowMenu({ label, items }) {
+  const [open, setOpen] = useState(false)
+  const wrapRef = useRef(null)
+  const btnRef = useRef(null)
+
+  useEffect(() => {
+    if (!open) return undefined
+    const onPointerDown = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false)
+    }
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        setOpen(false)
+        btnRef.current?.focus()
+      }
+    }
+    document.addEventListener('mousedown', onPointerDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  return (
+    <div ref={wrapRef} className="relative">
+      <button
+        ref={btnRef}
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={label}
+        title={label}
+        onClick={() => setOpen((v) => !v)}
+        className="flex h-11 w-11 items-center justify-center rounded-lg border border-slate-300 bg-white text-xl leading-none text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+      >
+        ⋯
+      </button>
+      {open ? (
+        <div
+          role="menu"
+          className="absolute right-0 z-20 mt-1 w-60 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800"
+        >
+          {items.map((item) =>
+            item.separator ? (
+              <div
+                key={item.key}
+                role="separator"
+                className="my-1 h-px bg-slate-200 dark:bg-slate-700"
+              />
+            ) : (
+              <button
+                key={item.key}
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setOpen(false)
+                  item.onSelect()
+                }}
+                className={[
+                  'block w-full px-3 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-300',
+                  item.danger
+                    ? 'text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/40'
+                    : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700',
+                ].join(' ')}
+              >
+                {item.label}
+              </button>
+            )
+          )}
+        </div>
+      ) : null}
+    </div>
+  )
 }
 
 export default function BodyMap() {
@@ -57,6 +136,13 @@ export default function BodyMap() {
   const [refConfirm, setRefConfirm] = useState(false)
   const [showAddView, setShowAddView] = useState(false)
   const [addViewKey, setAddViewKey] = useState('')
+  const [customAreaName, setCustomAreaName] = useState('')
+  const [showViewSettings, setShowViewSettings] = useState(false)
+  const [renameSelect, setRenameSelect] = useState('')
+  const [renameCustom, setRenameCustom] = useState('')
+  const [savingView, setSavingView] = useState(false)
+  const [viewDeleteConfirm, setViewDeleteConfirm] = useState(false)
+  const [deletingView, setDeletingView] = useState(false)
   const fileInputRef = useRef(null)
   const addInputRef = useRef(null)
   const pointerRef = useRef(null) // start wciśnięcia - rozróżnia klik od przesuwania
@@ -108,14 +194,23 @@ export default function BodyMap() {
   )
 
   // Pkt 1: pokazujemy TYLKO widoki mające aktualnie zdjęcie tła.
+  // Etykieta widoku ze słownika okolic (albo własna nazwa, gdy spoza słownika).
   const availableViews = useMemo(
-    () => VIEWS.filter((v) => viewByKey[v.key]?.image_url),
-    [viewByKey]
+    () =>
+      bodyMaps
+        .filter((m) => m.image_url)
+        .map((m) => ({ key: m.view_name, label: areaLabel(m.view_name) }))
+        .sort(
+          (a, b) =>
+            areaOrder(a.key) - areaOrder(b.key) ||
+            a.label.localeCompare(b.label)
+        ),
+    [bodyMaps]
   )
 
-  // Widoki bez zdjęcia tła - można je dodać przez "+ Dodaj widok".
+  // Okolice bez zdjęcia tła - można je dodać przez "+ Dodaj widok".
   const viewsToAdd = useMemo(
-    () => VIEWS.filter((v) => !viewByKey[v.key]?.image_url),
+    () => BODY_AREAS.filter((a) => !viewByKey[a.key]?.image_url),
     [viewByKey]
   )
 
@@ -151,6 +246,16 @@ export default function BodyMap() {
     }
   }, [currentMap?.image_url])
 
+  // Esc zamyka modal ustawień widoku.
+  useEffect(() => {
+    if (!showViewSettings) return undefined
+    const onKey = (e) => {
+      if (e.key === 'Escape') setShowViewSettings(false)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [showViewSettings])
+
   // Zapamiętaj start wciśnięcia, żeby odróżnić klik od przesuwania zdjęcia.
   const handlePointerDown = (e) => {
     pointerRef.current = { x: e.clientX, y: e.clientY }
@@ -175,7 +280,8 @@ export default function BodyMap() {
     setPending({
       pos_x: Number(Math.min(100, Math.max(0, x)).toFixed(2)),
       pos_y: Number(Math.min(100, Math.max(0, y)).toFixed(2)),
-      label: '',
+      // Nazwa z prefiksu okolicy + numer (można nadpisać ręcznie).
+      label: nextLesionLabel(activeView, mapLesions),
     })
   }
 
@@ -238,6 +344,7 @@ export default function BodyMap() {
       setError(err.message)
     } finally {
       setUploadingRef(false)
+      setCustomAreaName('')
       if (fileInputRef.current) fileInputRef.current.value = ''
       if (addInputRef.current) addInputRef.current.value = ''
     }
@@ -273,6 +380,108 @@ export default function BodyMap() {
     } finally {
       setDeletingRef(false)
       setRefConfirm(false)
+    }
+  }
+
+  // --- Ustawienia widoku: zmiana nazwy okolicy + usunięcie widoku ---
+  const openViewSettings = () => {
+    if (!currentMap) return
+    const predefined = isPredefinedArea(currentMap.view_name)
+    setRenameSelect(predefined ? currentMap.view_name : CUSTOM_AREA)
+    setRenameCustom(predefined ? '' : currentMap.view_name)
+    setShowViewSettings(true)
+  }
+
+  const closeViewSettings = () => {
+    setShowViewSettings(false)
+    setSavingView(false)
+  }
+
+  const saveViewRename = async () => {
+    if (!currentMap) return
+    const nextKey =
+      renameSelect === CUSTOM_AREA ? slugify(renameCustom) : renameSelect
+    if (!nextKey) {
+      setError('Podaj nazwę okolicy ciała.')
+      return
+    }
+    if (nextKey === currentMap.view_name) {
+      closeViewSettings()
+      return
+    }
+    if (bodyMaps.some((m) => m.view_name === nextKey && m.id !== currentMap.id)) {
+      setError('Widok o tej nazwie już istnieje.')
+      return
+    }
+    setSavingView(true)
+    setError(null)
+    const { error: updErr } = await supabase
+      .from('body_maps')
+      .update({ view_name: nextKey })
+      .eq('id', currentMap.id)
+
+    if (updErr) {
+      setSavingView(false)
+      setError(updErr.message)
+      return
+    }
+    // Ticket 02: prefiks nazw znamion jest niezmienny — NIE przepisujemy
+    // istniejących `lesions.label`. Nowe znamiona dostaną nowy prefiks.
+    setView(nextKey)
+    closeViewSettings()
+    toast.success('Nazwa widoku zmieniona')
+    await load()
+  }
+
+  // Usunięcie widoku = rekord `body_maps` + wszystkie znamiona tego widoku
+  // (i ich pliki). Wymaga potwierdzenia, bo kasuje też znamiona (ticket 07).
+  const runDeleteView = async () => {
+    if (!currentMap) return
+    setDeletingView(true)
+    setError(null)
+
+    const mapId = currentMap.id
+    const bgPath = currentMap.image_url
+    const viewLesions = lesions.filter((l) => l.body_map_id === mapId)
+    const photoPaths = viewLesions.flatMap((l) =>
+      (l.lesion_photos || []).map((p) => p.photo_url)
+    )
+
+    try {
+      // `lesions.body_map_id` jest `on delete set null`, więc rekord widoku
+      // usuwamy PO znamionach — inaczej zostałyby osierocone (bez widoku).
+      if (viewLesions.length > 0) {
+        const { error: delLesionsErr } = await supabase
+          .from('lesions')
+          .delete()
+          .eq('body_map_id', mapId)
+        if (delLesionsErr) throw delLesionsErr
+      }
+      const { error: delMapErr } = await supabase
+        .from('body_maps')
+        .delete()
+        .eq('id', mapId)
+      if (delMapErr) throw delMapErr
+
+      // Best-effort: sprzątanie plików (tło + zdjęcia znamion).
+      for (const path of [bgPath, ...photoPaths]) {
+        if (!path) continue
+        try {
+          await removeStorageFile(path)
+        } catch {
+          /* plik mógł już nie istnieć - ignorujemy */
+        }
+      }
+
+      setView(null)
+      setViewDeleteConfirm(false)
+      closeViewSettings()
+      toast.success('Widok usunięty')
+      await load()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDeletingView(false)
     }
   }
 
@@ -398,7 +607,23 @@ export default function BodyMap() {
     )
   }
 
-  const currentViewLabel = VIEWS.find((v) => v.key === activeView)?.label
+  const currentViewLabel = areaLabel(activeView)
+  const hasViews = availableViews.length > 0
+  // Docelowa okolica dla „+ Dodaj widok": klucz słownika albo własna nazwa.
+  const addViewTarget =
+    addViewKey === CUSTOM_AREA ? customAreaName.trim() : addViewKey
+
+  const startAddViewUpload = () => {
+    if (!addViewTarget) {
+      setError('Podaj nazwę okolicy ciała.')
+      return
+    }
+    if (viewByKey[addViewTarget]) {
+      setError('Taki widok już istnieje — wybierz inną okolicę.')
+      return
+    }
+    addInputRef.current?.click()
+  }
 
   return (
     <div className="space-y-4">
@@ -412,43 +637,84 @@ export default function BodyMap() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Wariant B — kontekstowe renderowanie akcji (ticket 04/10):
+            brak widoków → tylko „+ Dodaj widok" (primary, duży);
+            są widoki → „+ Dodaj znamię" (primary) + „+ Dodaj widok" (secondary)
+            + menu „⋯" z akcjami tła i ustawieniami widoku. */}
+        <div className="flex flex-wrap items-center gap-2">
+          {hasViews ? (
+            <button
+              type="button"
+              onClick={() => {
+                setPending(null)
+                setAddMode((v) => !v)
+              }}
+              disabled={!currentMap}
+              className={[
+                'min-h-[44px] rounded-lg px-4 font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
+                addMode
+                  ? 'bg-teal-800 text-white hover:bg-teal-900 dark:bg-teal-500 dark:hover:bg-teal-400'
+                  : 'bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500',
+                !currentMap
+                  ? 'cursor-not-allowed bg-gray-300 dark:bg-slate-700'
+                  : '',
+              ].join(' ')}
+              title={!currentMap ? 'Najpierw dodaj zdjęcie referencyjne' : ''}
+            >
+              {addMode ? 'Anuluj dodawanie' : '+ Dodaj znamię'}
+            </button>
+          ) : null}
+
           <button
             type="button"
             onClick={() => {
-              setPending(null)
-              setAddMode((v) => !v)
+              setAddViewKey((k) =>
+                viewsToAdd.some((v) => v.key === k)
+                  ? k
+                  : viewsToAdd[0]?.key || CUSTOM_AREA
+              )
+              setShowAddView((s) => !s)
             }}
-            disabled={!currentMap}
-            className={[
-              'min-h-[44px] rounded-lg px-4 font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
-              addMode
-                ? 'bg-teal-800 text-white hover:bg-teal-900 dark:bg-teal-500 dark:hover:bg-teal-400'
-                : 'bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500',
-              !currentMap ? 'cursor-not-allowed bg-gray-300 dark:bg-slate-700' : '',
-            ].join(' ')}
-            title={!currentMap ? 'Najpierw dodaj zdjęcie referencyjne' : ''}
+            className={
+              hasViews
+                ? 'min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+                : 'min-h-[52px] rounded-lg bg-teal-700 px-5 text-base font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500'
+            }
           >
-            {addMode ? 'Anuluj dodawanie' : '+ Dodaj znamię'}
+            {showAddView ? 'Zamknij' : '+ Dodaj widok'}
           </button>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploadingRef || !activeView}
-            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-          >
-            {uploadingRef ? 'Wysyłanie…' : 'Zmień zdjęcie tła'}
-          </button>
-          {currentMap?.image_url ? (
-            <button
-              type="button"
-              onClick={() => setRefConfirm(true)}
-              disabled={deletingRef}
-              className="min-h-[44px] rounded-lg border border-red-200 bg-white px-4 font-medium text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-200 disabled:opacity-60 dark:border-red-900 dark:bg-slate-900 dark:text-red-300 dark:hover:bg-red-950/40"
-            >
-              {deletingRef ? 'Usuwanie…' : 'Usuń zdjęcie tła'}
-            </button>
+
+          {hasViews ? (
+            <OverflowMenu
+              label="Więcej akcji widoku"
+              items={[
+                {
+                  key: 'change-bg',
+                  label: uploadingRef ? 'Wysyłanie…' : 'Zmień zdjęcie tła',
+                  onSelect: () => fileInputRef.current?.click(),
+                },
+                ...(currentMap?.image_url
+                  ? [
+                      {
+                        key: 'remove-bg',
+                        label: deletingRef
+                          ? 'Usuwanie…'
+                          : 'Usuń zdjęcie tła',
+                        danger: true,
+                        onSelect: () => setRefConfirm(true),
+                      },
+                    ]
+                  : []),
+                { key: 'separator', separator: true },
+                {
+                  key: 'view-settings',
+                  label: 'Ustawienia widoku…',
+                  onSelect: openViewSettings,
+                },
+              ]}
+            />
           ) : null}
+
           <input
             ref={fileInputRef}
             type="file"
@@ -460,76 +726,86 @@ export default function BodyMap() {
             ref={addInputRef}
             type="file"
             accept="image/*"
-            onChange={(e) => handleRefUpload(e, addViewKey)}
+            onChange={(e) => handleRefUpload(e, addViewTarget)}
             className="hidden"
           />
         </div>
       </div>
 
       {/* Zakładki widoków - tylko te z aktualnym zdjęciem tła (pkt 1) */}
-      <div className="flex flex-wrap items-center gap-2">
-        {availableViews.map((v) => (
-          <button
-            key={v.key}
-            type="button"
-            onClick={() => {
-              setView(v.key)
-              setPending(null)
-              setAddMode(false)
-            }}
-            className={[
-              'min-h-[44px] rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
-              activeView === v.key
-                ? 'bg-teal-700 text-white dark:bg-teal-600'
-                : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800',
-            ].join(' ')}
-          >
-            {v.label}
-          </button>
-        ))}
+      {availableViews.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-2">
+          {availableViews.map((v) => (
+            <button
+              key={v.key}
+              type="button"
+              onClick={() => {
+                setView(v.key)
+                setPending(null)
+                setAddMode(false)
+              }}
+              className={[
+                'min-h-[44px] rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
+                activeView === v.key
+                  ? 'bg-teal-700 text-white dark:bg-teal-600'
+                  : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800',
+              ].join(' ')}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
-        {viewsToAdd.length > 0 ? (
-          <button
-            type="button"
-            onClick={() => {
-              setAddViewKey((k) =>
-                viewsToAdd.some((v) => v.key === k) ? k : viewsToAdd[0].key
-              )
-              setShowAddView((s) => !s)
-            }}
-            className="min-h-[44px] rounded-full border border-dashed border-slate-300 px-4 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
-          >
-            {showAddView ? 'Zamknij' : '+ Dodaj widok'}
-          </button>
-        ) : null}
-      </div>
+      {/* Panel dodawania nowego widoku: okolica ze słownika albo własna nazwa */}
+      {showAddView ? (
+        <div className="flex flex-wrap items-end gap-3 rounded-lg bg-slate-50 p-3 text-sm dark:bg-slate-800/50">
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="add-view"
+              className="text-slate-700 dark:text-slate-200"
+            >
+              Okolica ciała
+            </label>
+            <select
+              id="add-view"
+              value={addViewKey || viewsToAdd[0]?.key || CUSTOM_AREA}
+              onChange={(e) => setAddViewKey(e.target.value)}
+              className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            >
+              {viewsToAdd.map((v) => (
+                <option key={v.key} value={v.key}>
+                  {v.label}
+                </option>
+              ))}
+              <option value={CUSTOM_AREA}>Inna okolica (własna nazwa)…</option>
+            </select>
+          </div>
 
-      {/* Panel dodawania nowego widoku (bez zdjęcia tła) */}
-      {showAddView && viewsToAdd.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg bg-slate-50 p-3 text-sm dark:bg-slate-800/50">
-          <label
-            htmlFor="add-view"
-            className="text-slate-700 dark:text-slate-200"
-          >
-            Nowy widok
-          </label>
-          <select
-            id="add-view"
-            value={addViewKey || viewsToAdd[0].key}
-            onChange={(e) => setAddViewKey(e.target.value)}
-            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-          >
-            {viewsToAdd.map((v) => (
-              <option key={v.key} value={v.key}>
-                {v.label}
-              </option>
-            ))}
-          </select>
+          {addViewKey === CUSTOM_AREA ? (
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="add-view-custom"
+                className="text-slate-700 dark:text-slate-200"
+              >
+                Własna nazwa okolicy
+              </label>
+              <input
+                id="add-view-custom"
+                type="text"
+                value={customAreaName}
+                onChange={(e) => setCustomAreaName(e.target.value)}
+                placeholder="np. „Plecy prawa”"
+                className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+              />
+            </div>
+          ) : null}
+
           <button
             type="button"
-            onClick={() => addInputRef.current?.click()}
-            disabled={uploadingRef}
-            className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-60 dark:bg-teal-600 dark:hover:bg-teal-500"
+            onClick={startAddViewUpload}
+            disabled={uploadingRef || !addViewTarget}
+            className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
           >
             {uploadingRef ? 'Wysyłanie…' : 'Wgraj zdjęcie'}
           </button>
@@ -785,10 +1061,11 @@ export default function BodyMap() {
               htmlFor="new-lesion-label"
               className="block text-sm font-medium text-teal-800 dark:text-teal-200"
             >
-              Nazwa / opis znamienia
+              Nazwa znamienia (możesz nadpisać)
             </label>
             <p className="mt-0.5 text-xs text-teal-700 dark:text-teal-300">
-              Nowa pozycja na mapie: {pending.pos_x}% / {pending.pos_y}%
+              Okolica „{currentViewLabel}” nadała prefiks · nowa pozycja:{' '}
+              {pending.pos_x}% / {pending.pos_y}%
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
@@ -800,7 +1077,7 @@ export default function BodyMap() {
               onChange={(e) =>
                 setPending((p) => ({ ...p, label: e.target.value }))
               }
-              placeholder="Nazwa/opis, np. „plecy, prawa łopatka”"
+              placeholder="np. „znamię przy łopatce”"
               className="min-h-[44px] flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
             />
             <button
@@ -822,23 +1099,21 @@ export default function BodyMap() {
       ) : null}
       </div>
 
-      {/* Legenda */}
+      {/* Legenda — etykiety spójne z resztą UI (jedno źródło: status.js). */}
       <div className="flex flex-wrap gap-4 pt-2 text-xs text-slate-500 dark:text-slate-400">
-        {Object.entries({
-          stable: 'Stabilne',
-          watch: 'Do obserwacji',
-          urgent: 'Do pilnej konsultacji',
-          new: 'Nowe',
-          removed: 'Usunięte',
-        }).map(([key, label]) => (
-          <span key={key} className="inline-flex items-center gap-1.5">
-            <span
-              className="h-2.5 w-2.5 rounded-full"
-              style={{ backgroundColor: statusMeta(key).dot }}
-            />
-            {label}
-          </span>
-        ))}
+        {STATUSES.map((key) => {
+          const meta = statusMeta(key)
+          return (
+            <span key={key} className="inline-flex items-center gap-1.5">
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ backgroundColor: meta.dot }}
+                aria-hidden="true"
+              />
+              {meta.label}
+            </span>
+          )
+        })}
       </div>
 
       {/* Potwierdzenie usunięcia tła - spójne z usuwaniem znamienia/zdjęcia
@@ -852,6 +1127,116 @@ export default function BodyMap() {
         onConfirm={runDeleteRef}
         onCancel={() => {
           if (!deletingRef) setRefConfirm(false)
+        }}
+      />
+
+      {/* Panel ustawień widoku (ticket 06: modal). Zmiana nazwy okolicy +
+          usunięcie widoku (ticket 07/12). */}
+      {showViewSettings && currentMap ? (
+        <div
+          role="presentation"
+          onClick={closeViewSettings}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="view-settings-title"
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-700 dark:bg-slate-900"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <h2
+                id="view-settings-title"
+                className="text-lg font-semibold text-slate-800 dark:text-slate-100"
+              >
+                Ustawienia widoku
+              </h2>
+              <button
+                type="button"
+                onClick={closeViewSettings}
+                className="rounded-md px-2 py-1 text-sm text-slate-500 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300 dark:text-slate-300 dark:hover:text-slate-100"
+              >
+                Zamknij
+              </button>
+            </div>
+
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Widok: <strong>{currentViewLabel}</strong> · znamion:{' '}
+              {mapLesions.length}
+            </p>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="rename-area"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-200"
+              >
+                Okolica ciała
+              </label>
+              <select
+                id="rename-area"
+                value={renameSelect || CUSTOM_AREA}
+                onChange={(e) => setRenameSelect(e.target.value)}
+                className="min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              >
+                {BODY_AREAS.map((a) => (
+                  <option key={a.key} value={a.key}>
+                    {a.label}
+                  </option>
+                ))}
+                <option value={CUSTOM_AREA}>Inna okolica (własna nazwa)…</option>
+              </select>
+              {renameSelect === CUSTOM_AREA ? (
+                <input
+                  type="text"
+                  value={renameCustom}
+                  onChange={(e) => setRenameCustom(e.target.value)}
+                  placeholder="np. „Plecy prawa”"
+                  aria-label="Własna nazwa okolicy"
+                  className="min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-3 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+                />
+              ) : null}
+              <button
+                type="button"
+                onClick={saveViewRename}
+                disabled={savingView}
+                className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-60 dark:bg-teal-600 dark:hover:bg-teal-500"
+              >
+                {savingView ? 'Zapisywanie…' : 'Zapisz nazwę'}
+              </button>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Zmiana nazwy nie przepisuje nazw istniejących znamion — nowe
+                znamiona dostaną nowy prefiks.
+              </p>
+            </div>
+
+            <div className="space-y-2 rounded-lg border border-red-200 p-3 dark:border-red-900/60">
+              <p className="text-sm text-slate-600 dark:text-slate-300">
+                Usunięcie widoku kasuje też wszystkie znamiona w nim
+                ({mapLesions.length}) i ich zdjęcia.
+              </p>
+              <button
+                type="button"
+                onClick={() => setViewDeleteConfirm(true)}
+                className="min-h-[44px] rounded-lg border border-red-200 bg-white px-4 font-medium text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-200 dark:border-red-900 dark:bg-slate-900 dark:text-red-300 dark:hover:bg-red-950/40"
+              >
+                Usuń widok
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Potwierdzenie usunięcia widoku (kasuje też znamiona) */}
+      <ConfirmDialog
+        open={viewDeleteConfirm}
+        busy={deletingView}
+        title="Usunąć widok?"
+        description={`Usunięty zostanie widok „${currentViewLabel}” oraz ${mapLesions.length} znamion w nim (wraz z ich zdjęciami). Tej operacji nie można cofnąć.`}
+        confirmLabel="Tak, usuń widok"
+        onConfirm={runDeleteView}
+        onCancel={() => {
+          if (!deletingView) setViewDeleteConfirm(false)
         }}
       />
     </div>

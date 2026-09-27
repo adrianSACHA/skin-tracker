@@ -201,51 +201,46 @@ export default function Reminders() {
           role="alert"
           className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
         >
-          {error}
+                    {error}
         </div>
       ) : null}
 
-      {/* Ustawienia przypomnień */}
-      <div className="flex flex-wrap items-end gap-4 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
-        <div className="flex items-center gap-2">
-          <label htmlFor="lead-days">Przypomnij</label>
-          <input
-            id="lead-days"
-            type="number"
-            min="0"
-            max="60"
-            value={leadDays}
-            onChange={(e) => setLeadDays(e.target.value)}
-            onBlur={persistLeadDays}
-            disabled={savingLead}
-            className="min-h-[44px] w-20 rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-          />
-          <span>dni przed kontrolą</span>
-        </div>
-
-        <p className="text-slate-600 dark:text-slate-300">
-          Interwał kontroli:{' '}
-          <strong className="text-slate-800 dark:text-slate-100">
-            co {intervalWeeks} tyg.
-          </strong>{' '}
-          <Link
-            to={`/person/${personId}/list`}
-            className="text-teal-700 hover:underline dark:text-teal-300"
-          >
-            (zmień na liście znamion)
-          </Link>
-        </p>
-      </div>
-
-      {/* Pasek podsumowania */}
+      {/* Pasek podsumowania — kolor = sygnał; zero przyjmuje neutralny wygląd */}
       <div className="flex flex-wrap gap-3 text-sm">
-        <span className="inline-flex items-center gap-2 rounded-full bg-red-100 px-3 py-1 text-red-800 dark:bg-red-950 dark:text-red-200">
-          <span className="h-2 w-2 rounded-full bg-red-500" aria-hidden="true" />
+        <span
+          className={[
+            'inline-flex items-center gap-2 rounded-full px-3 py-1',
+            summary.overdue > 0
+              ? 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200'
+              : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+          ].join(' ')}
+        >
+          <span
+            className={[
+              'h-2 w-2 rounded-full',
+              summary.overdue > 0
+                ? 'bg-red-500'
+                : 'bg-slate-400 dark:bg-slate-500',
+            ].join(' ')}
+            aria-hidden="true"
+          />
           Zaległe: <strong>{summary.overdue}</strong>
         </span>
-        <span className="inline-flex items-center gap-2 rounded-full bg-teal-100 px-3 py-1 text-teal-800 dark:bg-teal-950 dark:text-teal-200">
+        <span
+          className={[
+            'inline-flex items-center gap-2 rounded-full px-3 py-1',
+            summary.soon > 0
+              ? 'bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-200'
+              : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+          ].join(' ')}
+        >
           <span
-            className="h-2 w-2 rounded-full bg-teal-600 dark:bg-teal-400"
+            className={[
+              'h-2 w-2 rounded-full',
+              summary.soon > 0
+                ? 'bg-teal-600 dark:bg-teal-400'
+                : 'bg-slate-400 dark:bg-slate-500',
+            ].join(' ')}
             aria-hidden="true"
           />
           W ciągu {SOON_DAYS} dni: <strong>{summary.soon}</strong>
@@ -278,12 +273,12 @@ export default function Reminders() {
                   </Link>
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
                     <StatusBadge status={lesion.status} />
-                    <span className="text-sm text-slate-500 dark:text-slate-400">
+                                        <span className="text-sm text-slate-500 dark:text-slate-400">
                       Ostatnie zdjęcie: {formatDate(last)}
                     </span>
                     {snoozed ? (
                       <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                        przesunięte
+                        data ręcznie przesunięta
                       </span>
                     ) : null}
                   </div>
@@ -340,10 +335,42 @@ export default function Reminders() {
                   startDate={next}
                 />
               </div>
-            </li>
+                        </li>
           ))}
         </ul>
       )}
+
+      {/* Ustawienia przypomnień — na dole: najpierw treść, potem konfiguracja */}
+      <div className="flex flex-wrap items-end gap-4 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+        <div className="flex items-center gap-2">
+          <label htmlFor="lead-days">Przypomnij</label>
+          <input
+            id="lead-days"
+            type="number"
+            min="0"
+            max="60"
+            value={leadDays}
+            onChange={(e) => setLeadDays(e.target.value)}
+            onBlur={persistLeadDays}
+            disabled={savingLead}
+            className="min-h-[44px] w-20 rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          />
+          <span>dni przed kontrolą</span>
+        </div>
+
+        <p className="text-slate-600 dark:text-slate-300">
+          Interwał kontroli:{' '}
+          <strong className="text-slate-800 dark:text-slate-100">
+            co {intervalWeeks} tyg.
+          </strong>{' '}
+          <Link
+            to={`/person/${personId}/list`}
+            className="text-teal-700 hover:underline dark:text-teal-300"
+          >
+            (zmień na liście znamion)
+          </Link>
+        </p>
+      </div>
 
       <p className="text-xs text-slate-500 dark:text-slate-400">
         Daty są wyliczane z ostatniego zdjęcia + interwał (albo z ręcznie
