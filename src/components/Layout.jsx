@@ -1,6 +1,9 @@
+import { useEffect } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { usePerson } from '../context/PersonContext'
+import { useDueReminders } from '../lib/useDueReminders'
+import { notifyOverdueOnce } from '../lib/reminderNotify'
 import ThemeToggle from './ThemeToggle'
 
 function navClass({ isActive }) {
@@ -15,6 +18,13 @@ function navClass({ isActive }) {
 export default function Layout({ children }) {
   const { person, setPerson } = usePerson()
   const navigate = useNavigate()
+  const due = useDueReminders(person?.id)
+
+  // Lekkie przypomnienie: jedno powiadomienie dziennie, gdy są zaległe kontrole
+  // (tylko przy otwartej aplikacji; bez Web Push).
+  useEffect(() => {
+    notifyOverdueOnce(due.overdue)
+  }, [due.overdue])
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -62,6 +72,15 @@ export default function Layout({ children }) {
             </NavLink>
             <NavLink to={`/person/${person.id}/reminders`} className={navClass}>
               Kontrole
+              {due.overdue > 0 ? (
+                <span className="ml-2 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-semibold text-white">
+                  {due.overdue}
+                </span>
+              ) : due.soon > 0 ? (
+                <span className="ml-2 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-teal-100 px-1.5 text-xs font-semibold text-teal-800 dark:bg-teal-900 dark:text-teal-100">
+                  {due.soon}
+                </span>
+              ) : null}
             </NavLink>
           </nav>
         ) : null}

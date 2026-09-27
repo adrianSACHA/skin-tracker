@@ -1,7 +1,7 @@
 # 01 — Jak dostarczać przypomnienia w tle bez własnego serwera
 
 Type: research
-Status: open
+Status: resolved
 Map: .scratch/pwa-przypomnienia/map.md
 
 ## Pytanie
@@ -33,3 +33,10 @@ backendzie Supabase — bez własnego serwera aplikacji?
 
 Zakres: pełny Web Push (nowa tabela `push_subscriptions`, service worker
 `push`, Edge Function + Cron, klucze VAPID) vs wariant lekki (in-app + `.ics`).
+
+## Answer
+
+Rozpoznanie domknięte — warianty w tabeli powyżej. Kluczowy wniosek: „prawdziwe"
+przypomnienie w tle wymaga nadawcy (u nas Supabase Edge Function + Cron); bez
+infra zostaje wariant lekki (in-app + `.ics`). Decyzję o zakresie podjęto w
+ticketcie 02.

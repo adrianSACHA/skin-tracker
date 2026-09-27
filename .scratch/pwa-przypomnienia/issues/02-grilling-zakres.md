@@ -1,7 +1,7 @@
 # 02 — Zakres: pełny Web Push vs wariant lekki
 
 Type: grilling
-Status: open
+Status: resolved
 Blocked by: 01
 Map: .scratch/pwa-przypomnienia/map.md
 
@@ -41,4 +41,16 @@ krok po akceptacji nowej tabeli i Edge Function.
 
 ## Answer
 
-_(uzupełniane przy rozwiązywaniu)_
+**Decyzja: B — wariant lekki (bez infra).**
+
+Wdrożone:
+- `src/lib/lesionView.js` → `summarizeDue` (wspólne liczenie zaległych/wkrótce).
+- `src/lib/useDueReminders.js` → licznik dla osoby.
+- `src/components/Layout.jsx` → znacznik przy „Kontrole" (czerwony = zaległe,
+  morski = w ciągu 30 dni).
+- `src/lib/reminderNotify.js` + opt-in w `Reminders.jsx` → lokalne
+  powiadomienie przy otwarciu (max raz dziennie, za zgodą).
+- `.ics` bez zmian.
+
+Web Push (opcja A) zostaje jako ewentualny krok 2 — wymaga nowej tabeli,
+Edge Function + harmonogramu i kluczy VAPID.

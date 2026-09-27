@@ -21,6 +21,9 @@ Dostarczać przypomnienia o kontrolach znamion **w tle** (nie tylko plikiem
 - Przypomnienia generowane lokalnie jako **cykliczny `.ics`** (RRULE + alarm) —
   wdrożone (`src/lib/ics.js`, `CalendarReminderButton`). To działa i zostaje.
 - Manifest PWA + ikony — wdrożone (`public/manifest.webmanifest`).
+- **Wariant lekki (B, wybrany):** in-app licznik przy „Kontrole" + opcjonalne
+  powiadomienie przeglądarki przy otwarciu (max raz dziennie, za zgodą);
+  `.ics` bez zmian. Web Push (A) — ewentualny krok 2, wymaga infra.
 
 ## Not yet specified (mgła)
 
@@ -40,9 +43,10 @@ Dostarczać przypomnienia o kontrolach znamion **w tle** (nie tylko plikiem
 
 | #  | Type     | Tytuł                                                              | Blocked by | Status |
 | -- | -------- | ------------------------------------------------------------------ | ---------- | ------ |
-| 01 | research | [Jak dostarczać przypomnienia w tle bez własnego serwera](issues/01-research-scheduling.md) | — | open |
-| 02 | grilling | [Zakres: pełny Web Push vs wariant lekki](issues/02-grilling-zakres.md) | 01 | open |
+| 01 | research | [Jak dostarczać przypomnienia w tle bez własnego serwera](issues/01-research-scheduling.md) | — | resolved |
+| 02 | grilling | [Zakres: pełny Web Push vs wariant lekki](issues/02-grilling-zakres.md) | 01 | resolved |
 
 ## Frontier
 
-Pierwszy otwarty: **01** (research).
+Brak — oba tickety `resolved`. Wdrożony **wariant lekki** (in-app + powiadomienie
+przy otwarciu). Web Push (opcja A) pozostaje jako ewentualny krok 2.

@@ -57,6 +57,24 @@ export function sortRowsByNext(rows) {
   })
 }
 
+// Podsumowanie terminów: ile zaległych i ile „wkrótce" (w ciągu `soonDays`).
+export function summarizeDue(rows, soonDays = 30) {
+  let overdue = 0
+  let soon = 0
+  for (const row of rows || []) {
+    if (row.overdue) {
+      overdue += 1
+    } else if (
+      row.daysUntilNext !== null &&
+      row.daysUntilNext !== undefined &&
+      row.daysUntilNext <= soonDays
+    ) {
+      soon += 1
+    }
+  }
+  return { overdue, soon }
+}
+
 // Data najpóźniejszego zdjęcia ("ostatnie zdjęcie") albo null, gdy brak zdjęć.
 function lastPhotoDate(photos) {
   if (!photos || photos.length === 0) return null

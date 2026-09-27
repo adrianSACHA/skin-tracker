@@ -28,6 +28,9 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
   (np. `Tył · znamię przy łopatce`) na liście znamion, w Kontrolach, w panelu
   pina i w szczegółach. Okolica brana dynamicznie z widoku; auto-nazwy
   (`Tył-3`) bez zmian.
+- **Przypomnienia in-app (wariant lekki)** — licznik zaległych/wkrótce kontroli
+  przy „Kontrole" w nawigacji oraz opcjonalne powiadomienie przeglądarki przy
+  otwarciu aplikacji (za zgodą, max raz dziennie). `.ics` do kalendarza zostaje.
 
 ### Zmienione
 

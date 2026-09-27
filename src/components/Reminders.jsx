@@ -10,6 +10,12 @@ import {
 } from '../lib/date'
 import { useIntervalWeeks } from '../lib/interval'
 import { buildRows } from '../lib/lesionView'
+import {
+  isNotifyOnOpenEnabled,
+  notificationsSupported,
+  requestNotificationPermission,
+  setNotifyOnOpenEnabled,
+} from '../lib/reminderNotify'
 import StatusBadge from './StatusBadge'
 import LesionName from './LesionName'
 import CalendarReminderButton from './CalendarReminderButton'
@@ -63,6 +69,9 @@ export default function Reminders() {
   const [busyId, setBusyId] = useState(null)
 
   const [leadDays, setLeadDays] = useState(7)
+  const [notifyOnOpen, setNotifyOnOpen] = useState(() =>
+    isNotifyOnOpenEnabled()
+  )
 
   const load = async () => {
     setLoading(true)
@@ -135,6 +144,29 @@ export default function Reminders() {
     }
     setPerson((p) => (p ? { ...p, reminder_lead_days: value } : p))
     toast.success('Ustawienie zapisane')
+  }
+
+  const toggleNotifyOnOpen = async (e) => {
+    const on = e.target.checked
+    if (!on) {
+      setNotifyOnOpenEnabled(false)
+      setNotifyOnOpen(false)
+      return
+    }
+    const permission = await requestNotificationPermission()
+    if (permission !== 'granted') {
+      setNotifyOnOpenEnabled(false)
+      setNotifyOnOpen(false)
+      toast.error(
+        permission === 'unsupported'
+          ? 'Ta przeglądarka nie wspiera powiadomień.'
+          : 'Brak zgody na powiadomienia — włącz je w ustawieniach przeglądarki.'
+      )
+      return
+    }
+    setNotifyOnOpenEnabled(true)
+    setNotifyOnOpen(true)
+    toast.success('Włączono powiadomienie przy otwarciu')
   }
 
   const snooze = async (lesion, weeks) => {
@@ -375,6 +407,18 @@ export default function Reminders() {
             (zmień na liście znamion)
           </Link>
         </p>
+
+        {notificationsSupported() ? (
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={notifyOnOpen}
+              onChange={toggleNotifyOnOpen}
+              className="h-5 w-5 rounded border-slate-300 text-teal-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-600 dark:bg-slate-800"
+            />
+            <span>Powiadom przy otwarciu, gdy są zaległe kontrole</span>
+          </label>
+        ) : null}
       </div>
 
       <p className="text-xs text-slate-500 dark:text-slate-400">

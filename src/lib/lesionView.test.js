@@ -4,6 +4,7 @@ import {
   filterByStatus,
   sortRows,
   sortRowsByNext,
+  summarizeDue,
 } from './lesionView'
 
 describe('buildRows', () => {
@@ -151,6 +152,26 @@ describe('sortRows', () => {
     sortRows(rows)
 
     expect(rows).toEqual(snapshot)
+  })
+})
+
+describe('summarizeDue', () => {
+  it('liczy zaległe i wkrótce (horyzont 30 dni)', () => {
+    const rows = [
+      { overdue: true, daysUntilNext: -3 },
+      { overdue: true, daysUntilNext: -1 },
+      { overdue: false, daysUntilNext: 10 },
+      { overdue: false, daysUntilNext: 30 },
+      { overdue: false, daysUntilNext: 60 },
+    ]
+    expect(summarizeDue(rows)).toEqual({ overdue: 2, soon: 2 })
+  })
+
+  it('brak terminu nie wpada do „wkrótce"', () => {
+    expect(summarizeDue([{ overdue: false, daysUntilNext: null }])).toEqual({
+      overdue: 0,
+      soon: 0,
+    })
   })
 })
 
