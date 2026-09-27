@@ -630,6 +630,135 @@ export default function BodyMap() {
     inputRef.current?.click()
   }
 
+  const openAddView = () => {
+    setAddViewKey((k) =>
+      viewsToAdd.some((v) => v.key === k)
+        ? k
+        : viewsToAdd[0]?.key || CUSTOM_AREA
+    )
+    setCustomAreaName('')
+    setError(null)
+    setShowAddView(true)
+  }
+
+  // Dodawanie widoku to osobny ekran — nie pokazujemy przy tym bieżącego widoku
+  // (mapy ani zakładek), żeby nie mylić z dodawaniem znamienia.
+  if (showAddView) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
+            Dodaj widok{person ? ` — ${person.display_name}` : ''}
+          </h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Wybierz okolicę ciała i wgraj zdjęcie referencyjne. Znamiona dodasz
+            później, w tym widoku.
+          </p>
+        </div>
+
+        {error ? (
+          <div
+            role="alert"
+            className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
+          >
+            {error}
+          </div>
+        ) : null}
+
+        <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="add-view"
+              className="text-sm font-medium text-slate-700 dark:text-slate-200"
+            >
+              Okolica ciała
+            </label>
+            <select
+              id="add-view"
+              value={addViewKey || viewsToAdd[0]?.key || CUSTOM_AREA}
+              onChange={(e) => setAddViewKey(e.target.value)}
+              className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            >
+              {viewsToAdd.map((v) => (
+                <option key={v.key} value={v.key}>
+                  {v.label}
+                </option>
+              ))}
+              <option value={CUSTOM_AREA}>Inna okolica (własna nazwa)…</option>
+            </select>
+          </div>
+
+          {addViewKey === CUSTOM_AREA ? (
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="add-view-custom"
+                className="text-sm font-medium text-slate-700 dark:text-slate-200"
+              >
+                Własna nazwa okolicy
+              </label>
+              <input
+                id="add-view-custom"
+                type="text"
+                value={customAreaName}
+                onChange={(e) => setCustomAreaName(e.target.value)}
+                placeholder="np. „Plecy prawa”"
+                className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+              />
+            </div>
+          ) : null}
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => startAddViewUpload(addCameraRef)}
+              disabled={uploadingRef || !addViewTarget}
+              className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
+            >
+              {uploadingRef ? 'Wysyłanie…' : 'Zrób zdjęcie'}
+            </button>
+            <button
+              type="button"
+              onClick={() => startAddViewUpload(addInputRef)}
+              disabled={uploadingRef || !addViewTarget}
+              className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            >
+              Wybierz z plików
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowAddView(false)}
+              disabled={uploadingRef}
+              className="min-h-[44px] rounded-lg px-4 font-medium text-slate-600 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-60 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              Anuluj
+            </button>
+          </div>
+
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Zdjęcie trafi jako tło tego widoku. Jeśli okolica istnieje już bez
+            zdjęcia, tło zostanie do niej dodane.
+          </p>
+        </div>
+
+        <input
+          ref={addInputRef}
+          type="file"
+          accept="image/*"
+          onChange={(e) => handleRefUpload(e, addViewTarget)}
+          className="hidden"
+        />
+        <input
+          ref={addCameraRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={(e) => handleRefUpload(e, addViewTarget)}
+          className="hidden"
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -642,10 +771,8 @@ export default function BodyMap() {
           </p>
         </div>
 
-        {/* Wariant B — kontekstowe renderowanie akcji (ticket 04/10):
-            brak widoków → tylko „+ Dodaj widok" (primary, duży);
-            są widoki → „+ Dodaj znamię" (primary) + „+ Dodaj widok" (secondary)
-            + menu „⋯" z akcjami tła i ustawieniami widoku. */}
+        {/* Akcje bieżącego widoku: „+ Dodaj znamię" + menu „⋯".
+            „+ Dodaj widok" jest osobno — w strefie zakładek (nie tutaj). */}
         <div className="flex flex-wrap items-center gap-2">
           {hasViews ? (
             <button
@@ -669,25 +796,6 @@ export default function BodyMap() {
               {addMode ? 'Anuluj dodawanie' : '+ Dodaj znamię'}
             </button>
           ) : null}
-
-          <button
-            type="button"
-            onClick={() => {
-              setAddViewKey((k) =>
-                viewsToAdd.some((v) => v.key === k)
-                  ? k
-                  : viewsToAdd[0]?.key || CUSTOM_AREA
-              )
-              setShowAddView((s) => !s)
-            }}
-            className={
-              hasViews
-                ? 'min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
-                : 'min-h-[52px] rounded-lg bg-teal-700 px-5 text-base font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500'
-            }
-          >
-            {showAddView ? 'Zamknij' : '+ Dodaj widok'}
-          </button>
 
           {hasViews ? (
             <OverflowMenu
@@ -742,113 +850,43 @@ export default function BodyMap() {
             onChange={(e) => handleRefUpload(e, activeView)}
             className="hidden"
           />
-          <input
-            ref={addInputRef}
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleRefUpload(e, addViewTarget)}
-            className="hidden"
-          />
-          <input
-            ref={addCameraRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={(e) => handleRefUpload(e, addViewTarget)}
-            className="hidden"
-          />
         </div>
       </div>
 
-      {/* Zakładki widoków - tylko te z aktualnym zdjęciem tła (pkt 1) */}
-      {availableViews.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-2">
-          {availableViews.map((v) => (
-            <button
-              key={v.key}
-              type="button"
-              onClick={() => {
-                setView(v.key)
-                setPending(null)
-                setAddMode(false)
-              }}
-              className={[
-                'min-h-[44px] rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
-                activeView === v.key
-                  ? 'bg-teal-700 text-white dark:bg-teal-600'
-                  : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800',
-              ].join(' ')}
-            >
-              {v.label}
-            </button>
-          ))}
-        </div>
-      ) : null}
-
-      {/* Panel dodawania nowego widoku: okolica ze słownika albo własna nazwa */}
-      {showAddView ? (
-        <div className="flex flex-wrap items-end gap-3 rounded-lg bg-slate-50 p-3 text-sm dark:bg-slate-800/50">
-          <div className="flex flex-col gap-1">
-            <label
-              htmlFor="add-view"
-              className="text-slate-700 dark:text-slate-200"
-            >
-              Okolica ciała
-            </label>
-            <select
-              id="add-view"
-              value={addViewKey || viewsToAdd[0]?.key || CUSTOM_AREA}
-              onChange={(e) => setAddViewKey(e.target.value)}
-              className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-            >
-              {viewsToAdd.map((v) => (
-                <option key={v.key} value={v.key}>
-                  {v.label}
-                </option>
-              ))}
-              <option value={CUSTOM_AREA}>Inna okolica (własna nazwa)…</option>
-            </select>
-          </div>
-
-          {addViewKey === CUSTOM_AREA ? (
-            <div className="flex flex-col gap-1">
-              <label
-                htmlFor="add-view-custom"
-                className="text-slate-700 dark:text-slate-200"
-              >
-                Własna nazwa okolicy
-              </label>
-              <input
-                id="add-view-custom"
-                type="text"
-                value={customAreaName}
-                onChange={(e) => setCustomAreaName(e.target.value)}
-                placeholder="np. „Plecy prawa”"
-                className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
-              />
-            </div>
-          ) : null}
-
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => startAddViewUpload(addCameraRef)}
-              disabled={uploadingRef || !addViewTarget}
-              className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
-            >
-              {uploadingRef ? 'Wysyłanie…' : 'Zrób zdjęcie'}
-            </button>
-            <button
-              type="button"
-              onClick={() => startAddViewUpload(addInputRef)}
-              disabled={uploadingRef || !addViewTarget}
-              className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-            >
-              Wybierz z plików
-            </button>
-          </div>
-        </div>
-      ) : null}
+      {/* Strefa widoków: zakładki + „+ Dodaj widok".
+          To osobna strefa od akcji znamion („+ Dodaj znamię" jest przy mapie). */}
+      <div className="flex flex-wrap items-center gap-2">
+        {availableViews.map((v) => (
+          <button
+            key={v.key}
+            type="button"
+            onClick={() => {
+              setView(v.key)
+              setPending(null)
+              setAddMode(false)
+            }}
+            className={[
+              'min-h-[44px] rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
+              activeView === v.key
+                ? 'bg-teal-700 text-white dark:bg-teal-600'
+                : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800',
+            ].join(' ')}
+          >
+            {v.label}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={openAddView}
+          className={
+            hasViews
+              ? 'min-h-[44px] rounded-full border border-dashed border-slate-300 px-4 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
+              : 'min-h-[52px] rounded-lg bg-teal-700 px-5 text-base font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500'
+          }
+        >
+          + Dodaj widok
+        </button>
+      </div>
 
       {error ? (
         <div
