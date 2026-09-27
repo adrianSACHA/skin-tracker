@@ -130,7 +130,7 @@ export default function BodyMap() {
   const [pending, setPending] = useState(null) // { pos_x, pos_y, label }
   const [savingPin, setSavingPin] = useState(false)
 
-  const [refUrl, setRefUrl] = useState(null)
+  const [refState, setRefState] = useState({ view: null, url: null })
   const [uploadingRef, setUploadingRef] = useState(false)
   const [deletingRef, setDeletingRef] = useState(false)
   const [refConfirm, setRefConfirm] = useState(false)
@@ -230,23 +230,26 @@ export default function BodyMap() {
   )
 
   // Rozwiąż signed URL zdjęcia referencyjnego dla aktywnego widoku.
+  // `refState.view` mówi, dla jakiego widoku rozwiązano URL — dzięki temu przy
+  // zmianie zakładki pokazujemy wskaźnik ładowania, a nie zdjęcie innego widoku.
   useEffect(() => {
     let active = true
+    const view = activeView
     if (currentMap?.image_url) {
       getSignedUrl(currentMap.image_url)
         .then((url) => {
-          if (active) setRefUrl(url)
+          if (active) setRefState({ view, url })
         })
         .catch(() => {
-          if (active) setRefUrl(null)
+          if (active) setRefState({ view, url: null })
         })
     } else {
-      setRefUrl(null)
+      setRefState({ view, url: null })
     }
     return () => {
       active = false
     }
-  }, [currentMap?.image_url])
+  }, [activeView, currentMap?.image_url])
 
   // Esc zamyka modal ustawień widoku.
   useEffect(() => {
@@ -375,7 +378,7 @@ export default function BodyMap() {
         /* plik mógł już nie istnieć - ignorujemy */
       }
 
-      setRefUrl(null)
+      setRefState({ view: null, url: null })
       await load()
     } catch (err) {
       setError(err.message)
@@ -611,6 +614,11 @@ export default function BodyMap() {
 
   const currentViewLabel = areaLabel(activeView)
   const hasViews = availableViews.length > 0
+  // Zdjęcie referencyjne aktywnego widoku — pokazujemy je tylko, gdy URL został
+  // rozwiązany dla TEGO widoku; inaczej (zmiana zakładki) widzimy ładowanie.
+  const refUrl = refState.view === activeView ? refState.url : null
+  const refLoading =
+    Boolean(currentMap?.image_url) && refState.view !== activeView
   // Docelowa okolica dla „+ Dodaj widok": klucz słownika albo własna nazwa.
   const addViewTarget =
     addViewKey === CUSTOM_AREA ? customAreaName.trim() : addViewKey
@@ -914,7 +922,37 @@ export default function BodyMap() {
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-6">
         <div className="lg:mx-auto lg:w-full lg:max-w-[700px]">
       {/* Obszar mapy */}
-      {!refUrl ? (
+      {refLoading ? (
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-16 dark:border-slate-800 dark:bg-slate-900"
+        >
+          <span className="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+            <svg
+              className="h-5 w-5 animate-spin text-teal-700 dark:text-teal-300"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+            Wczytywanie widoku „{currentViewLabel}”…
+          </span>
+        </div>
+      ) : !refUrl ? (
         <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-10 text-center dark:border-slate-700 dark:bg-slate-900">
           {activeView ? (
             <>
