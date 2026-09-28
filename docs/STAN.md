@@ -20,9 +20,9 @@ osób („Ja", „Syn").
 
 ## Jakość / stan repo
 
-- `npm run build` ✓, `npm test` → **64/64** ✓.
-- Gałąź `main` zsynchronizowana z `origin/main`, working tree czysty.
-- Tracker: **7 effortów, 51 ticketów (+1 spec) — wszystkie `resolved`**.
+- `npm run build` ✓, `npm test` → **69/69** ✓ (jednostkowe).
+- `npm run e2e` → **18/18** ✓ (Playwright, zmockowany Supabase, ~7 s).
+- Tracker: **11 effortów, 71 ticketów (+1 spec) — wszystkie `resolved`**.
 
 ## Funkcje
 
@@ -37,6 +37,9 @@ osób („Ja", „Syn").
 ## Automatyzacja (GitHub)
 
 - **Deploy:** każdy push na `main` → build + publikacja na GitHub Pages.
+- **Testy:** workflow „Testy" (`.github/workflows/e2e.yml`) — `npm test`
+  (jednostkowe) + `npm run e2e` (Playwright). Bez sekretów: backend jest
+  zamockowany. Uruchamiany na `push`/PR i ręcznie; nie blokuje deployu.
 - **Przypomnienia:** workflow „Powiadomienia o kontrolach" — cron codziennie
   08:00 UTC (09:00 zimą / 10:00 latem, czasu PL) (+ ręczne „Run workflow").
   Nadawcą jest GitHub Actions (koszt 0).

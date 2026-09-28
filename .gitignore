@@ -29,6 +29,12 @@ Thumbs.db
 # Artefakty narzędzi (Playwright MCP itp.)
 .playwright-mcp/
 
+# Artefakty testów e2e (Playwright)
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
 # Lokalne artefakty testu UX (mock backendu + zrzuty ekranu)
 scripts/mock-skin.cjs
 ux-report/

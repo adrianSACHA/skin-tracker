@@ -194,6 +194,24 @@ npm run build
 npm run preview
 ```
 
+### Testy
+
+```bash
+npm test        # jednostkowe (Vitest) — czyste funkcje z `src/lib`
+npm run e2e     # e2e (Playwright) — prawdziwa przeglądarka + mock Supabase
+```
+
+Testy e2e **nie potrzebują bazy ani konta**: backend jest zamockowany
+(`e2e/support/mock-supabase.js`), a aplikacja startuje z adresem
+`https://e2e.invalid` (domena `.invalid` jest nierozwiązywalna — żadne zapytanie
+nie opuszcza przeglądarki). Kontrola: `npm run dev:e2e` uruchamia Vite z
+`vite.config.e2e.js`, który ma `envDir: false`, więc prawdziwy `.env` nie jest
+wczytywany.
+
+Przydatne: `npm run e2e:ui` (tryb interaktywny), `npm run e2e:report` (raport
+HTML z ostatniego przebiegu). W CI oba zestawy testów uruchamia workflow
+`.github/workflows/e2e.yml` (na `push` do `main`, na PR i ręcznie).
+
 ---
 
 ## 4. Sekrety w GitHub Actions

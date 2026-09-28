@@ -37,6 +37,17 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
   narożnikami, osobna ikona maskowalna `icon-maskable-512` (tło do krawędzi, dla
   Android/launcherów) oraz `apple-touch-icon.png` dla iOS; podłączone w manifeście
   i w `index.html`.
+- **Testy e2e (Playwright) + CI.** 18 „dymnych" testów w prawdziwej
+  przeglądarce: logowanie, wybór/edycja/usunięcie osoby, mapa ciała z pinami,
+  lista znamion (nazwy, statusy, wyszukiwanie i filtr w adresie), motyw oraz
+  układ na telefonie. Backend Supabase jest **zamockowany**
+  (`e2e/support/mock-supabase.js`) — bez bazy, konta i bez sekretów w CI.
+  Osobny config `vite.config.e2e.js` (`envDir: false`) gwarantuje, że prawdziwy
+  projekt Supabase nie jest używany (adres `https://e2e.invalid`). Workflow
+  `.github/workflows/e2e.yml` uruchamia jednostkowe + e2e. Skrypty:
+  `npm run e2e`, `npm run e2e:ui`, `npm run e2e:report`. Rozdział runnerów:
+  `vitest.config.js` ogranicza jednostkowe do `src/**`, żeby Vitest nie
+  próbował uruchamiać plików `e2e/*.spec.js` (te wymagają Playwrighta).
 - **Wybór osoby — edycja:** zmiana nazwy osoby oraz usunięcie osoby (w menu
   „⋯" na karcie, z potwierdzeniem); usunięcie kasuje też znamiona, zdjęcia i
   pliki ze Storage. Do tego porcja UX logowania/uploadu/pomiaru.
