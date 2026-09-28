@@ -28,9 +28,8 @@ Druga część przeglądu UX: ekran logowania, wybór osoby oraz formularz zdję
 | 01 | task | [Logowanie: spójne kolory z resztą apki](issues/01-login-kolory.md) | — | resolved |
 | 02 | task | [Upload: kompaktowe przyciski edycji zdjęcia](issues/02-upload-edycja.md) | — | resolved |
 | 03 | task | [Segmentator: krótsze etykiety kroków](issues/03-segmentator-kroki.md) | — | resolved |
-| 04 | task | [Wybór osoby: zmiana nazwy i usunięcie](issues/04-osoba-edycja.md) | — | needs-triage |
+| 04 | task | [Wybór osoby: zmiana nazwy i usunięcie](issues/04-osoba-edycja.md) | — | resolved |
 
 ## Frontier
 
-Zostało: **04** (edycja/usuwanie osoby) — czeka na decyzję (needs-triage).
-Zrobione: 01, 02, 03.
+Brak — wszystkie 4 tickety **resolved** (01/02/03 UX, 04 edycja osoby).

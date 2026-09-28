@@ -88,6 +88,38 @@ export async function uploadBodyMapImage({ file, personId, view }) {
   return path
 }
 
+// Usuwa WSZYSTKIE pliki osoby ze Storage (best-effort). Ścieżki mają postać
+// {auth.uid()}/{person_id}/... — kasujemy cały folder osoby (rekurencyjnie).
+export async function removePersonFiles(personId) {
+  if (!personId) return
+  let userId
+  try {
+    userId = await currentUserId()
+  } catch {
+    return
+  }
+  const root = userId + '/' + personId
+  const paths = []
+
+  async function collect(prefix) {
+    const { data, error } = await supabase.storage
+      .from(PHOTOS_BUCKET)
+      .list(prefix, { limit: 1000 })
+    if (error || !data) return
+    for (const item of data) {
+      const full = prefix + '/' + item.name
+      // Folder nie ma własnego id — schodzimy głębiej; plik ma id.
+      if (!item.id) await collect(full)
+      else paths.push(full)
+    }
+  }
+
+  await collect(root)
+  if (paths.length > 0) {
+    await supabase.storage.from(PHOTOS_BUCKET).remove(paths)
+  }
+}
+
 export async function removeStorageFile(path) {
   if (!path) return
   await supabase.storage.from(PHOTOS_BUCKET).remove([path])

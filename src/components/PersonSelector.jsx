@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { supabase } from '../lib/supabase'
+import { removePersonFiles } from '../lib/uploadPhoto'
 import { usePerson } from '../context/PersonContext'
+import OverflowMenu from './OverflowMenu'
+import ConfirmDialog from './ConfirmDialog'
 
 // Ekran wyboru osoby ("Ja" / "Syn"). Syn nie ma własnego konta —
 // jest osobą zarządzaną przez moje konto.
@@ -11,6 +15,11 @@ export default function PersonSelector() {
   const [newName, setNewName] = useState('')
   const [error, setError] = useState(null)
   const [adding, setAdding] = useState(false)
+  const [editId, setEditId] = useState(null)
+  const [editName, setEditName] = useState('')
+  const [savingEdit, setSavingEdit] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(null)
+  const [deleting, setDeleting] = useState(false)
   const { setPerson } = usePerson()
   const navigate = useNavigate()
 
@@ -58,6 +67,56 @@ export default function PersonSelector() {
     load()
   }
 
+  const startRename = (person) => {
+    setError(null)
+    setEditId(person.id)
+    setEditName(person.display_name)
+  }
+
+  const saveName = async (person) => {
+    const name = editName.trim()
+    if (!name) return
+    setSavingEdit(true)
+    setError(null)
+    const { error: updErr } = await supabase
+      .from('monitored_persons')
+      .update({ display_name: name })
+      .eq('id', person.id)
+    setSavingEdit(false)
+    if (updErr) {
+      setError(updErr.message)
+      return
+    }
+    setEditId(null)
+    toast.success('Nazwa zmieniona')
+    load()
+  }
+
+  const runDelete = async (person) => {
+    if (!person) return
+    setDeleting(true)
+    setError(null)
+    // Najpierw pliki ze Storage (rekurencyjnie), potem rekord osoby — kaskada
+    // w bazie usunie jej znamiona i zdjęcia.
+    try {
+      await removePersonFiles(person.id)
+    } catch {
+      /* best effort */
+    }
+    const { error: delErr } = await supabase
+      .from('monitored_persons')
+      .delete()
+      .eq('id', person.id)
+    setDeleting(false)
+    setConfirmDelete(null)
+    if (delErr) {
+      setError(delErr.message)
+      return
+    }
+    toast.success('Osoba usunięta')
+    load()
+  }
+
   const choose = (person) => {
     setPerson(person)
     navigate(`/person/${person.id}`)
@@ -94,19 +153,82 @@ export default function PersonSelector() {
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2">
           {persons.map((person) => (
-            <li key={person.id}>
-              <button
-                type="button"
-                onClick={() => choose(person)}
-                className="w-full rounded-xl border border-slate-200 bg-white p-4 text-left transition-colors hover:border-teal-400 hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-teal-600 dark:hover:bg-teal-950/40"
-              >
-                <span className="block text-lg font-semibold text-slate-800 dark:text-slate-100">
-                  {person.display_name}
-                </span>
-                <span className="mt-1 block text-sm text-teal-700 dark:text-teal-300">
-                  Otwórz mapę ciała →
-                </span>
-              </button>
+            <li key={person.id} className="relative">
+              {editId === person.id ? (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    saveName(person)
+                  }}
+                  className="rounded-xl border border-teal-300 bg-white p-3 dark:border-teal-700 dark:bg-slate-900"
+                >
+                  <label
+                    htmlFor="rename-person"
+                    className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200"
+                  >
+                    Nazwa osoby
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <input
+                      id="rename-person"
+                      type="text"
+                      autoFocus
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="min-h-[44px] min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    />
+                    <button
+                      type="submit"
+                      disabled={savingEdit || !editName.trim()}
+                      className="min-h-[44px] rounded-lg bg-teal-700 px-3 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
+                    >
+                      {savingEdit ? 'Zapisywanie…' : 'Zapisz'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditId(null)}
+                      className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                    >
+                      Anuluj
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => choose(person)}
+                  className="w-full rounded-xl border border-slate-200 bg-white p-4 pr-14 text-left transition-colors hover:border-teal-400 hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-teal-600 dark:hover:bg-teal-950/40"
+                >
+                  <span className="block text-lg font-semibold text-slate-800 dark:text-slate-100">
+                    {person.display_name}
+                  </span>
+                  <span className="mt-1 block text-sm text-teal-700 dark:text-teal-300">
+                    Otwórz mapę ciała →
+                  </span>
+                </button>
+              )}
+
+              {editId === person.id ? null : (
+                <div className="absolute right-2 top-2">
+                  <OverflowMenu
+                    label={'Akcje osoby ' + person.display_name}
+                    items={[
+                      {
+                        key: 'rename',
+                        label: 'Zmień nazwę',
+                        onSelect: () => startRename(person),
+                      },
+                      { key: 'sep', separator: true },
+                      {
+                        key: 'delete',
+                        label: 'Usuń osobę',
+                        danger: true,
+                        onSelect: () => setConfirmDelete(person),
+                      },
+                    ]}
+                  />
+                </div>
+              )}
             </li>
           ))}
         </ul>
@@ -140,6 +262,21 @@ export default function PersonSelector() {
           </button>
         </div>
       </form>
+
+      <ConfirmDialog
+        open={Boolean(confirmDelete)}
+        busy={deleting}
+        title="Usunąć tę osobę?"
+        description={
+          'Usunięte zostaną też wszystkie znamiona tej osoby oraz ich zdjęcia. ' +
+          'Tej operacji nie można cofnąć.'
+        }
+        confirmLabel="Tak, usuń osobę"
+        onConfirm={() => runDelete(confirmDelete)}
+        onCancel={() => {
+          if (!deleting) setConfirmDelete(null)
+        }}
+      />
     </div>
   )
 }

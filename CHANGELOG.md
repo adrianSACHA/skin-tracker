@@ -31,6 +31,9 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 - **Przypomnienia in-app (wariant lekki)** — licznik zaległych/wkrótce kontroli
   przy „Kontrole" w nawigacji oraz opcjonalne powiadomienie przeglądarki przy
   otwarciu aplikacji (za zgodą, max raz dziennie). `.ics` do kalendarza zostaje.
+- **Wybór osoby — edycja:** zmiana nazwy osoby oraz usunięcie osoby (w menu
+  „⋯" na karcie, z potwierdzeniem); usunięcie kasuje też znamiona, zdjęcia i
+  pliki ze Storage. Do tego porcja UX logowania/uploadu/pomiaru.
 - **Druga porcja UX:** logowanie na spójnych kolorach (slate), kompaktowe
   przyciski edycji zdjęcia (ikony na telefonie), krótsze etykiety kroków
   segmentatora.
