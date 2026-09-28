@@ -28,19 +28,19 @@ export default function Login() {
   }
 
   const inputClass =
-    'min-h-[44px] w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500'
+    'min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500'
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-slate-950">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4 dark:bg-slate-950">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm space-y-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+        className="w-full max-w-sm space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
       >
         <div>
-          <h1 className="text-xl font-semibold text-gray-800 dark:text-slate-100">
+          <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
             Zaloguj się
           </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Skin Tracker — prywatna dokumentacja znamion.
           </p>
         </div>
@@ -48,7 +48,7 @@ export default function Login() {
         <div>
           <label
             htmlFor="login-email"
-            className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-200"
+            className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200"
           >
             Email
           </label>
@@ -66,7 +66,7 @@ export default function Login() {
         <div>
           <label
             htmlFor="login-password"
-            className="mb-1 block text-sm font-medium text-gray-700 dark:text-slate-200"
+            className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200"
           >
             Hasło
           </label>
@@ -86,7 +86,7 @@ export default function Login() {
               aria-label={showPassword ? 'Ukryj hasło' : 'Pokaż hasło'}
               aria-pressed={showPassword}
               aria-controls="login-password"
-              className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-lg text-gray-500 transition-colors hover:text-teal-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-slate-400 dark:hover:text-teal-300"
+              className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-lg text-slate-500 transition-colors hover:text-teal-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-slate-400 dark:hover:text-teal-300"
             >
               {showPassword ? (
                 <svg
@@ -130,7 +130,7 @@ export default function Login() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-teal-700 py-3 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
+          className="w-full rounded-lg bg-teal-700 py-3 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
         >
           {loading ? 'Logowanie...' : 'Zaloguj'}
         </button>

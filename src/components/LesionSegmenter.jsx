@@ -484,10 +484,11 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
         <button
           type="button"
           aria-current={step === 1 ? 'step' : undefined}
+          aria-label="Krok 1 z 2: skala"
           onClick={() => goToStep(1)}
           className={stepBtn(step === 1)}
         >
-          Krok 1 z 2 · Skala {haveScale ? '✓' : ''}
+          1. Skala {haveScale ? '✓' : ''}
         </button>
         <span aria-hidden="true" className="text-slate-400">
           →
@@ -495,11 +496,12 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
         <button
           type="button"
           aria-current={step === 2 ? 'step' : undefined}
+          aria-label="Krok 2 z 2: znamię"
           disabled={!haveScale}
           onClick={() => goToStep(2)}
           className={stepBtn(step === 2)}
         >
-          Krok 2 z 2 · Znamię
+          2. Znamię
         </button>
       </div>
 

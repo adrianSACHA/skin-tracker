@@ -267,37 +267,51 @@ export default function PhotoUploadForm({
             <button
               type="button"
               onClick={() => setRotate((r) => (r + 270) % 360)}
+              aria-label="Obróć w lewo"
+              title="Obróć w lewo"
               className={editBtnClass}
             >
-              ⟲ Obróć w lewo
+              <span aria-hidden="true">⟲</span>
+              <span className="hidden sm:inline"> Obróć w lewo</span>
             </button>
             <button
               type="button"
               onClick={() => setRotate((r) => (r + 90) % 360)}
+              aria-label="Obróć w prawo"
+              title="Obróć w prawo"
               className={editBtnClass}
             >
-              ⟳ Obróć w prawo
+              <span aria-hidden="true">⟳</span>
+              <span className="hidden sm:inline"> Obróć w prawo</span>
             </button>
             <button
               type="button"
               onClick={() => setFlipH((v) => !v)}
               aria-pressed={flipH}
+              aria-label="Odbij w poziomie"
+              title="Odbij w poziomie"
               className={editBtnClass}
             >
-              ↔ Odbij w poziomie
+              <span aria-hidden="true">↔</span>
+              <span className="hidden sm:inline"> Odbij w poziomie</span>
             </button>
             <button
               type="button"
               onClick={() => setFlipV((v) => !v)}
               aria-pressed={flipV}
+              aria-label="Odbij w pionie"
+              title="Odbij w pionie"
               className={editBtnClass}
             >
-              ↕ Odbij w pionie
+              <span aria-hidden="true">↕</span>
+              <span className="hidden sm:inline"> Odbij w pionie</span>
             </button>
             <button
               type="button"
               onClick={resetEdit}
               disabled={!editActive}
+              aria-label="Reset edycji"
+              title="Reset edycji"
               className={editBtnClass}
             >
               Reset
