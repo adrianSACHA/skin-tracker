@@ -1,7 +1,7 @@
 # 05 — Kontrole: panel "Przypomnienia na telefon" zwijany
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Map: .scratch/ux-inspekcja/map.md
 
 ## Problem
@@ -17,5 +17,11 @@ wszystko jest już włączone (instalacja + zgoda + push).
 
 ## Kryteria akceptacji
 
-- [ ] Stan "wszystko gotowe" to jedna zwijalna linia.
-- [ ] Brakujący warunek rozwija pełną listę z akcją.
+- [x] Stan "wszystko gotowe" to jedna zwijalna linia.
+- [x] Brakujący warunek rozwija pełną listę z akcją.
+
+## Answer
+
+Zrealizowane w src/components/Reminders.jsx: gdy instalacja + zgoda + push są
+spełnione, panel zwija się do jednej linii „Powiadomienia w tle: włączone"
+z przyciskiem „Szczegóły"; przy brakach pokazuje pełną listę z akcjami.

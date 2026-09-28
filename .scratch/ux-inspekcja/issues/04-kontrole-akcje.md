@@ -1,7 +1,7 @@
 # 04 — Kontrole: przeładowany rząd akcji na karcie
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Map: .scratch/ux-inspekcja/map.md
 
 ## Problem
@@ -19,6 +19,13 @@ kilku linii i rozpraszają.
 
 ## Kryteria akceptacji
 
-- [ ] Karta ma 1 wyraźną akcję + menu "⋯" (spójne z mapą ciała).
-- [ ] Wszystkie dotychczasowe akcje dostępne.
-- [ ] Na telefonie karta zajmuje mniej miejsca.
+- [x] Karta ma 1 wyraźną akcję + menu "⋯" (spójne z mapą ciała).
+- [x] Wszystkie dotychczasowe akcje dostępne.
+- [x] Na telefonie karta zajmuje mniej miejsca.
+
+## Answer
+
+Menu „⋯" wyodrębnione do wspólnego komponentu (src/components/OverflowMenu.jsx,
+używanego też na mapie). Karta Kontroli: **Dodaj zdjęcie** + **Do kalendarza**
++ **⋯** (w menu: „Przesuń o N tyg." dla typowych wartości oraz „Przywróć
+wyliczoną datę", gdy termin przesunięty). Usunięto inline SnoozeControl.

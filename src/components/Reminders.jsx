@@ -26,42 +26,9 @@ import { isStandalone, useInstallPrompt } from '../lib/install'
 import StatusBadge from './StatusBadge'
 import LesionName from './LesionName'
 import CalendarReminderButton from './CalendarReminderButton'
+import OverflowMenu from './OverflowMenu'
 
 const SOON_DAYS = 30 // horyzont "wkrótce" w pasku podsumowania
-
-// Sekcja przesuwania terminu: wybierz liczbę tygodni, potem „Przesuń".
-function SnoozeControl({ defaultWeeks, busy, onSnooze }) {
-  const options = [...new Set([defaultWeeks, 1, 2, 3, 4, 6, 8, 12])]
-    .filter((w) => w > 0)
-    .sort((a, b) => a - b)
-  const [weeks, setWeeks] = useState(defaultWeeks)
-
-  return (
-    <span className="inline-flex items-center">
-      <select
-        aria-label="Przesuń o ile tygodni"
-        value={weeks}
-        onChange={(e) => setWeeks(Number(e.target.value))}
-        disabled={busy}
-        className="min-h-[44px] rounded-l-lg border border-r-0 border-slate-300 bg-white px-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-      >
-        {options.map((w) => (
-          <option key={w} value={w}>
-            {w} tyg.
-          </option>
-        ))}
-      </select>
-      <button
-        type="button"
-        onClick={() => onSnooze(weeks)}
-        disabled={busy}
-        className="min-h-[44px] rounded-r-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-      >
-        Przesuń
-      </button>
-    </span>
-  )
-}
 
 export default function Reminders() {
   const { personId } = useParams()
@@ -85,6 +52,8 @@ export default function Reminders() {
     () => notificationsSupported() && Notification.permission === 'granted'
   )
   const { canInstall, promptInstall } = useInstallPrompt()
+  const [showFullPanel, setShowFullPanel] = useState(false)
+  const notificationsReady = installed && permGranted && pushOn
 
   const load = async () => {
     setLoading(true)
@@ -150,6 +119,15 @@ export default function Reminders() {
     }
     return { overdue, soon }
   }, [rows])
+
+  // Tygodnie do „Przesuń" (menu ⋯) — interwał domyślny + typowe wartości.
+  const snoozeWeeks = useMemo(
+    () =>
+      [...new Set([intervalWeeks, 1, 2, 3, 4, 6, 8, 12])]
+        .filter((w) => w > 0)
+        .sort((a, b) => a - b),
+    [intervalWeeks]
+  )
 
   const persistLeadDays = async () => {
     const value = Math.min(60, Math.max(0, Number(leadDays) || 0))
@@ -262,9 +240,6 @@ export default function Reminders() {
     })
   }
 
-  const btnSecondary =
-    'inline-flex min-h-[44px] items-center rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
-
   return (
     <div className="space-y-4">
       <div>
@@ -278,6 +253,26 @@ export default function Reminders() {
       </div>
 
       {/* Onboarding: co zrobić, aby dostawać przypomnienia na telefon */}
+      {notificationsReady && !showFullPanel ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-teal-200 bg-teal-50/60 px-3 py-2 text-sm dark:border-teal-800 dark:bg-teal-950/20">
+          <span className="inline-flex items-center gap-2 font-medium text-teal-900 dark:text-teal-100">
+            <span
+              aria-hidden="true"
+              className="text-green-600 dark:text-green-400"
+            >
+              ✓
+            </span>
+            Powiadomienia w tle: włączone
+          </span>
+          <button
+            type="button"
+            onClick={() => setShowFullPanel(true)}
+            className="min-h-[44px] rounded-md px-3 font-medium text-teal-800 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-200"
+          >
+            Szczegóły
+          </button>
+        </div>
+      ) : (
       <div className="space-y-3 rounded-xl border border-teal-200 bg-teal-50/60 p-4 text-sm dark:border-teal-800 dark:bg-teal-950/20">
         <div>
           <h2 className="font-semibold text-teal-900 dark:text-teal-100">
@@ -368,7 +363,18 @@ export default function Reminders() {
             Wszystko gotowe — przypomnienia będą przychodzić same.
           </p>
         ) : null}
+
+        {notificationsReady ? (
+          <button
+            type="button"
+            onClick={() => setShowFullPanel(false)}
+            className="min-h-[44px] rounded-md px-1 font-medium text-teal-800 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-200"
+          >
+            Ukryj
+          </button>
+        ) : null}
       </div>
+      )}
 
       {error ? (
         <div
@@ -482,35 +488,41 @@ export default function Reminders() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={() => addSession(lesion)}
-                  className="inline-flex min-h-[44px] items-center rounded-lg bg-teal-700 px-3 text-sm font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500"
+                  disabled={busyId === lesion.id}
+                  className="inline-flex min-h-[44px] items-center rounded-lg bg-teal-700 px-3 text-sm font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-60 dark:bg-teal-600 dark:hover:bg-teal-500"
                 >
                   Dodaj zdjęcie
                 </button>
-                <SnoozeControl
-                  defaultWeeks={intervalWeeks}
-                  busy={busyId === lesion.id}
-                  onSnooze={(weeks) => snooze(lesion, weeks)}
-                />
-                {snoozed ? (
-                  <button
-                    type="button"
-                    onClick={() => clearSnooze(lesion)}
-                    disabled={busyId === lesion.id}
-                    className={btnSecondary}
-                  >
-                    Przywróć wyliczoną
-                  </button>
-                ) : null}
                 <CalendarReminderButton
                   label={lesion.label}
                   lastDate={last}
                   intervalWeeks={intervalWeeks}
                   leadDays={leadDays}
                   startDate={next}
+                />
+                <OverflowMenu
+                  label="Więcej akcji kontroli"
+                  items={[
+                    ...snoozeWeeks.map((w) => ({
+                      key: `snooze-${w}`,
+                      label: `Przesuń o ${w} tyg.`,
+                      onSelect: () => snooze(lesion, w),
+                    })),
+                    ...(snoozed
+                      ? [
+                          { key: 'sep', separator: true },
+                          {
+                            key: 'clear-snooze',
+                            label: 'Przywróć wyliczoną datę',
+                            onSelect: () => clearSnooze(lesion),
+                          },
+                        ]
+                      : []),
+                  ]}
                 />
               </div>
             </li>

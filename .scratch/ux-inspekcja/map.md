@@ -32,13 +32,13 @@ diagnozuje; chodzi o czytelność i mniej szumu, nie o nowe funkcje.
 | 01 | task | [Lista: filtry i sortowanie zajmują pół ekranu](issues/01-lista-filtry.md) | — | resolved |
 | 02 | task | [Lista: gęstość karty znamienia](issues/02-lista-karty.md) | — | ready-for-agent |
 | 03 | task | [Lista: wyszukiwanie po nazwie/okolicy](issues/03-lista-wyszukiwanie.md) | — | ready-for-agent |
-| 04 | task | [Kontrole: przeładowany rząd akcji na karcie](issues/04-kontrole-akcje.md) | — | ready-for-agent |
-| 05 | task | [Kontrole: panel "Przypomnienia na telefon" zwijany](issues/05-kontrole-panel.md) | — | ready-for-agent |
+| 04 | task | [Kontrole: przeładowany rząd akcji na karcie](issues/04-kontrole-akcje.md) | — | resolved |
+| 05 | task | [Kontrole: panel "Przypomnienia na telefon" zwijany](issues/05-kontrole-panel.md) | — | resolved |
 | 06 | task | [Mapa ciała: legenda statusów zajmuje miejsce](issues/06-mapa-legenda.md) | — | ready-for-agent |
 | 07 | task | [Szczegóły znamienia: długi widok bez nawigacji](issues/07-detail-nawigacja.md) | — | ready-for-agent |
 | 08 | task | [Nagłówek: tłoczno na telefonie](issues/08-naglowek.md) | — | ready-for-agent |
 
 ## Frontier
 
-Kolejne wg ustalonej kolejności: **04 + 05** (Kontrole), potem **06 + 08**
-(mapa/instalacja), na końcu **02 + 03 + 07**.
+Kolejne: **06 + 08** (mapa/instalacja), na końcu **02 + 03 + 07**.
+Zrobione: 01, 04, 05.
