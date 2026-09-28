@@ -1,6 +1,6 @@
 # Stan projektu — Skin Tracker
 
-> Krótki, aktualizowany ręcznie przegląd. Ostatnia aktualizacja: **2026-09-27**.
+> Krótki, aktualizowany ręcznie przegląd. Ostatnia aktualizacja: **2026-09-28**.
 > Szczegóły: `README.md` (jak uruchomić), `CONTEXT.md` (słownik domeny),
 > `CHANGELOG.md` (historia wdrożeń), `.scratch/README.md` (indeks ticketów).
 
@@ -20,14 +20,16 @@ osób („Ja", „Syn").
 
 ## Jakość / stan repo
 
-- `npm run build` ✓, `npm test` → **69/69** ✓ (jednostkowe).
-- `npm run e2e` → **18/18** ✓ (Playwright, zmockowany Supabase, ~7 s).
-- Tracker: **11 effortów, 71 ticketów (+1 spec) — wszystkie `resolved`**.
+- `npm run build` ✓, `npm test` → **80/80** ✓ (jednostkowe).
+- `npm run e2e` → **18/18** ✓ (Playwright, zmockowany Supabase, ~10 s).
+- Tracker: **12 effortów, 77 ticketów (+1 spec): 71 `resolved`, 6 otwartych**
+  w `.scratch/backlog/`.
 
 ## Funkcje
 
 | Obszar | Stan |
 | --- | --- |
+| **Wybór osoby** | karta z liczbami (znamiona, zdjęcia, najbliższa kontrola + „zaległe” gdy minęła); zmiana nazwy i usunięcie osoby w menu „⋯” |
 | **Mapa ciała** | widoki ze słownika 17 okolic + własne nazwy; piny (dodaj / przesuń / edytuj); zdjęcie tła per widok (aparat lub plik); kontekst okolicy w nazwie znamienia; panel pina jako bottom sheet na telefonie |
 | **Znamię** | zdjęcia z edycją (obrót / odbicia) i kompresją; pomiar z obrysu (MediaPipe, geometria); notatki ABCDE; status; porównanie przeciąganym suwakiem; wykres rozmiaru; powiększanie zdjęć (lightbox) |
 | **Lista znamion** | filtr po statusie + sortowanie po terminie kontroli; stan w URL |
@@ -59,9 +61,24 @@ osób („Ja", „Syn").
 
 ## Otwarte / do rozważenia
 
-- Kolejne drobiazgi UX z następnych przeglądów. Przegląd UX (effort
-  ux-inspekcja) **domknięty** — 8 ticketów wdrożonych: zwijane filtry listy,
-  kondensacja kart, wyszukiwanie, uproszczone akcje Kontroli, zwijany panel
-  powiadomień, zwijana legenda statusów, przypominacz instalacji, kolejność
-  sekcji znamienia (zdjęcia/porównanie na górze).
-- Web Push dla wielu urządzeń (deduplikacja subskrypcji).
+Backlog żyje w **`.scratch/backlog/`** — 6 ticketów, każdy z etykietą triage.
+
+| #  | Temat | Status |
+| -- | ----- | ------ |
+| 01 | Eksport / kopia zapasowa danych | needs-triage |
+| 02 | Znamiona „Usunięte” wciąż liczą się jako zaległe | ready-for-agent |
+| 03 | Wyszukiwanie i sortowanie w Kontrolach | ready-for-agent |
+| 04 | Testy wizualne w e2e | ready-for-agent |
+| 05 | Audyt dostępności (a11y) | needs-triage |
+| 06 | Wspólny wzorzec zwijanych paneli | wontfix |
+
+Najważniejsze: **01** — jedyny realny sposób ochrony dorobku przed utratą
+projektu Supabase.
+
+### Sprawdzone — nie wracać
+
+- **Web Push na wielu urządzeniach:** `enablePush()` zapisuje subskrypcję
+  przez `upsert` po `endpoint`, a wysyłka sama usuwa wygasłe (`404`/`410`).
+- **Treść powiadomień:** `scripts/send-reminders.mjs` już agreguje — jedno
+  znamię z nazwą i terminem, kilka jako „N kontroli do wykonania — X
+  zaległych”.

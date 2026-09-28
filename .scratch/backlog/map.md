@@ -1,0 +1,58 @@
+# Backlog
+
+Effort: .scratch/backlog/
+Tickets: .scratch/backlog/issues/
+
+## Destination
+
+**Holding area na pracę, która nie została jeszcze zaplanowana.** Wcześniej ten
+backlog był rozproszony: część w `docs/STAN.md` („Otwarte / do rozważenia”),
+część tylko w rozmowie — i przez to wracał przy każdej sesji od zera.
+
+Zasada tego katalogu: **ticket istnieje tu tylko wtedy, gdy wiemy, co ma być
+zrobione.** Każdy ma `Status:` z `docs/agents/triage-labels.md`. Gdy temat
+zostaje podjęty, ticket przenosi się do własnego effortu (albo tu dostaje
+`Status: resolved` i `## Answer`).
+
+## Decisions so far
+
+- **Multi-device Web Push — zrobione, nie wracać.** `enablePush()` zapisuje
+  subskrypcję przez `upsert(..., { onConflict: 'endpoint' })`, `disablePush()`
+  kasuje po `endpoint`, a `scripts/send-reminders.mjs` wysyła do **wszystkich**
+  subskrypcji właściciela i sam usuwa wygasłe (`404`/`410`).
+- **Treść powiadomień — zrobione, nie wracać.** `send-reminders.mjs` już
+  agreguje: jedno znamię → z nazwą i terminem, kilka → „N kontroli do wykonania
+  — X zaległych”.
+- **Testy e2e — zrobione** (`.scratch/e2e-smoke-testy/`, 18 testów). Kolejne
+  pomysły testowe wpisujemy jako rozszerzenia tam, nie tutaj.
+- **Refaktor zwijanych paneli — `wontfix`** (ticket 06). Świadomie odrzucony.
+
+## Not yet specified (mgła)
+
+- Import danych (odtworzenie kopii zapasowej na nowym projekcie). Zależy od
+  tego, jaki format wybierzemy w tickecie 01.
+- Kopia zapasowa po stronie GitHuba (workflow cyklicznie zrzucający dump) —
+  sensowne dopiero, gdy będzie ustalony format.
+- Progi na darmowym tierze Supabase (500 MB baza / 1 GB Storage) — czy chcemy
+  licznik użycia w UI, czy to przesada przy jednym koncie.
+
+## Out of scope
+
+- Pomysły bez zdefiniowanego celu („zrobić ładniej”).
+- Wszystko, co już działa (patrz Decisions so far).
+
+## Tickets
+
+| #  | Type | Tytuł | Status |
+| -- | ---- | ----- | ------ |
+| 01 | task | [Eksport / kopia zapasowa danych](issues/01-eksport-kopia-zapasowa.md) | needs-triage |
+| 02 | task | [Znamiona „Usunięte” wciąż liczą się jako zaległe](issues/02-usuniete-nie-jest-zalegle.md) | ready-for-agent |
+| 03 | task | [Wyszukiwanie i sortowanie w Kontrolach](issues/03-szukanie-w-kontrolach.md) | ready-for-agent |
+| 04 | task | [Testy wizualne w e2e](issues/04-testy-wizualne.md) | ready-for-agent |
+| 05 | task | [Audyt dostępności (a11y)](issues/05-audyt-a11y.md) | needs-triage |
+| 06 | task | [Wspólny wzorzec zwijanych paneli](issues/06-wspolny-zwijany-wzorzec.md) | wontfix |
+
+## Frontier
+
+Do wzięcia bez decyzji: **02**, **03**, **04** (`ready-for-agent`).
+Wymagają Twojej decyzji: **01** (format i zakres eksportu), **05** (zakres audytu).

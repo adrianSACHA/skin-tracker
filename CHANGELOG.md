@@ -37,6 +37,17 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
   narożnikami, osobna ikona maskowalna `icon-maskable-512` (tło do krawędzi, dla
   Android/launcherów) oraz `apple-touch-icon.png` dla iOS; podłączone w manifeście
   i w `index.html`.
+- **Karta osoby — liczby i najbliższa kontrola.** Na ekranie wyboru osoby
+  karta pokazuje, ile osoba ma znamion i zdjęć oraz kiedy wypada najbliższa
+  kontrola (data na czerwono + plakietka „zaległe”, gdy termin już minął;
+  „Brak znamion” dla świeżej osoby). Terminy liczy ta sama logika co Kontrole
+  (`src/lib/summary.js` + `buildRows`), więc liczby na karcie nie rozjeżdżają
+  się ze znacznikiem przy „Kontrole”.
+- **Backlog uporządkowany.** Pomysły, które żyły tylko w rozmowie i w
+  `docs/STAN.md` („Otwarte / do rozważenia”), trafiły jako tickety do
+  `.scratch/backlog/` — 6 pozycji, każda z etykietą triage. Dwie okazały się
+  już zrobione (Web Push na wielu urządzeniach, treść powiadomień) i są
+  zapisane jako „nie wracać”.
 - **Testy e2e (Playwright) + CI.** 18 „dymnych" testów w prawdziwej
   przeglądarce: logowanie, wybór/edycja/usunięcie osoby, mapa ciała z pinami,
   lista znamion (nazwy, statusy, wyszukiwanie i filtr w adresie), motyw oraz
