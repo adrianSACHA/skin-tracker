@@ -29,7 +29,8 @@ Druga część przeglądu UX: ekran logowania, wybór osoby oraz formularz zdję
 | 02 | task | [Upload: kompaktowe przyciski edycji zdjęcia](issues/02-upload-edycja.md) | — | resolved |
 | 03 | task | [Segmentator: krótsze etykiety kroków](issues/03-segmentator-kroki.md) | — | resolved |
 | 04 | task | [Wybór osoby: zmiana nazwy i usunięcie](issues/04-osoba-edycja.md) | — | resolved |
+| 05 | task | [Logo: monogram „ST" (loader, nagłówek, favicon)](issues/05-task-logo-monogram.md) | — | resolved |
 
 ## Frontier
 
-Brak — wszystkie 4 tickety **resolved** (01/02/03 UX, 04 edycja osoby).
+Brak — wszystkie 5 ticketów **resolved** (01/02/03 UX, 04 edycja osoby, 05 logo).

@@ -6,6 +6,7 @@ import { useDueReminders } from '../lib/useDueReminders'
 import { useInstallPrompt } from '../lib/install'
 import { notifyOverdueOnce } from '../lib/reminderNotify'
 import ThemeToggle from './ThemeToggle'
+import Logo from './Logo'
 
 function navClass({ isActive }) {
   return [
@@ -71,8 +72,9 @@ export default function Layout({ children }) {
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-3 lg:max-w-6xl">
           <Link
             to="/"
-            className="font-semibold text-teal-800 dark:text-teal-300"
+            className="inline-flex items-center gap-2 font-semibold text-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-300"
           >
+            <Logo size={24} />
             Skin Tracker
           </Link>
           <div className="flex items-center gap-2 text-sm">
