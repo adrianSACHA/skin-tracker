@@ -81,6 +81,10 @@ export default function BodyMap() {
   const [viewDeleteConfirm, setViewDeleteConfirm] = useState(false)
   const [deletingView, setDeletingView] = useState(false)
   const [sheetDragY, setSheetDragY] = useState(0) // swipe w dół bottom sheetu
+  // Legenda: na telefonie schowana (oszczędza miejsce), domyślnie widoczna od lg.
+  const [showLegend, setShowLegend] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches
+  )
   const fileInputRef = useRef(null) // zmiana tła: wybór z plików
   const cameraInputRef = useRef(null) // zmiana tła: aparat
   const addInputRef = useRef(null) // dodawanie widoku: wybór z plików
@@ -1260,21 +1264,36 @@ export default function BodyMap() {
       ) : null}
       </div>
 
-      {/* Legenda — etykiety spójne z resztą UI (jedno źródło: status.js). */}
-      <div className="flex flex-wrap gap-4 pt-2 text-xs text-slate-500 dark:text-slate-400">
-        {STATUSES.map((key) => {
-          const meta = statusMeta(key)
-          return (
-            <span key={key} className="inline-flex items-center gap-1.5">
-              <span
-                className="h-2.5 w-2.5 rounded-full"
-                style={{ backgroundColor: meta.dot }}
-                aria-hidden="true"
-              />
-              {meta.label}
-            </span>
-          )
-        })}
+      {/* Legenda (zwijana) — etykiety spójne z resztą UI (źródło: status.js). */}
+      <div className="pt-2 text-xs text-slate-500 dark:text-slate-400">
+        <button
+          type="button"
+          onClick={() => setShowLegend((v) => !v)}
+          aria-expanded={showLegend}
+          className="inline-flex min-h-[44px] items-center gap-1.5 font-medium text-slate-600 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-slate-300"
+        >
+          Kolory statusów
+          <span aria-hidden="true" className="text-slate-400">
+            {showLegend ? '▴' : '▾'}
+          </span>
+        </button>
+        {showLegend ? (
+          <div className="mt-1 flex flex-wrap gap-4">
+            {STATUSES.map((key) => {
+              const meta = statusMeta(key)
+              return (
+                <span key={key} className="inline-flex items-center gap-1.5">
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: meta.dot }}
+                    aria-hidden="true"
+                  />
+                  {meta.label}
+                </span>
+              )
+            })}
+          </div>
+        ) : null}
       </div>
 
       {/* Potwierdzenie usunięcia tła - spójne z usuwaniem znamienia/zdjęcia

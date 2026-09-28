@@ -22,6 +22,36 @@ export default function Layout({ children }) {
   const due = useDueReminders(person?.id)
   const { canInstall, iosHint, promptInstall } = useInstallPrompt()
   const [showInstallTip, setShowInstallTip] = useState(false)
+  const [showInstallNudge, setShowInstallNudge] = useState(false)
+
+  // Przypominacz instalacji: pokazuj raz na ~7 dni, dopóki aplikacja nie jest
+  // zainstalowana (bez instalacji nie ma powiadomień w tle).
+  useEffect(() => {
+    if (!canInstall && !iosHint) return undefined
+    const KEY = 'skin-tracker:install-nudge'
+    let last = 0
+    try {
+      last = Number(localStorage.getItem(KEY)) || 0
+    } catch {
+      last = 0
+    }
+    if (Date.now() - last > 7 * 24 * 60 * 60 * 1000) setShowInstallNudge(true)
+    return undefined
+  }, [canInstall, iosHint])
+
+  const dismissInstallNudge = () => {
+    try {
+      localStorage.setItem('skin-tracker:install-nudge', String(Date.now()))
+    } catch {
+      /* ignorujemy */
+    }
+    setShowInstallNudge(false)
+  }
+
+  const handleInstallClick = () => {
+    if (canInstall) promptInstall()
+    else setShowInstallTip((v) => !v)
+  }
 
   // Lekkie przypomnienie: jedno powiadomienie dziennie, gdy są zaległe kontrole
   // (tylko przy otwartej aplikacji; bez Web Push).
@@ -57,10 +87,7 @@ export default function Layout({ children }) {
             {canInstall || iosHint ? (
               <button
                 type="button"
-                onClick={() => {
-                  if (canInstall) promptInstall()
-                  else setShowInstallTip((v) => !v)
-                }}
+                onClick={handleInstallClick}
                 className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-teal-200 bg-teal-50 px-2.5 text-sm font-medium text-teal-800 transition-colors hover:bg-teal-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-teal-800 dark:bg-teal-950/50 dark:text-teal-200 dark:hover:bg-teal-900/60"
                 title="Dodaj aplikację do ekranu początkowego"
               >
@@ -128,6 +155,34 @@ export default function Layout({ children }) {
               ) : null}
             </NavLink>
           </nav>
+        ) : null}
+
+        {showInstallNudge && (canInstall || iosHint) ? (
+          <div className="border-t border-teal-200 bg-teal-50 dark:border-teal-800 dark:bg-teal-950/40">
+            <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-2 px-4 py-2 text-sm text-teal-900 lg:max-w-6xl dark:text-teal-100">
+              <span>
+                Zainstaluj aplikację, żeby dostawać{' '}
+                <strong>powiadomienia o kontrolach</strong>. Bez instalacji
+                zostaną tylko przypomnienia w kalendarzu.
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleInstallClick}
+                  className="min-h-[44px] rounded-lg bg-teal-700 px-3 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500"
+                >
+                  Zainstaluj
+                </button>
+                <button
+                  type="button"
+                  onClick={dismissInstallNudge}
+                  className="min-h-[44px] rounded-lg px-3 font-medium text-teal-800 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-200"
+                >
+                  Nie teraz
+                </button>
+              </div>
+            </div>
+          </div>
         ) : null}
       </header>
 

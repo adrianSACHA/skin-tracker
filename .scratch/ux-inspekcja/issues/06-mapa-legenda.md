@@ -1,7 +1,7 @@
 # 06 — Mapa ciała: legenda statusów zajmuje miejsce
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Map: .scratch/ux-inspekcja/map.md
 
 ## Problem
@@ -23,6 +23,12 @@ Legenda jest **potrzebna** — bez niej nie wiadomo, co oznacza dany kolor.
 
 ## Kryteria akceptacji
 
-- [ ] Legenda dostępna jednym kliknięciem (nie znika na stałe).
-- [ ] Domyślnie nie zajmuje miejsca na telefonie.
-- [ ] Na desktopie może być widoczna od razu.
+- [x] Legenda dostępna jednym kliknięciem (nie znika na stałe).
+- [x] Domyślnie nie zajmuje miejsca na telefonie.
+- [x] Na desktopie może być widoczna od razu.
+
+## Answer
+
+Zrealizowane w src/components/BodyMap.jsx: legenda pod przyciskiem „Kolory
+statusów" (rozwija/zwija). Domyślnie rozwinięta od szerokości lg (desktop),
+zwinięta na telefonie. Kropki przy pinach i etykieta w panelu zostają.

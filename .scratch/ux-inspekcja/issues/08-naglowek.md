@@ -1,7 +1,7 @@
 # 08 — Nagłówek: tłoczno na telefonie
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Map: .scratch/ux-inspekcja/map.md
 
 ## Problem
@@ -29,6 +29,13 @@ instalacji nie ma powiadomień w tle** (zostają tylko te w kalendarzu).
 
 ## Kryteria akceptacji
 
-- [ ] „Zainstaluj" widoczne, dopóki aplikacja nie jest zainstalowana.
-- [ ] Baner przypomina okresowo (nie częściej niż raz na N dni) i da się zamknąć.
-- [ ] Komunikat wprost łączy brak instalacji z brakiem powiadomień w tle.
+- [x] „Zainstaluj" widoczne, dopóki aplikacja nie jest zainstalowana.
+- [x] Baner przypomina okresowo (nie częściej niż raz na N dni) i da się zamknąć.
+- [x] Komunikat wprost łączy brak instalacji z brakiem powiadomień w tle.
+
+## Answer
+
+Zrealizowane w src/components/Layout.jsx: przycisk „Zainstaluj" w nagłówku (aż do
+instalacji) + baner przypominający raz na ~7 dni (data w localStorage), gdy apka
+nie jest zainstalowana, z komunikatem „Bez instalacji zostaną tylko przypomnienia
+w kalendarzu" i przyciskami „Zainstaluj"/„Nie teraz".
