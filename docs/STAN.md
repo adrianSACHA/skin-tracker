@@ -20,9 +20,9 @@ osób („Ja", „Syn").
 
 ## Jakość / stan repo
 
-- `npm run build` ✓, `npm test` → **80/80** ✓ (jednostkowe).
-- `npm run e2e` → **18/18** ✓ (Playwright, zmockowany Supabase, ~10 s).
-- Tracker: **12 effortów, 77 ticketów (+1 spec): 71 `resolved`, 6 otwartych**
+- `npm run build` ✓, `npm test` → **85/85** ✓ (jednostkowe).
+- `npm run e2e` → **20/20** ✓ (Playwright, zmockowany Supabase, ~10 s).
+- Tracker: **12 effortów, 77 ticketów (+1 spec): 72 `resolved`, 5 otwartych**
   w `.scratch/backlog/`.
 
 ## Funkcje
@@ -61,12 +61,13 @@ osób („Ja", „Syn").
 
 ## Otwarte / do rozważenia
 
-Backlog żyje w **`.scratch/backlog/`** — 6 ticketów, każdy z etykietą triage.
+Backlog żyje w **`.scratch/backlog/`** — 5 otwartych ticketów, każdy z etykietą
+triage (ticket 02 jest już `resolved`).
 
 | #  | Temat | Status |
 | -- | ----- | ------ |
 | 01 | Eksport / kopia zapasowa danych | needs-triage |
-| 02 | Znamiona „Usunięte” wciąż liczą się jako zaległe | ready-for-agent |
+| 02 | Znamiona „Usunięte” wciąż liczą się jako zaległe | resolved |
 | 03 | Wyszukiwanie i sortowanie w Kontrolach | ready-for-agent |
 | 04 | Testy wizualne w e2e | ready-for-agent |
 | 05 | Audyt dostępności (a11y) | needs-triage |

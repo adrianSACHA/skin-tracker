@@ -1,7 +1,7 @@
 # 02 — Znamiona „Usunięte” wciąż liczą się jako zaległe
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Map: .scratch/backlog/map.md
 
 ## Problem
@@ -54,3 +54,38 @@ export function dueRows(lesions, options) {
 - Lista znamion nadal pokazuje znamiona „Usunięte” (filtr po statusie działa).
 - Testy: jednostkowe na `dueRows` (osobno „Usunięte” nie wpada, „Urgent” wpada)
   + e2e: oznaczenie znamienia jako „Usunięte” zdejmuje „zaległe” z karty osoby.
+
+## Answer
+
+Zrealizowane. Nowy, jawny szew w `src/lib/lesionView.js`:
+
+```js
+export function dueRows(lesions, options) {
+  return buildRows((lesions || []).filter((l) => l.status !== 'removed'), options)
+}
+```
+
+`buildRows` **został bez zmian** — lista znamion nadal pokazuje „Usunięte”
+(filtr po statusie działa). `dueRows` weszło w cztery miejsca, które liczą
+terminy:
+
+- `src/lib/useDueReminders.js` — znacznik przy „Kontrole” w nagłówku
+  (a tym samym powiadomienie in-app, bo `notifyOverdueOnce` dostaje już
+  policzoną liczbę),
+- `src/components/Reminders.jsx` — lista i licznik „Zaległe”,
+- `src/lib/summary.js` — termin na karcie osoby,
+- `scripts/send-reminders.mjs` — Web Push (filtr `status !== 'removed'`
+  przed liczeniem terminów).
+
+Świadoma asymetria na karcie osoby: `lesionCount` / `photoCount` liczą**całą**
+dokumentację (także „Usunięte” — karta opisuje archiwum), a `next` / `overdue`
+tylko znamiona pilnowane. Opisane w kodzie i w teście.
+
+Testy: 4 nowe jednostkowe na `dueRows` + 1 na `summarizePerson` („Usunięte”
+nie wyznaczają terminu) + nowy plik e2e `e2e/reminders.spec.js` (2 testy).
+Sprawdzone mutacją: po wyłączeniu filtra padają 2 testy jednostkowe i 1 e2e,
+czyli testy faktycznie pilnują tej reguły.
+
+Nie zrobione (świadomie): ukrycie „Usuniętych” w Kontrolach za przełącznikiem
+„pokaż usunięte” — to zmiana UI, nie była potrzebna do naprawy. Jeśli będzie
+chciane, zasługuje na osobny ticket.

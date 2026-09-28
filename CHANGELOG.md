@@ -125,6 +125,15 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 
 ### Naprawione
 
+- **Znamiona „Usunięte” przestały być zaległe.** Status „Usunięte” nie był
+  nigdzie pomijany przy liczeniu terminów, więc oznaczone nim znamię dalej
+  zawyżało znacznik przy „Kontrole”, trafiało na listę Kontroli, generowało
+  powiadomienie in-app i Web Push, a kartę osoby robiło czerwoną
+  („zaległe”). Nowy szew `dueRows()` (`src/lib/lesionView.js`) liczy terminy
+  bez „Usuniętych” i jest używany w znaczniku, Kontrolach, karcie osoby oraz
+  skrypcie przypomnień. `buildRows` bez zmian — lista znamion nadal pokazuje
+  „Usunięte” (filtr po statusie działa).
+
 - **„Taki widok już istnieje"** przy dodawaniu okolicy, której wiersz w
   `body_maps` istnieje bez zdjęcia tła — teraz tło jest dogrywane do tego wiersza.
 - **`SignedImage`** nie pokazuje już zdjęcia poprzedniego znamienia przy zmianie
