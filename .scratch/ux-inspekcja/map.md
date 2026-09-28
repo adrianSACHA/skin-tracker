@@ -35,7 +35,7 @@ diagnozuje; chodzi o czytelność i mniej szumu, nie o nowe funkcje.
 | 04 | task | [Kontrole: przeładowany rząd akcji na karcie](issues/04-kontrole-akcje.md) | — | ready-for-agent |
 | 05 | task | [Kontrole: panel "Przypomnienia na telefon" zwijany](issues/05-kontrole-panel.md) | — | ready-for-agent |
 | 06 | task | [Mapa ciała: legenda statusów zajmuje miejsce](issues/06-mapa-legenda.md) | — | needs-triage |
-| 07 | task | [Szczegóły znamienia: długi widok bez nawigacji](issues/07-detail-nawigacja.md) | — | needs-triage |
+| 07 | task | [Szczegóły znamienia: długi widok bez nawigacji](issues/07-detail-nawigacja.md) | — | ready-for-agent |
 | 08 | task | [Nagłówek: tłoczno na telefonie](issues/08-naglowek.md) | — | needs-triage |
 
 ## Frontier
