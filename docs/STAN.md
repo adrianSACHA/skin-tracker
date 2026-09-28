@@ -56,9 +56,9 @@ osób („Ja", „Syn").
 
 ## Otwarte / do rozważenia
 
-- **Lista znamion — uproszczenie UX** („za dużo się dzieje"): schowanie filtra/
-  sortowania pod „Filtry" albo skrócenie kontrolek. Effort `lista-znamion-ux`
-  (ticket 01, `needs-info` — czeka na doprecyzowanie).
-- Wyszukiwanie znamion po nazwie (na liście).
+- Kolejne drobiazgi UX z następnych przeglądów. Przegląd UX (effort
+  ux-inspekcja) **domknięty** — 8 ticketów wdrożonych: zwijane filtry listy,
+  kondensacja kart, wyszukiwanie, uproszczone akcje Kontroli, zwijany panel
+  powiadomień, zwijana legenda statusów, przypominacz instalacji, kolejność
+  sekcji znamienia (zdjęcia/porównanie na górze).
 - Web Push dla wielu urządzeń (deduplikacja subskrypcji).
-- Dalsze drobiazgi UX (przegląd pozostałych widoków na telefonie).
