@@ -33,6 +33,10 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
   otwarciu aplikacji (za zgodą, max raz dziennie). `.ics` do kalendarza zostaje.
 - **Nowe logo (monogram „ST"):** ekran ładowania, nagłówek, favicon i manifest
   PWA; lżejsza animacja (puls) zamiast wirującego pierścienia.
+- **Ikony PNG z monogramu „ST":** `icon-192` i `icon-512` z zaokrąglonymi
+  narożnikami, osobna ikona maskowalna `icon-maskable-512` (tło do krawędzi, dla
+  Android/launcherów) oraz `apple-touch-icon.png` dla iOS; podłączone w manifeście
+  i w `index.html`.
 - **Wybór osoby — edycja:** zmiana nazwy osoby oraz usunięcie osoby (w menu
   „⋯" na karcie, z potwierdzeniem); usunięcie kasuje też znamiona, zdjęcia i
   pliki ze Storage. Do tego porcja UX logowania/uploadu/pomiaru.
