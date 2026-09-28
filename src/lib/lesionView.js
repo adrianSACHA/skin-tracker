@@ -1,6 +1,8 @@
 // Czysty model widoku listy znamion - bez JSX i bez I/O, więc łatwy do testów.
-// Publiczny szew: `buildRows`, `filterByStatus`, `sortRows`, `sortRowsByNext`.
-// Współdzielony przez `LesionsList` i `Reminders` (usuwa duplikat `lastPhotoDate`).
+// Publiczny szew: `buildRows` (lista znamion), `dueRows` (tylko terminy
+// kontroli), `filterByStatus`, `sortRows`, `sortRowsByNext`.
+// Współdzielony przez `LesionsList`, `Reminders` i `summary` (usuwa duplikat
+// `lastPhotoDate`).
 import { addWeeksYMD, daysBetween, todayYMD } from './date'
 import { STATUS_PRIORITY } from './status'
 import { areaLabel } from './bodyAreas'
@@ -24,6 +26,20 @@ export function buildRows(lesions, { intervalWeeks, today = todayYMD() } = {}) {
       overdue: daysUntilNext !== null && daysUntilNext < 0,
     }
   })
+}
+
+// Wiersze do liczenia TERMINÓW kontroli - bez znamion oznaczonych jako
+// „Usunięte”. Znamiona usunięte nie mają czego pilnować, więc nie mogą:
+//   - zawyżać znacznika przy „Kontrole” w nagłówku,
+//   - trafiać do listy Kontroli ani do powiadomień (in-app i Web Push),
+//   - robić z karty osoby czerwonej plakietki „zaległe”.
+// `buildRows` zostaje bez zmian: lista znamion ma nadal pokazywać
+// „Usunięte” (jest filtr po statusie i można do nich wrócić).
+export function dueRows(lesions, options) {
+  return buildRows(
+    (lesions || []).filter((lesion) => lesion.status !== 'removed'),
+    options
+  )
 }
 
 // Filtr po statusie; pusta lista = brak filtra (pokazujemy wszystko).

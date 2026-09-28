@@ -87,6 +87,22 @@ describe('summarizePerson', () => {
     expect(summary.overdue).toBe(false)
   })
 
+  it('„Usunięte” nie wyznaczają terminu na karcie', () => {
+    const lesions = [
+      // Usunięte i dawno zaległe - nie może robić karty na czerwono.
+      { id: 'a', status: 'removed', lesion_photos: [{ taken_at: '2026-01-05' }] },
+      // Jedyne pilnowane znamię - termin w przyszłości.
+      { id: 'b', status: 'stable', next_check_at: '2026-06-10', lesion_photos: [] },
+    ]
+
+    const summary = summarizePerson(lesions, { intervalWeeks: 6, today })
+
+    expect(summary.next).toBe('2026-06-10')
+    expect(summary.overdue).toBe(false)
+    // Liczniki nadal obejmują całą dokumentację (także „Usunięte”).
+    expect(summary.lesionCount).toBe(2)
+  })
+
   it('bez zapisanego interwału używa wartości domyślnej', () => {
     const lesions = [{ id: 'a', lesion_photos: [] }]
 

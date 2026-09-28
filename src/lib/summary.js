@@ -2,9 +2,9 @@
 // kiedy wypada najbliższa kontrola. Czysta funkcja (bez JSX, bez I/O), więc
 // testowalna tak samo jak `lesionView.js`.
 //
-// Terminy liczy `buildRows` - ta sama logika co Lista znamion i Kontrole,
-// żeby liczby na karcie nie rozjechały się ze znacznikiem przy „Kontrole”.
-import { buildRows } from './lesionView'
+// Terminy liczy `dueRows` - ta sama logika co Kontrole i znacznik w nagłówku,
+// żeby liczby na karcie nie rozjechały się z resztą aplikacji.
+import { dueRows } from './lesionView'
 import { DEFAULT_INTERVAL_WEEKS } from './settings'
 
 // Polska odmiana rzeczownika po liczbie: 1 znamię, 2-4 znamiona, 5+ znamion.
@@ -31,16 +31,19 @@ export function countPhotos(lesions) {
  *
  * `overdue` dotyczy TEGO najbliższego terminu (czyli czy karta ma być czerwona).
  *
- * Uwaga: celowo bierzemy wszystkie znamiona (tak samo jak znacznik przy
- * „Kontrole” w nagłówku) - także te ze statusem „Usunięte”. Gdybyśmy je tu
- * pomijali, liczba na karcie kłóciłaby się ze znacznikiem.
+ * Dwie różne rzeczy liczone są celowo różnie:
+ * - `lesionCount` / `photoCount` - cała dokumentacja, także znamiona
+ *   „Usunięte” (karta opisuje stan archiwum, a lista znamion też je pokazuje),
+ * - `next` / `overdue` - tylko znamiona, które mają czego pilnować, czyli bez
+ *   „Usuniętych” (`dueRows`). Dzięki temu termin zgadza się ze znacznikiem przy
+ *   „Kontrole” i z listą Kontroli.
  *
  * @param {Array} lesions znamiona osoby (płaskie, jak z `lesions`)
  * @param {{ intervalWeeks?: number, today?: string }} [options]
  */
 export function summarizePerson(lesions, { intervalWeeks, today } = {}) {
   const list = lesions || []
-  const rows = buildRows(list, {
+  const rows = dueRows(list, {
     intervalWeeks: intervalWeeks || DEFAULT_INTERVAL_WEEKS,
     today,
   })

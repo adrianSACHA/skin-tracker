@@ -91,6 +91,9 @@ for (const person of persons || []) {
   }
 
   const due = (lesions || [])
+    // Znamiona „Usunięte” nie mają czego pilnować - nie wysyłamy o nich
+    // powiadomień (spójnie z Kontrolami i znacznikiem w aplikacji).
+    .filter((lesion) => lesion.status !== 'removed')
     .map((lesion) => ({ lesion, ...dueForLesion(lesion, intervalWeeks, leadDays) }))
     .filter((r) => r.due)
 

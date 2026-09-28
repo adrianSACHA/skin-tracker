@@ -9,7 +9,7 @@ import {
   todayYMD,
 } from '../lib/date'
 import { useIntervalWeeks } from '../lib/interval'
-import { buildRows } from '../lib/lesionView'
+import { dueRows } from '../lib/lesionView'
 import {
   isNotifyOnOpenEnabled,
   notificationsSupported,
@@ -98,7 +98,8 @@ export default function Reminders() {
   }, [])
 
   const rows = useMemo(() => {
-    const built = buildRows(lesions, { intervalWeeks, today: todayYMD() })
+    // Bez znamion „Usunięte” - nie ma czego kontrolować ani o czym przypominać.
+    const built = dueRows(lesions, { intervalWeeks, today: todayYMD() })
     const mapped = built.map((row) => ({
       ...row,
       daysLeft: row.daysUntilNext,

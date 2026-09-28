@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   buildRows,
+  dueRows,
   filterByQuery,
   filterByStatus,
   sortRows,
@@ -232,5 +233,45 @@ describe('sortRowsByNext', () => {
     ]
 
     expect(sortRowsByNext(rows).map((r) => r.lesion.label)).toEqual(['a', 'b'])
+  })
+})
+
+describe('dueRows', () => {
+  const today = '2026-06-01'
+  const options = { intervalWeeks: 6, today }
+
+  it('pomija znamiona oznaczone jako „Usunięte”', () => {
+    const lesions = [
+      { id: 'a', status: 'stable', lesion_photos: [{ taken_at: '2026-01-05' }] },
+      { id: 'b', status: 'removed', lesion_photos: [{ taken_at: '2026-01-05' }] },
+    ]
+
+    const ids = dueRows(lesions, options).map((row) => row.lesion.id)
+
+    expect(ids).toEqual(['a'])
+  })
+
+  it('zostawia wszystkie pozostałe statusy', () => {
+    const lesions = [
+      { id: 'a', status: 'urgent', lesion_photos: [] },
+      { id: 'b', status: 'watch', lesion_photos: [] },
+      { id: 'c', status: 'new', lesion_photos: [] },
+      { id: 'd', status: 'stable', lesion_photos: [] },
+    ]
+
+    expect(dueRows(lesions, options)).toHaveLength(4)
+  })
+
+  it('liczy terminy tak samo jak buildRows', () => {
+    const lesions = [
+      { id: 'a', status: 'stable', lesion_photos: [{ taken_at: '2026-01-05' }] },
+    ]
+
+    expect(dueRows(lesions, options)).toEqual(buildRows(lesions, options))
+  })
+
+  it('brak danych nie wywala liczenia', () => {
+    expect(dueRows([], options)).toEqual([])
+    expect(dueRows(null, options)).toEqual([])
   })
 })
