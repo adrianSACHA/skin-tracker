@@ -1,7 +1,7 @@
 # 01 — Lista: filtry i sortowanie zajmują pół ekranu
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Map: .scratch/ux-inspekcja/map.md
 
 ## Problem (zgłoszony)
@@ -21,6 +21,13 @@ prawie pół ekranu, zanim zobaczymy same znamiona.
 
 ## Kryteria akceptacji
 
-- [ ] Domyślnie nad listą widać tylko przycisk "Filtry" + licznik/skrót.
-- [ ] Rozwinięcie pokazuje obecne kontrolki; filtry działają jak dziś (stan w URL).
-- [ ] "Wyczyść" działa; aktywny filtr jest oznaczony na przycisku.
+- [x] Domyślnie nad listą widać tylko przycisk "Filtry" + licznik/skrót.
+- [x] Rozwinięcie pokazuje obecne kontrolki; filtry działają jak dziś (stan w URL).
+- [x] "Wyczyść" działa; aktywny filtr jest oznaczony na przycisku.
+
+## Answer
+
+Zrealizowane w src/components/LesionsList.jsx: panel filtrów zwijany (stan
+showFilters, domyślnie zwinięty). Nad listą tylko przycisk "Filtry" (+ plakietka
+z liczbą aktywnych statusów) i skrót "N z M · wg terminu/pilności". W środku
+panel: pigułki statusu + "Wyczyść" oraz interwał i sortowanie.

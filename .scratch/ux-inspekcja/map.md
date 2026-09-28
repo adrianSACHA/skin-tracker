@@ -29,7 +29,7 @@ diagnozuje; chodzi o czytelność i mniej szumu, nie o nowe funkcje.
 
 | #  | Type | Tytuł | Blocked by | Status |
 | -- | ---- | ----- | ---------- | ------ |
-| 01 | task | [Lista: filtry i sortowanie zajmują pół ekranu](issues/01-lista-filtry.md) | — | ready-for-agent |
+| 01 | task | [Lista: filtry i sortowanie zajmują pół ekranu](issues/01-lista-filtry.md) | — | resolved |
 | 02 | task | [Lista: gęstość karty znamienia](issues/02-lista-karty.md) | — | ready-for-agent |
 | 03 | task | [Lista: wyszukiwanie po nazwie/okolicy](issues/03-lista-wyszukiwanie.md) | — | ready-for-agent |
 | 04 | task | [Kontrole: przeładowany rząd akcji na karcie](issues/04-kontrole-akcje.md) | — | ready-for-agent |
@@ -40,4 +40,5 @@ diagnozuje; chodzi o czytelność i mniej szumu, nie o nowe funkcje.
 
 ## Frontier
 
-Pierwszy: **01** (filtry na liście — zgłoszony przez użytkownika).
+Kolejne wg ustalonej kolejności: **04 + 05** (Kontrole), potem **06 + 08**
+(mapa/instalacja), na końcu **02 + 03 + 07**.

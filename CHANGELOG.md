@@ -31,6 +31,9 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 - **Przypomnienia in-app (wariant lekki)** — licznik zaległych/wkrótce kontroli
   przy „Kontrole" w nawigacji oraz opcjonalne powiadomienie przeglądarki przy
   otwarciu aplikacji (za zgodą, max raz dziennie). `.ics` do kalendarza zostaje.
+- **Lista znamion — zwijane filtry:** filtr po statusie, interwał i sortowanie
+  są domyślnie schowane pod przyciskiem „Filtry" (z licznikiem aktywnych
+  statusów); nad listą tylko zwięzły skrót.
 - **Panel „Przypomnienia na telefon" w Kontrolach** — pokazuje status
   (instalacja / zgoda / powiadomienia w tle) i akcje, żeby włączyć push; wyjaśnia,
   że bez tego działają tylko przypomnienia w kalendarzu.
