@@ -72,7 +72,7 @@ export function makeData() {
         next_check_at: null,
         created_at: '2026-02-01T00:00:00Z',
         lesion_photos: [
-          { taken_at: '2026-02-01', size_mm: 5.2, photo_url: null },
+          { taken_at: '2025-11-10', size_mm: 5.2, photo_url: null },
         ],
         body_maps: { view_name: 'back' },
       },

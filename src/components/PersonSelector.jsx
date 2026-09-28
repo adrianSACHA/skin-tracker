@@ -1,16 +1,73 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { supabase } from '../lib/supabase'
 import { removePersonFiles } from '../lib/uploadPhoto'
+import { formatDate } from '../lib/date'
+import { pluralPl, summarizePerson } from '../lib/summary'
 import { usePerson } from '../context/PersonContext'
 import OverflowMenu from './OverflowMenu'
 import ConfirmDialog from './ConfirmDialog'
+
+// Znamiona pogrupowane po osobie - jedno zapytanie obsługuje wszystkie karty.
+function groupByPerson(lesions) {
+  const map = {}
+  for (const lesion of lesions) {
+    if (!map[lesion.person_id]) map[lesion.person_id] = []
+    map[lesion.person_id].push(lesion)
+  }
+  return map
+}
+
+// Linia z liczbami na karcie osoby: znamiona, zdjęcia i najbliższa kontrola.
+// Gdy termin już minął, data na czerwono + plakietka „zaległe”.
+function PersonSummaryLine({ summary }) {
+  if (!summary) return null
+
+  if (summary.lesionCount === 0) {
+    return (
+      <span className="mt-1 block text-sm text-slate-500 dark:text-slate-400">
+        Brak znamion
+      </span>
+    )
+  }
+
+  return (
+    <span className="mt-1 block text-sm text-slate-600 dark:text-slate-300">
+      {summary.lesionCount}{' '}
+      {pluralPl(summary.lesionCount, 'znamię', 'znamiona', 'znamion')}
+      {' · '}
+      {summary.photoCount}{' '}
+      {pluralPl(summary.photoCount, 'zdjęcie', 'zdjęcia', 'zdjęć')}
+      {summary.next ? (
+        <>
+          {' · kontrola '}
+          <strong
+            className={
+              summary.overdue
+                ? 'text-red-700 dark:text-red-300'
+                : 'text-slate-700 dark:text-slate-200'
+            }
+          >
+            {formatDate(summary.next)}
+          </strong>
+          {' '}
+          {summary.overdue ? (
+            <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-700 dark:bg-red-950 dark:text-red-300">
+              zaległe
+            </span>
+          ) : null}
+        </>
+      ) : null}
+    </span>
+  )
+}
 
 // Ekran wyboru osoby ("Ja" / "Syn"). Syn nie ma własnego konta —
 // jest osobą zarządzaną przez moje konto.
 export default function PersonSelector() {
   const [persons, setPersons] = useState([])
+  const [lesionsByPerson, setLesionsByPerson] = useState({})
   const [loading, setLoading] = useState(true)
   const [newName, setNewName] = useState('')
   const [error, setError] = useState(null)
@@ -25,19 +82,42 @@ export default function PersonSelector() {
 
   const load = async () => {
     setLoading(true)
-    const { data, error: loadError } = await supabase
-      .from('monitored_persons')
-      .select('*')
-      .order('created_at', { ascending: true })
+    setError(null)
 
-    if (loadError) setError(loadError.message)
-    else setPersons(data || [])
+    const [personsRes, lesionsRes] = await Promise.all([
+      supabase
+        .from('monitored_persons')
+        .select('*')
+        .order('created_at', { ascending: true }),
+      // Jedno zapytanie na wszystkie osoby - karta pokazuje liczby i termin.
+      supabase
+        .from('lesions')
+        .select('id, person_id, next_check_at, lesion_photos(taken_at)'),
+    ])
+
+    if (personsRes.error) setError(personsRes.error.message)
+    else setPersons(personsRes.data || [])
+
+    // Brak znamion (albo błąd odczytu) nie może psuć ekranu - karta pokaże 0.
+    setLesionsByPerson(groupByPerson(lesionsRes.data || []))
+
     setLoading(false)
   }
 
   useEffect(() => {
     load()
   }, [])
+
+  // Liczby + najbliższy termin dla każdej karty (liczone raz, nie w renderze).
+  const summaries = useMemo(() => {
+    const out = {}
+    for (const person of persons) {
+      out[person.id] = summarizePerson(lesionsByPerson[person.id] || [], {
+        intervalWeeks: person.interval_weeks,
+      })
+    }
+    return out
+  }, [persons, lesionsByPerson])
 
   const handleAdd = async (e) => {
     e.preventDefault()
@@ -202,6 +282,7 @@ export default function PersonSelector() {
                   <span className="block text-lg font-semibold text-slate-800 dark:text-slate-100">
                     {person.display_name}
                   </span>
+                  <PersonSummaryLine summary={summaries[person.id]} />
                   <span className="mt-1 block text-sm text-teal-700 dark:text-teal-300">
                     Otwórz mapę ciała →
                   </span>

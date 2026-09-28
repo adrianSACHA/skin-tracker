@@ -10,6 +10,15 @@ test.describe('Osoby', () => {
     await expect(page.getByText('Ja', { exact: true })).toBeVisible()
     await expect(page.getByText('Syn', { exact: true })).toBeVisible()
 
+    // Karta pokazuje liczby i najbliższy termin, liczone tą samą logiką co
+    // Kontrole (2 znamiona, 1 zdjęcie; 2025-11-10 + 6 tyg. = 22.12.2025).
+    await expect(page.getByText('2 znamiona · 1 zdjęcie')).toBeVisible()
+    await expect(page.getByText('kontrola 22.12.2025')).toBeVisible()
+    await expect(page.getByText('zaległe')).toBeVisible()
+
+    // Osoba bez znamion zamiast liczb dostaje wprost informację.
+    await expect(page.getByText('Brak znamion')).toBeVisible()
+
     await openPerson(page, 'Syn')
 
     // HashRouter: adres trzyma id osoby, więc odświeżenie nie gubi kontekstu.
@@ -31,6 +40,8 @@ test.describe('Osoby', () => {
 
     await expect(page.getByText('Mama', { exact: true })).toBeVisible()
     await expect(page.getByText('Brak osób', { exact: false })).toHaveCount(0)
+    // Świeża osoba nie ma jeszcze znamion.
+    await expect(page.getByText('Brak znamion')).toBeVisible()
   })
 
   test('zmiana nazwy osoby z menu „⋯”', async ({ page }) => {

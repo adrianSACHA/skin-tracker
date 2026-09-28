@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { DEFAULT_INTERVAL_WEEKS } from './settings'
 
 const STORAGE_KEY = 'skin-tracker:interval-weeks'
 
-// Domyślny interwał kontroli w tygodniach.
-export const DEFAULT_INTERVAL_WEEKS = 6
+// Domyślny interwał kontroli w tygodniach mieszka w `settings.js` (czystym,
+// bez Supabase i Reacta), żeby mogły go używać także moduły w pełni
+// testowalne. Re-eksport, żeby dotychczasowe importy działały.
+export { DEFAULT_INTERVAL_WEEKS }
 
 // Interwał trzymamy lokalnie (szybko, per urządzenie) ORAZ synchronizujemy do
 // `monitored_persons.interval_weeks` — dzięki temu nadawca przypomnień Web Push
