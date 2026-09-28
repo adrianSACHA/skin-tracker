@@ -45,6 +45,7 @@ Dostarczać przypomnienia o kontrolach znamion **w tle** (nie tylko plikiem
 | 01 | research | [Jak dostarczać przypomnienia w tle bez własnego serwera](issues/01-research-scheduling.md) | — | resolved |
 | 02 | grilling | [Zakres: pełny Web Push vs wariant lekki](issues/02-grilling-zakres.md) | 01 | resolved |
 | 03 | task | [Web Push przez GitHub Actions (bez płatnych funkcji)](issues/03-task-web-push-actions.md) | 02 | resolved |
+| 04 | task | [Onboarding przypomnień w Kontrolach](issues/04-task-onboarding-kontrole.md) | 03 | resolved |
 
 ## Frontier
 

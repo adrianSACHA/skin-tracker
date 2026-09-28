@@ -31,7 +31,7 @@ osób („Ja", „Syn").
 | **Mapa ciała** | widoki ze słownika 17 okolic + własne nazwy; piny (dodaj / przesuń / edytuj); zdjęcie tła per widok (aparat lub plik); kontekst okolicy w nazwie znamienia; panel pina jako bottom sheet na telefonie |
 | **Znamię** | zdjęcia z edycją (obrót / odbicia) i kompresją; pomiar z obrysu (MediaPipe, geometria); notatki ABCDE; status; porównanie przeciąganym suwakiem; wykres rozmiaru; powiększanie zdjęć (lightbox) |
 | **Lista znamion** | filtr po statusie + sortowanie po terminie kontroli; stan w URL |
-| **Kontrole** | terminy, przesuwanie, ustawienia; **3 poziomy przypomnień**: `.ics` (kalendarz), in‑app (licznik + powiadomienie przy otwarciu), **Web Push w tle** |
+| **Kontrole** | terminy, przesuwanie, ustawienia; panel „Przypomnienia na telefon" (instalacja + zgoda + push ze statusem); **3 poziomy przypomnień**: `.ics`, in‑app, **Web Push w tle** |
 | **PWA** | manifest + ikony, przycisk **„Zainstaluj"** (Android: prompt; iOS: instrukcja), service worker (obsługa push) |
 
 ## Automatyzacja (GitHub)
@@ -56,6 +56,9 @@ osób („Ja", „Syn").
 
 ## Otwarte / do rozważenia
 
+- **Lista znamion — uproszczenie UX** („za dużo się dzieje"): schowanie filtra/
+  sortowania pod „Filtry" albo skrócenie kontrolek. Effort `lista-znamion-ux`
+  (ticket 01, `needs-info` — czeka na doprecyzowanie).
 - Wyszukiwanie znamion po nazwie (na liście).
 - Web Push dla wielu urządzeń (deduplikacja subskrypcji).
 - Dalsze drobiazgi UX (przegląd pozostałych widoków na telefonie).

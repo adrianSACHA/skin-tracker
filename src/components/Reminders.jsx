@@ -22,6 +22,7 @@ import {
   getPushSubscription,
   pushConfigured,
 } from '../lib/push'
+import { isStandalone, useInstallPrompt } from '../lib/install'
 import StatusBadge from './StatusBadge'
 import LesionName from './LesionName'
 import CalendarReminderButton from './CalendarReminderButton'
@@ -79,6 +80,11 @@ export default function Reminders() {
     isNotifyOnOpenEnabled()
   )
   const [pushOn, setPushOn] = useState(false)
+  const [installed] = useState(() => isStandalone())
+  const [permGranted, setPermGranted] = useState(
+    () => notificationsSupported() && Notification.permission === 'granted'
+  )
+  const { canInstall, promptInstall } = useInstallPrompt()
 
   const load = async () => {
     setLoading(true)
@@ -187,8 +193,7 @@ export default function Reminders() {
     toast.success('Włączono powiadomienie przy otwarciu')
   }
 
-  const togglePush = async (e) => {
-    const on = e.target.checked
+  const applyPush = async (on) => {
     if (!on) {
       setPushOn(false)
       await disablePush()
@@ -208,6 +213,7 @@ export default function Reminders() {
       return
     }
     setPushOn(true)
+    setPermGranted(true)
     toast.success('Włączono powiadomienia w tle')
   }
 
@@ -269,6 +275,99 @@ export default function Reminders() {
           Kiedy zaplanować kolejną kontrolę każdego znamienia i co wysłać do
           kalendarza.
         </p>
+      </div>
+
+      {/* Onboarding: co zrobić, aby dostawać przypomnienia na telefon */}
+      <div className="space-y-3 rounded-xl border border-teal-200 bg-teal-50/60 p-4 text-sm dark:border-teal-800 dark:bg-teal-950/20">
+        <div>
+          <h2 className="font-semibold text-teal-900 dark:text-teal-100">
+            Przypomnienia na telefon
+          </h2>
+          <p className="mt-1 text-teal-800/80 dark:text-teal-200/80">
+            Aby dostawać powiadomienia w tle (nawet gdy aplikacja jest zamknięta),
+            spełnij wszystkie trzy warunki. Bez nich zadziałają tylko
+            przypomnienia zapisane w kalendarzu („Do kalendarza").
+          </p>
+        </div>
+
+        <ul className="space-y-2">
+          <li className="flex flex-wrap items-center gap-2">
+            <span
+              aria-hidden="true"
+              className={
+                installed
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-slate-400 dark:text-slate-500'
+              }
+            >
+              {installed ? '✓' : '○'}
+            </span>
+            <span className="flex-1 text-teal-900 dark:text-teal-100">
+              Aplikacja zainstalowana na telefonie
+            </span>
+            {!installed && canInstall ? (
+              <button
+                type="button"
+                onClick={promptInstall}
+                className="min-h-[44px] rounded-lg border border-teal-300 bg-white px-3 font-medium text-teal-800 transition-colors hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-teal-700 dark:bg-slate-900 dark:text-teal-200 dark:hover:bg-teal-950/40"
+              >
+                Zainstaluj
+              </button>
+            ) : null}
+          </li>
+
+          <li className="flex flex-wrap items-center gap-2">
+            <span
+              aria-hidden="true"
+              className={
+                permGranted
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-slate-400 dark:text-slate-500'
+              }
+            >
+              {permGranted ? '✓' : '○'}
+            </span>
+            <span className="flex-1 text-teal-900 dark:text-teal-100">
+              Zgoda na powiadomienia w przeglądarce
+            </span>
+          </li>
+
+          <li className="flex flex-wrap items-center gap-2">
+            <span
+              aria-hidden="true"
+              className={
+                pushOn
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-slate-400 dark:text-slate-500'
+              }
+            >
+              {pushOn ? '✓' : '○'}
+            </span>
+            <span className="flex-1 text-teal-900 dark:text-teal-100">
+              Powiadomienia w tle włączone
+            </span>
+            {pushConfigured() ? (
+              <button
+                type="button"
+                onClick={() => applyPush(!pushOn)}
+                className="min-h-[44px] rounded-lg bg-teal-700 px-3 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500"
+              >
+                {pushOn ? 'Wyłącz' : 'Włącz'}
+              </button>
+            ) : null}
+          </li>
+        </ul>
+
+        {!pushConfigured() ? (
+          <p className="text-teal-800/80 dark:text-teal-200/80">
+            Ten build nie ma skonfigurowanych powiadomień w tle (brak klucza
+            VAPID).
+          </p>
+        ) : installed && permGranted && pushOn ? (
+          <p className="font-medium text-teal-900 dark:text-teal-100">
+            Wszystko gotowe — przypomnienia będą przychodzić same.
+          </p>
+        ) : null}
       </div>
 
       {error ? (
@@ -462,17 +561,6 @@ export default function Reminders() {
           </label>
         ) : null}
 
-        {pushConfigured() ? (
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={pushOn}
-              onChange={togglePush}
-              className="h-5 w-5 rounded border-slate-300 text-teal-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-600 dark:bg-slate-800"
-            />
-            <span>Powiadomienia w tle (gdy aplikacja zamknięta)</span>
-          </label>
-        ) : null}
       </div>
 
       <p className="text-xs text-slate-500 dark:text-slate-400">

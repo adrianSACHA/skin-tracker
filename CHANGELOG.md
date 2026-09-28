@@ -31,6 +31,9 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 - **Przypomnienia in-app (wariant lekki)** — licznik zaległych/wkrótce kontroli
   przy „Kontrole" w nawigacji oraz opcjonalne powiadomienie przeglądarki przy
   otwarciu aplikacji (za zgodą, max raz dziennie). `.ics` do kalendarza zostaje.
+- **Panel „Przypomnienia na telefon" w Kontrolach** — pokazuje status
+  (instalacja / zgoda / powiadomienia w tle) i akcje, żeby włączyć push; wyjaśnia,
+  że bez tego działają tylko przypomnienia w kalendarzu.
 - **Przycisk „Zainstaluj" (PWA)** — dodanie aplikacji do ekranu początkowego
   w każdej chwili (przechwycony `beforeinstallprompt`, przycisk w nagłówku);
   ukryty, gdy aplikacja jest już zainstalowana. Service worker dostał handler
