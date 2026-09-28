@@ -30,15 +30,14 @@ diagnozuje; chodzi o czytelność i mniej szumu, nie o nowe funkcje.
 | #  | Type | Tytuł | Blocked by | Status |
 | -- | ---- | ----- | ---------- | ------ |
 | 01 | task | [Lista: filtry i sortowanie zajmują pół ekranu](issues/01-lista-filtry.md) | — | resolved |
-| 02 | task | [Lista: gęstość karty znamienia](issues/02-lista-karty.md) | — | ready-for-agent |
-| 03 | task | [Lista: wyszukiwanie po nazwie/okolicy](issues/03-lista-wyszukiwanie.md) | — | ready-for-agent |
+| 02 | task | [Lista: gęstość karty znamienia](issues/02-lista-karty.md) | — | resolved |
+| 03 | task | [Lista: wyszukiwanie po nazwie/okolicy](issues/03-lista-wyszukiwanie.md) | — | resolved |
 | 04 | task | [Kontrole: przeładowany rząd akcji na karcie](issues/04-kontrole-akcje.md) | — | resolved |
 | 05 | task | [Kontrole: panel "Przypomnienia na telefon" zwijany](issues/05-kontrole-panel.md) | — | resolved |
 | 06 | task | [Mapa ciała: legenda statusów zajmuje miejsce](issues/06-mapa-legenda.md) | — | resolved |
-| 07 | task | [Szczegóły znamienia: długi widok bez nawigacji](issues/07-detail-nawigacja.md) | — | ready-for-agent |
+| 07 | task | [Szczegóły znamienia: długi widok bez nawigacji](issues/07-detail-nawigacja.md) | — | resolved |
 | 08 | task | [Nagłówek: tłoczno na telefonie](issues/08-naglowek.md) | — | resolved |
 
 ## Frontier
 
-Zostały: **02 + 03 + 07** (lista: karty, wyszukiwanie; szczegóły znamienia).
-Zrobione: 01, 04, 05, 06, 08.
+Brak — wszystkie 8 ticketów **resolved**. Effort domknięty.

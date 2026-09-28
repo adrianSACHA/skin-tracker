@@ -34,4 +34,5 @@ stan w URL — patrz `lesion-list-filters`).
 
 ## Frontier
 
-**01** — czeka na doprecyzowanie (co konkretnie „za dużo").
+Brak — zrealizowane w efforcie **ux-inspekcja** (tickety 01/02/03: zwijane
+filtry, kondensacja kart, wyszukiwanie). Ten effort zamknięty jako nadmiarowy.

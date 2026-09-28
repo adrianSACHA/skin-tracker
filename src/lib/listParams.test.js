@@ -5,6 +5,7 @@ describe('readListParams', () => {
   it('brak parametrów = brak filtra i domyślne sortowanie', () => {
     expect(readListParams(new URLSearchParams(''))).toEqual({
       statuses: [],
+      q: '',
       sort: DEFAULT_SORT,
     })
   })
@@ -29,6 +30,10 @@ describe('readListParams', () => {
       readListParams(new URLSearchParams('sort=status')).sort
     ).toBe('status')
   })
+
+  it('czyta wyszukiwanie (q)', () => {
+    expect(readListParams(new URLSearchParams('q=tył')).q).toBe('tył')
+  })
 })
 
 describe('buildListParams', () => {
@@ -51,5 +56,12 @@ describe('buildListParams', () => {
     expect(
       buildListParams({ statuses: ['new'], sort: DEFAULT_SORT }).get('sort')
     ).toBe(null)
+  })
+
+  it('zapisuje wyszukiwanie (q), puste pomija', () => {
+    expect(buildListParams({ statuses: [], q: 'łopatka' }).get('q')).toBe(
+      'łopatka'
+    )
+    expect(buildListParams({ statuses: [], q: '   ' }).get('q')).toBe(null)
   })
 })

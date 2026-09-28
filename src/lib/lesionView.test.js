@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   buildRows,
+  filterByQuery,
   filterByStatus,
   sortRows,
   sortRowsByNext,
@@ -112,6 +113,31 @@ describe('filterByStatus', () => {
     expect(
       filterByStatus(rows, ['watch', 'urgent']).map((r) => r.lesion.status)
     ).toEqual(['watch', 'urgent'])
+  })
+})
+
+describe('filterByQuery', () => {
+  const rows = [
+    { lesion: { label: 'Tył-1', body_maps: { view_name: 'back' } } },
+    { lesion: { label: 'znamię przy łopatce', body_maps: { view_name: 'back' } } },
+    { lesion: { label: 'Kark-2', body_maps: { view_name: 'kark' } } },
+  ]
+
+  it('puste zapytanie = brak filtra', () => {
+    expect(filterByQuery(rows, '')).toHaveLength(3)
+    expect(filterByQuery(rows, '   ')).toHaveLength(3)
+  })
+
+  it('dopasowuje po nazwie (bez wielkości liter)', () => {
+    expect(filterByQuery(rows, 'łopatce').map((r) => r.lesion.label)).toEqual([
+      'znamię przy łopatce',
+    ])
+  })
+
+  it('dopasowuje po okolicy (etykieta ze słownika)', () => {
+    expect(filterByQuery(rows, 'kark').map((r) => r.lesion.label)).toEqual([
+      'Kark-2',
+    ])
   })
 })
 

@@ -534,55 +534,6 @@ export default function LesionDetail() {
             </section>
           ) : null}
 
-          {/* Wykres rozmiaru */}
-          {sizeData.length >= 2 ? (
-            <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-              <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">
-                Trend rozmiaru (mm)
-              </h2>
-              <div className="h-56 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={sizeData}
-                    margin={{ top: 8, right: 16, bottom: 8, left: -16 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
-                    <XAxis
-                      dataKey="date"
-                      tick={{ fontSize: 11, fill: tickFill }}
-                      minTickGap={16}
-                      interval="preserveStartEnd"
-                    />
-                    <YAxis
-                      tick={{ fontSize: 11, fill: tickFill }}
-                      width={40}
-                      unit="mm"
-                    />
-                    <Tooltip contentStyle={tooltipStyle} />
-                    <Line
-                      type="monotone"
-                      dataKey="size"
-                      stroke={lineStroke}
-                      strokeWidth={2}
-                      dot={{ r: 4 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-              {sizeSummary ? (
-                <>
-                  <p className="text-sm text-slate-600 dark:text-slate-300">
-                    {sizeSummary}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    To tylko odczyt zapisanych pomiarów. Zmiany rozmiaru oceniaj
-                    z lekarzem.
-                  </p>
-                </>
-              ) : null}
-            </section>
-          ) : null}
-
           {/* Oś czasu zdjęć + ABCDE */}
           <section className="space-y-3">
             <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">
@@ -647,6 +598,55 @@ export default function LesionDetail() {
               ))}
             </ol>
           </section>
+          {/* Wykres rozmiaru */}
+          {sizeData.length >= 2 ? (
+            <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+              <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">
+                Trend rozmiaru (mm)
+              </h2>
+              <div className="h-56 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={sizeData}
+                    margin={{ top: 8, right: 16, bottom: 8, left: -16 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 11, fill: tickFill }}
+                      minTickGap={16}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: tickFill }}
+                      width={40}
+                      unit="mm"
+                    />
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Line
+                      type="monotone"
+                      dataKey="size"
+                      stroke={lineStroke}
+                      strokeWidth={2}
+                      dot={{ r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              {sizeSummary ? (
+                <>
+                  <p className="text-sm text-slate-600 dark:text-slate-300">
+                    {sizeSummary}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    To tylko odczyt zapisanych pomiarów. Zmiany rozmiaru oceniaj
+                    z lekarzem.
+                  </p>
+                </>
+              ) : null}
+            </section>
+          ) : null}
+
         </>
       )}
 

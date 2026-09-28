@@ -1,7 +1,7 @@
 # 01 — Uproszczenie kontrolek i gęstości listy
 
 Type: task
-Status: needs-info
+Status: resolved
 Map: .scratch/lista-znamion-ux/map.md
 
 ## Kontekst

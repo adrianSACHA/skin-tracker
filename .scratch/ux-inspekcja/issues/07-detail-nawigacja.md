@@ -1,7 +1,7 @@
 # 07 — Szczegóły znamienia: długi widok bez nawigacji
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Map: .scratch/ux-inspekcja/map.md
 
 ## Problem
@@ -25,7 +25,13 @@ najłatwiej dostępne. Trend i historia są drugorzędne.
 
 ## Kryteria akceptacji
 
-- [ ] Dodanie/obejrzenie zdjęć i porównanie są dostępne od razu, bez długiego
+- [x] Dodanie/obejrzenie zdjęć i porównanie są dostępne od razu, bez długiego
       przewijania.
-- [ ] Trend, historia i zarządzanie nadal dostępne (niżej / zwijane).
-- [ ] Bez utraty funkcji i bez zmian backendu.
+- [x] Trend, historia i zarządzanie nadal dostępne (niżej / zwijane).
+- [x] Bez utraty funkcji i bez zmian backendu.
+
+## Answer
+
+Zrealizowane w LesionDetail.jsx: kolejność sekcji zmieniona na Porównanie ->
+Zdjęcia (historia) -> Trend -> Zarządzanie, więc najczęściej używane (zdjęcia,
+porównanie) są od razu u góry.

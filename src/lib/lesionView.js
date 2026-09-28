@@ -3,6 +3,7 @@
 // Współdzielony przez `LesionsList` i `Reminders` (usuwa duplikat `lastPhotoDate`).
 import { addWeeksYMD, daysBetween, todayYMD } from './date'
 import { STATUS_PRIORITY } from './status'
+import { areaLabel } from './bodyAreas'
 
 // Wiersze widoku dla listy znamion. `today` podawane jawnie, by wynik był
 // deterministyczny i testowalny.
@@ -30,6 +31,18 @@ export function filterByStatus(rows, statuses = []) {
   if (!statuses || statuses.length === 0) return rows
   const allowed = new Set(statuses)
   return rows.filter((row) => allowed.has(row.lesion.status))
+}
+
+// Filtr tekstowy: dopasuj do nazwy znamienia albo okolicy (bez wielkości liter).
+export function filterByQuery(rows, query) {
+  const q = String(query || '').trim().toLowerCase()
+  if (!q) return rows
+  return (rows || []).filter((row) => {
+    const view = row.lesion?.body_maps?.view_name
+    const label = String(row.lesion?.label || '').toLowerCase()
+    const area = String(areaLabel(view) || '').toLowerCase()
+    return label.includes(q) || area.includes(q)
+  })
 }
 
 // Kolejność listy: najpierw pilność statusu, potem dawniej kontrolowane na górze.

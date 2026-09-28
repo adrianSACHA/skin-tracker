@@ -17,15 +17,17 @@ export function readListParams(searchParams) {
   const rawSort = searchParams.get('sort')
   return {
     statuses,
+    q: (searchParams.get('q') || '').trim(),
     sort: SORTS.includes(rawSort) ? rawSort : DEFAULT_SORT,
   }
 }
 
 // Buduje parametry URL z aktualnego stanu; wartości domyślne pomija,
 // żeby adres zostawał czysty.
-export function buildListParams({ statuses, sort }) {
+export function buildListParams({ statuses, sort, q }) {
   const params = new URLSearchParams()
   if (statuses && statuses.length > 0) params.set('status', statuses.join(','))
+  if (q && q.trim()) params.set('q', q.trim())
   if (sort && sort !== DEFAULT_SORT) params.set('sort', sort)
   return params
 }

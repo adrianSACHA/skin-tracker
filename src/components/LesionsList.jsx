@@ -5,6 +5,7 @@ import { formatDate, todayYMD } from '../lib/date'
 import { useIntervalWeeks } from '../lib/interval'
 import {
   buildRows,
+  filterByQuery,
   filterByStatus,
   sortRows,
   sortRowsByNext,
@@ -22,9 +23,12 @@ export default function LesionsList() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [intervalWeeks, setIntervalWeeks] = useIntervalWeeks(personId)
   const [showFilters, setShowFilters] = useState(false)
+  const [searchInput, setSearchInput] = useState(
+    () => (searchParams.get('q') || '').trim()
+  )
 
   // Filtr i sortowanie żyją w URL (HashRouter) - przetrwają odświeżenie i powrót.
-  const { statuses: selectedStatuses, sort: sortBy } = useMemo(
+  const { statuses: selectedStatuses, q: query, sort: sortBy } = useMemo(
     () => readListParams(searchParams),
     [searchParams]
   )
@@ -49,27 +53,42 @@ export default function LesionsList() {
 
   const { rows, total } = useMemo(() => {
     const built = buildRows(lesions, { intervalWeeks, today: todayYMD() })
-    const filtered = filterByStatus(built, selectedStatuses)
+    const filtered = filterByQuery(
+      filterByStatus(built, selectedStatuses),
+      query
+    )
     const sorted =
       sortBy === 'status' ? sortRows(filtered) : sortRowsByNext(filtered)
     return { rows: sorted, total: built.length }
-  }, [lesions, selectedStatuses, sortBy, intervalWeeks])
+  }, [lesions, selectedStatuses, sortBy, intervalWeeks, query])
 
-  const setListParams = ({ statuses, sort }) => {
-    setSearchParams(buildListParams({ statuses, sort }), { replace: true })
+  // Synchronizacja pola z URL (np. wstecz/dalej) bez nadpisywania w trakcie
+  // pisania (porównujemy po przycięciu).
+  useEffect(() => {
+    setSearchInput((prev) => (prev.trim() === query ? prev : query))
+  }, [query])
+
+  const setListParams = ({ statuses, sort, q }) => {
+    setSearchParams(buildListParams({ statuses, sort, q }), { replace: true })
   }
 
   const toggleStatus = (status) => {
     const statuses = selectedStatuses.includes(status)
       ? selectedStatuses.filter((s) => s !== status)
       : [...selectedStatuses, status]
-    setListParams({ statuses, sort: sortBy })
+    setListParams({ statuses, sort: sortBy, q: query })
   }
 
-  const clearStatuses = () => setListParams({ statuses: [], sort: sortBy })
+  const clearStatuses = () =>
+    setListParams({ statuses: [], sort: sortBy, q: query })
 
   const changeSort = (value) =>
-    setListParams({ statuses: selectedStatuses, sort: value })
+    setListParams({ statuses: selectedStatuses, sort: value, q: query })
+
+  const changeQuery = (value) => {
+    setSearchInput(value)
+    setListParams({ statuses: selectedStatuses, sort: sortBy, q: value })
+  }
 
   return (
     <div className="space-y-4">
@@ -100,7 +119,15 @@ export default function LesionsList() {
 
       {/* Filtry (zwijane) — domyślnie schowane, żeby nie zajmowały pół ekranu */}
       <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(e) => changeQuery(e.target.value)}
+            placeholder="Szukaj po nazwie lub okolicy…"
+            aria-label="Szukaj znamion"
+            className="min-h-[44px] min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+          />
           <button
             type="button"
             onClick={() => setShowFilters((v) => !v)}
@@ -117,11 +144,11 @@ export default function LesionsList() {
               {showFilters ? '▴' : '▾'}
             </span>
           </button>
-          <span className="text-slate-500 dark:text-slate-400">
-            {rows.length} z {total} ·{' '}
-            {sortBy === 'status' ? 'wg pilności' : 'wg terminu'}
-          </span>
         </div>
+        <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
+          {rows.length} z {total} ·{' '}
+          {sortBy === 'status' ? 'wg pilności' : 'wg terminu'}
+        </span>
 
         {showFilters ? (
           <div className="mt-3 space-y-3">
@@ -216,54 +243,39 @@ export default function LesionsList() {
         <ul className="space-y-3">
           {rows.map(({ lesion, last, next, overdue }) => {
             return (
-              <li
-                key={lesion.id}
-                className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div>
-                    <Link
-                      to={`/person/${personId}/lesion/${lesion.id}`}
-                      state={{ from: 'list' }}
-                      className="text-base font-semibold text-slate-800 hover:text-teal-700 hover:underline dark:text-slate-100 dark:hover:text-teal-300"
-                    >
+              <li key={lesion.id}>
+                <Link
+                  to={`/person/${personId}/lesion/${lesion.id}`}
+                  state={{ from: 'list' }}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 transition-colors hover:border-teal-300 hover:bg-teal-50/40 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-teal-700 dark:hover:bg-teal-950/20"
+                >
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-base font-semibold text-slate-800 dark:text-slate-100">
                       <LesionName
                         label={lesion.label}
                         viewName={lesion.body_maps?.view_name}
                         areaClassName="font-normal text-slate-400 dark:text-slate-500"
                       />
-                    </Link>
-                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                      <StatusBadge status={lesion.status} />
-                      <span className="text-sm text-slate-500 dark:text-slate-400">
-                        Ostatnie zdjęcie: {formatDate(last)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-sm text-slate-600 dark:text-slate-300">
-                  Sugerowana następna kontrola:{' '}
-                  <strong
-                    className={
-                      overdue
-                        ? 'text-red-700 dark:text-red-300'
-                        : 'text-slate-800 dark:text-slate-100'
-                    }
-                  >
-                    {formatDate(next)}
-                  </strong>
-                  {overdue ? (
-                    <span className="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-700 dark:bg-red-950 dark:text-red-300">
-                      zaległe
                     </span>
-                  ) : null}
-                </div>
-
-                <Link
-                  to={`/person/${personId}/reminders`}
-                  className="self-start text-sm font-medium text-teal-700 hover:underline dark:text-teal-300"
-                >
-                  Zobacz kontrolę →
+                    <span className="mt-0.5 block text-sm text-slate-500 dark:text-slate-400">
+                      Kontrola:{' '}
+                      <strong
+                        className={
+                          overdue
+                            ? 'text-red-700 dark:text-red-300'
+                            : 'text-slate-700 dark:text-slate-200'
+                        }
+                      >
+                        {formatDate(next)}
+                      </strong>
+                      {overdue ? (
+                        <span className="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-700 dark:bg-red-950 dark:text-red-300">
+                          zaległe
+                        </span>
+                      ) : null}
+                    </span>
+                  </span>
+                  <StatusBadge status={lesion.status} />
                 </Link>
               </li>
             )
