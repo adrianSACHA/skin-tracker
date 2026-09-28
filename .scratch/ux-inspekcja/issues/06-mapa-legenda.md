@@ -1,7 +1,7 @@
 # 06 — Mapa ciała: legenda statusów zajmuje miejsce
 
 Type: task
-Status: needs-triage
+Status: ready-for-agent
 Map: .scratch/ux-inspekcja/map.md
 
 ## Problem
@@ -9,12 +9,20 @@ Map: .scratch/ux-inspekcja/map.md
 Legenda 5 statusów jest zawsze widoczna pod mapą. Na telefonie zabiera miejsce,
 a statusy są też widoczne przy pinach i w panelu pina.
 
-## Propozycja (do decyzji)
+## Decyzja (od użytkownika)
 
-- Schować legendę za przyciskiem "?"/info (popover) albo do panelu pina.
-- Ewentualnie pokazywać tylko na większych ekranach (desktop).
+Legenda jest **potrzebna** — bez niej nie wiadomo, co oznacza dany kolor.
 
-## Czego potrzebuję (needs-triage)
+## Propozycja
 
-- Czy legenda w ogóle jest potrzebna, czy wystarczy kolor przy pinie + etykieta
-  w panelu?
+- Zamiast stale widocznej legendy: **przycisk „Kolory statusów"** (z ikoną „?")
+  obok mapy, który **rozwija** legendę w miejscu (popover / pasek). Domyślnie
+  zwinięty na telefonie; na większych ekranach może być widoczny od razu.
+- Kolorowe kropki przy pinach i etykieta statusu w panelu pina zostają (kontekst
+  na bieżąco).
+
+## Kryteria akceptacji
+
+- [ ] Legenda dostępna jednym kliknięciem (nie znika na stałe).
+- [ ] Domyślnie nie zajmuje miejsca na telefonie.
+- [ ] Na desktopie może być widoczna od razu.

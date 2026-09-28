@@ -1,7 +1,7 @@
 # 08 — Nagłówek: tłoczno na telefonie
 
 Type: task
-Status: needs-triage
+Status: ready-for-agent
 Map: .scratch/ux-inspekcja/map.md
 
 ## Problem
@@ -9,12 +9,26 @@ Map: .scratch/ux-inspekcja/map.md
 Na wąskim ekranie w nagłówku: logo + "Zainstaluj" + przełącznik motywu +
 "Wyloguj" (+ "Osoba:"). Zawija się i zajmuje miejsce.
 
-## Propozycja (do decyzji)
+## Decyzja (od użytkownika)
 
-- Schować "Zainstaluj"/"Wyloguj" pod menu użytkownika (np. "⋯" lub awatar).
-- Zostawić logo + motyw + menu.
+„Zainstaluj" ma się pokazywać **dopóki aplikacja nie jest zainstalowana**, lub
+**przypominać co jakiś czas**. Ważne: musi być jasna informacja, że **bez
+instalacji nie ma powiadomień w tle** (zostają tylko te w kalendarzu).
 
-## Czego potrzebuję (needs-triage)
+## Propozycja
 
-- Czy "Zainstaluj" ma być dostępne wszędzie, czy wystarczy w Kontrolach /
-  raz po wejściu?
+- Przycisk **„Zainstaluj"** w nagłówku widoczny, gdy aplikacja nie jest
+  zainstalowana i da się ją zainstalować (już działa; gdy przeglądarka nie
+  wystawia promptu, pokazuje instrukcję — szczególnie iOS).
+- **Przypominacz**: delikatny baner co jakiś czas (np. raz na 7 dni; data
+  ostatniego pokazania w localStorage) gdy aplikacja nie jest zainstalowana —
+  z przyciskiem „Zainstaluj" i informacją, że bez instalacji nie ma powiadomień
+  w tle. Można zamknąć.
+- Informacja o braku powiadomień bez instalacji również w panelu Kontroli
+  (ticket 05).
+
+## Kryteria akceptacji
+
+- [ ] „Zainstaluj" widoczne, dopóki aplikacja nie jest zainstalowana.
+- [ ] Baner przypomina okresowo (nie częściej niż raz na N dni) i da się zamknąć.
+- [ ] Komunikat wprost łączy brak instalacji z brakiem powiadomień w tle.
