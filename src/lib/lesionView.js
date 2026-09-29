@@ -1,11 +1,13 @@
 // Czysty model widoku listy znamion - bez JSX i bez I/O, więc łatwy do testów.
+// Importowany też przez skrypt Node (`send-reminders.mjs`) — dlatego importy
+// mają jawne rozszerzenia `.js` (Node ich nie zgaduje, Vite nie wymaga).
 // Publiczny szew: `buildRows` (lista znamion), `dueRows` (tylko terminy
 // kontroli), `filterByStatus`, `sortRows`, `sortRowsByNext`.
 // Współdzielony przez `LesionsList`, `Reminders` i `summary` (usuwa duplikat
 // `lastPhotoDate`).
-import { addWeeksYMD, daysBetween, todayYMD } from './date'
-import { STATUS_PRIORITY } from './status'
-import { areaLabel } from './bodyAreas'
+import { addWeeksYMD, daysBetween, todayYMD } from './date.js'
+import { STATUS_PRIORITY } from './status.js'
+import { areaLabel } from './bodyAreas.js'
 
 // Wiersze widoku dla listy znamion. `today` podawane jawnie, by wynik był
 // deterministyczny i testowalny.

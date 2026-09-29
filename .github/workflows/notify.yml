@@ -14,6 +14,11 @@ on:
     # Codziennie 08:00 UTC (= 09:00 zimą / 10:00 latem, czasu PL).
     - cron: '0 8 * * *'
   workflow_dispatch:
+    inputs:
+      force:
+        description: 'Wyślij powiadomienie próbne (ignoruje terminy i nie zużywa cyklu)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -39,3 +44,5 @@ jobs:
           VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
           VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
+          # Puste przy przebiegu z crona; 'true'/'false' przy ręcznym z „force”.
+          FORCE: ${{ inputs.force }}
