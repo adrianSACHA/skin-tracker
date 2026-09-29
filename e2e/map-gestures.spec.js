@@ -62,6 +62,24 @@ const scaleTransform = (page) =>
     return el ? el.style.transform : null
   })
 
+const readScale = (transform) => {
+  const match = /scale\(([\d.]+)\)/.exec(transform || '')
+  return match ? Number(match[1]) : null
+}
+
+// Czeka, az animacja zoomu sie skonczy (dwie identyczne skale pod rzad).
+// Bez tego gest potrafi poleciec w trakcie animacji.
+async function waitForSettledZoom(page) {
+  let previous = null
+  for (let attempt = 0; attempt < 60; attempt += 1) {
+    const value = readScale(await scaleTransform(page))
+    if (value !== null && value > 1 && value === previous) return value
+    previous = value
+    await page.waitForTimeout(50)
+  }
+  throw new Error('przybliżenie nie ustabilizowało się w czasie')
+}
+
 async function openMap(page) {
   await mockSupabase(page)
   await loginAsDemo(page)
@@ -86,9 +104,14 @@ test.describe('Mapa ciała a przewijanie strony', () => {
   }) => {
     await openMap(page)
 
+    // JEDNO klikniecie wystarczy, zeby pan sie wlaczyl. NIE sprawdzamy
+    // dokladnej wartosci skali: `zoomIn()` mnozy od BIEZACEJ wartosci, wiec
+    // gdy drugie klikniecie trafi w trwajaca animacje, wychodzi 1.65 zamiast
+    // 1.44 — test byl przez to niestabilny (~1 na 3 przebiegi, czesciej pod
+    // obciazeniem). Interesuje nas tylko: „jest przyblizone”.
     await page.getByRole('button', { name: 'Przybliż' }).click()
-    await page.getByRole('button', { name: 'Przybliż' }).click()
-    await expect.poll(() => scaleTransform(page)).toContain('scale(1.5')
+    const zoom = await waitForSettledZoom(page)
+    expect(zoom, 'mapa powinna być przybliżona').toBeGreaterThan(1)
 
     const before = await scaleTransform(page)
     const point = await mapPoint(page)
