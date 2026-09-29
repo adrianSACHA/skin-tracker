@@ -10,6 +10,7 @@ import {
   YAxis,
 } from 'recharts'
 import { supabase } from '../lib/supabase'
+import { notifyDueChanged } from '../lib/dueSignal'
 import { formatDate } from '../lib/date'
 import { STATUSES, statusMeta } from '../lib/status'
 import { useIntervalWeeks } from '../lib/interval'
@@ -223,6 +224,7 @@ export default function LesionDetail() {
     }
     setLesion((prev) => (prev ? { ...prev, status } : prev))
     toast.success('Zmiany zapisane')
+    notifyDueChanged()
   }
 
   // Usuwanie odbywa się WYŁĄCZNIE tutaj (LesionDetail), po potwierdzeniu w
@@ -252,6 +254,7 @@ export default function LesionDetail() {
     setDeleting(false)
     setConfirm(null)
     toast.success('Znamię usunięte')
+    notifyDueChanged()
     navigate(`/person/${personId}`)
   }
 
@@ -279,6 +282,7 @@ export default function LesionDetail() {
     setDeleting(false)
     setConfirm(null)
     toast.success('Zdjęcie usunięte')
+    notifyDueChanged()
     setCompareA(null)
     setCompareB(null)
     load()

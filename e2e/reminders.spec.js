@@ -31,8 +31,7 @@ test.describe('Znamiona „Usunięte”', () => {
     ).toBeVisible()
     await expect(page.getByText('Zaległe:')).toContainText('Zaległe: 0')
 
-    // Znacznik w nagłówku liczy się od nowa przy wejściu do aplikacji.
-    await page.reload()
+    // Znacznik w nagłówku przelicza się sam (ticket 07) — bez przeładowania.
     await expect(
       page.getByRole('link', { name: 'Kontrole', exact: true })
     ).toBeVisible()
@@ -76,5 +75,96 @@ test.describe('Znamiona „Usunięte”', () => {
     await expect(page.getByText('Tył-1')).toBeVisible()
     // Drugie znamię ma inny status, więc wypada z filtra.
     await expect(page.getByText('Kark — znamię przy włosach')).toHaveCount(0)
+  })
+})
+
+test.describe('Znacznik przy „Kontrole”', () => {
+  test('przelicza się po zmianie statusu, bez przeładowania', async ({
+    page,
+  }) => {
+    await mockSupabase(page)
+    await loginAsDemo(page)
+    await openPerson(page, 'Ja')
+
+    await expect(
+      page.getByRole('link', { name: /^Kontrole \d+$/ })
+    ).toBeVisible()
+
+    // Zmiana statusu na mapie — zostajemy na tym samym ekranie.
+    await page.getByRole('button', { name: 'Tył-1 — Stabilne' }).click()
+    await page.locator('#quick-status').selectOption('removed')
+    await expect(page.getByText('Zmiany zapisane')).toBeVisible()
+
+    // Znacznik musi zniknąć SAM: bez nawigacji i bez reloadu.
+    await expect(
+      page.getByRole('link', { name: 'Kontrole', exact: true })
+    ).toBeVisible()
+  })
+
+  test('przesunięcie terminu na Kontrolach od razu zdejmuje zaległość', async ({
+    page,
+  }) => {
+    await mockSupabase(page)
+    await loginAsDemo(page)
+    await openPerson(page, 'Ja')
+
+    await page.getByRole('link', { name: /^Kontrole/ }).click()
+    await expect(page.getByText('Zaległe:')).toContainText('Zaległe: 1')
+
+    // Przesunięcie o 12 tygodni wypada poza horyzont „wkrótce” (30 dni).
+    // Dwa wiersze mają własne menu „⋯” — zawężamy do tego ze „Tył-1”.
+    await page
+      .getByRole('listitem')
+      .filter({ hasText: 'Tył-1' })
+      .getByLabel('Więcej akcji kontroli')
+      .click()
+    await page.getByRole('menuitem', { name: 'Przesuń o 12 tyg.' }).click()
+
+    await expect(page.getByText('Zaległe:')).toContainText('Zaległe: 0')
+    await expect(
+      page.getByRole('link', { name: 'Kontrole', exact: true })
+    ).toBeVisible()
+  })
+})
+
+test.describe('Szukanie w Kontrolach', () => {
+  test('zawęża listę i zapisuje się w adresie', async ({ page }) => {
+    await mockSupabase(page)
+    await loginAsDemo(page)
+    await openPerson(page, 'Ja')
+    await page.getByRole('link', { name: /^Kontrole/ }).click()
+
+    await expect(page.getByText('Tył-1')).toBeVisible()
+    await expect(page.getByText('2 z 2')).toBeVisible()
+
+    await page.getByRole('searchbox', { name: 'Szukaj kontroli' }).fill('kark')
+
+    // Stan w adresie — jak na liście znamion.
+    await expect(page).toHaveURL(/q=kark/)
+    await expect(page.getByText('1 z 2')).toBeVisible()
+    await expect(page.getByText('Tył-1')).toHaveCount(0)
+    await expect(
+      page.getByText('Kark — znamię przy włosach')
+    ).toBeVisible()
+
+    // Odświeżenie zachowuje filtr.
+    await page.reload()
+    await expect(page.getByText('1 z 2')).toBeVisible()
+    await expect(
+      page.getByRole('searchbox', { name: 'Szukaj kontroli' })
+    ).toHaveValue('kark')
+  })
+
+  test('brak trafień mówi o tym wprost', async ({ page }) => {
+    await mockSupabase(page)
+    await loginAsDemo(page)
+    await openPerson(page, 'Ja')
+    await page.getByRole('link', { name: /^Kontrole/ }).click()
+
+    await page.getByRole('searchbox', { name: 'Szukaj kontroli' }).fill('nie-ma-takiego')
+
+    await expect(page.getByText('Brak kontroli dla podanego szukania.')).toBeVisible()
+    // Licznik pokazuje kontekst: nic z tego, co jest.
+    await expect(page.getByText('0 z 2')).toBeVisible()
   })
 })

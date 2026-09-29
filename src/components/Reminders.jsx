@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { supabase } from '../lib/supabase'
+import { notifyDueChanged } from '../lib/dueSignal'
 import {
   addDaysYMD,
   addWeeksYMD,
@@ -9,7 +10,8 @@ import {
   todayYMD,
 } from '../lib/date'
 import { useIntervalWeeks } from '../lib/interval'
-import { dueRows } from '../lib/lesionView'
+import { dueRows, filterByQuery } from '../lib/lesionView'
+import { readListParams, buildListParams } from '../lib/listParams'
 import {
   isNotifyOnOpenEnabled,
   notificationsSupported,
@@ -34,6 +36,13 @@ export default function Reminders() {
   const { personId } = useParams()
   const navigate = useNavigate()
   const [intervalWeeks] = useIntervalWeeks(personId)
+  // Szukanie trzymamy w adresie (jak na liście znamion), więc przeżywa
+  // odświeżenie i działa „wstecz”.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const { q: query } = useMemo(
+    () => readListParams(searchParams),
+    [searchParams]
+  )
 
   const [person, setPerson] = useState(null)
   const [lesions, setLesions] = useState([])
@@ -41,6 +50,9 @@ export default function Reminders() {
   const [error, setError] = useState(null)
   const [savingLead, setSavingLead] = useState(false)
   const [busyId, setBusyId] = useState(null)
+  const [searchInput, setSearchInput] = useState(
+    () => (searchParams.get('q') || '').trim()
+  )
 
   const [leadDays, setLeadDays] = useState(7)
   const [notifyOnOpen, setNotifyOnOpen] = useState(() =>
@@ -109,6 +121,21 @@ export default function Reminders() {
     // Najpilniejsze (najbardziej zaległe / najbliższe) na górze.
     return mapped.sort((a, b) => a.next.localeCompare(b.next))
   }, [lesions, intervalWeeks, leadDays])
+
+  // Szukanie po nazwie znamienia albo okolicy (ta sama funkcja co lista).
+  const visibleRows = useMemo(() => filterByQuery(rows, query), [rows, query])
+
+  // Pole podąża za adresem (np. „wstecz”), ale nie nadpisuje tego, co
+  // właśnie wpisujesz — porównujemy po przycięciu.
+  useEffect(() => {
+    setSearchInput((prev) => (prev.trim() === query ? prev : query))
+  }, [query])
+
+  const changeQuery = (value) => {
+    setSearchInput(value)
+    // Ten ekran używa wyłącznie `q` — nie ma tu filtra statusu ani sortowania.
+    setSearchParams(buildListParams({ q: value }), { replace: true })
+  }
 
   const summary = useMemo(() => {
     let overdue = 0
@@ -215,6 +242,7 @@ export default function Reminders() {
       prev.map((l) => (l.id === lesion.id ? { ...l, next_check_at: target } : l))
     )
     toast.success(`Przesunięto na ${formatDate(target)}`)
+    notifyDueChanged()
   }
 
   const clearSnooze = async (lesion) => {
@@ -233,6 +261,7 @@ export default function Reminders() {
       prev.map((l) => (l.id === lesion.id ? { ...l, next_check_at: null } : l))
     )
     toast.success('Przywrócono datę wyliczaną')
+    notifyDueChanged()
   }
 
   const addSession = (lesion) => {
@@ -386,7 +415,9 @@ export default function Reminders() {
         </div>
       ) : null}
 
-      {/* Pasek podsumowania — kolor = sygnał; zero przyjmuje neutralny wygląd */}
+      {/* Pasek podsumowania — kolor = sygnał; zero przyjmuje neutralny wygląd.
+          Liczby są CAŁKOWITE (niezależne od szukania), żeby zgadzały się ze
+          znacznikiem przy „Kontrole” w nagłówku. */}
       <div className="flex flex-wrap gap-3 text-sm">
         <span
           className={[
@@ -428,6 +459,22 @@ export default function Reminders() {
         </span>
       </div>
 
+      {!loading && rows.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(e) => changeQuery(e.target.value)}
+            placeholder="Szukaj po nazwie lub okolicy…"
+            aria-label="Szukaj kontroli"
+            className="min-h-[44px] min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+          />
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            {visibleRows.length} z {rows.length}
+          </span>
+        </div>
+      ) : null}
+
       {loading ? (
         <p className="text-sm text-slate-500 dark:text-slate-400">
           Wczytywanie kontroli…
@@ -436,9 +483,13 @@ export default function Reminders() {
         <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
           Brak znamion. Dodaj je na mapie ciała, aby planować kontrole.
         </div>
+      ) : visibleRows.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+          Brak kontroli dla podanego szukania.
+        </div>
       ) : (
         <ul className="space-y-3">
-          {rows.map(({ lesion, last, next, daysLeft, overdue, snoozed, remindOn }) => (
+          {visibleRows.map(({ lesion, last, next, daysLeft, overdue, snoozed, remindOn }) => (
             <li
               key={lesion.id}
               className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"

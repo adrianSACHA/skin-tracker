@@ -7,6 +7,7 @@ import {
   useTransformEffect,
 } from 'react-zoom-pan-pinch'
 import { supabase } from '../lib/supabase'
+import { notifyDueChanged } from '../lib/dueSignal'
 import {
   getSignedUrl,
   removeStorageFile,
@@ -262,6 +263,7 @@ export default function BodyMap() {
     }
 
     toast.success('Znamię dodane')
+    notifyDueChanged()
     setPending(null)
     setAddMode(false)
     load()
@@ -433,6 +435,7 @@ export default function BodyMap() {
       setViewDeleteConfirm(false)
       closeViewSettings()
       toast.success('Widok usunięty')
+      notifyDueChanged()
       await load()
     } catch (err) {
       setError(err.message)
@@ -519,6 +522,7 @@ export default function BodyMap() {
     }
     setLesions((prev) => prev.map((l) => (l.id === id ? { ...l, status } : l)))
     toast.success('Zmiany zapisane')
+    notifyDueChanged()
   }
 
   const startEdit = (lesion) => {
@@ -550,6 +554,7 @@ export default function BodyMap() {
       )
     )
     toast.success('Zmiany zapisane')
+    notifyDueChanged()
     setEditForm(null)
   }
 

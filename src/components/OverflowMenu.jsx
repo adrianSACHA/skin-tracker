@@ -6,6 +6,12 @@ import { useEffect, useRef, useState } from 'react'
 // przycisk bywa gdzieś na środku, więc menu „na sztywno" do niego (absolute
 // right-0) wychodziło poza krawędź ekranu.
 //
+// Pion też musi być pilnowany: w Kontrolach menu ma kilkanaście pozycji
+// („Przesuń o N tyg.”), więc przy przycisku nisko na ekranie dolne pozycje
+// były nieosiągalne — pozycji `fixed` nie da się doscrollować stroną.
+// Dlatego wybieramy stronę z większą ilością miejsca i ograniczamy wysokość
+// do tego, co faktycznie się mieści.
+//
 // `items`: [{ key, label, onSelect, danger? } | { key, separator: true }]
 export default function OverflowMenu({ label, items, buttonClassName = '' }) {
   const [open, setOpen] = useState(false)
@@ -14,17 +20,34 @@ export default function OverflowMenu({ label, items, buttonClassName = '' }) {
   const btnRef = useRef(null)
 
   const MENU_WIDTH = 240
+  const MIN_MENU_HEIGHT = 96
 
   const place = () => {
     const rect = btnRef.current?.getBoundingClientRect()
     if (!rect) return
     const margin = 8
+    const gap = 4
     const width = Math.min(MENU_WIDTH, window.innerWidth - margin * 2)
     const left = Math.max(
       margin,
       Math.min(rect.right - width, window.innerWidth - width - margin)
     )
-    setPos({ left, top: rect.bottom + 4, width })
+
+    // Miejsce pod i nad przyciskiem (bez marginesu od krawędzi ekranu).
+    const below = window.innerHeight - rect.bottom - gap - margin
+    const above = rect.top - gap - margin
+    // Domyślnie w dół; do góry tylko gdy na dole jest ciasno, a wyżej luźniej.
+    const openUp = below < 240 && above > below
+    const room = openUp ? above : below
+
+    setPos({
+      left,
+      width,
+      maxHeight: Math.max(MIN_MENU_HEIGHT, room),
+      ...(openUp
+        ? { bottom: window.innerHeight - rect.top + gap }
+        : { top: rect.bottom + gap }),
+    })
   }
 
   useEffect(() => {
@@ -75,10 +98,13 @@ export default function OverflowMenu({ label, items, buttonClassName = '' }) {
           style={{
             position: 'fixed',
             left: pos.left,
-            top: pos.top,
             width: pos.width,
+            maxHeight: pos.maxHeight,
+            ...(pos.bottom !== undefined
+              ? { bottom: pos.bottom }
+              : { top: pos.top }),
           }}
-          className="z-20 max-h-[70vh] overflow-y-auto overscroll-contain rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800"
+          className="z-20 overflow-y-auto overscroll-contain rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800"
         >
           {items.map((item) =>
             item.separator ? (
