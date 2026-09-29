@@ -1,7 +1,7 @@
 # 11 — Wysyłka przypomnień: nie widać, czy coś poszło (+ tryb testowy)
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Map: .scratch/backlog/map.md
 
 ## Problem
@@ -61,3 +61,65 @@ przypomnienie na cykl kontroli) działa zgodnie z projektem i **zostaje**.
 - Test: przebieg w trybie `force` na mocku/na sucho nie zapisuje
   `last_reminded_at` (jeśli da się to sensownie sprawdzić; w przeciwnym razie
   przynajmniej komentarz w kodzie i sprawdzenie ręczne).
+
+## Answer
+
+Zrealizowane. Logika terminów wyszła ze skryptu do **`src/lib/reminders.js`**
+(czyste funkcje, 15 testów w `src/lib/reminders.test.js`) — wcześniej była
+drugą kopią tego, co robi aplikacja, i nie dało się jej przetestować.
+Termin liczy teraz ten sam `dueRows()`, co Kontrole. Skrypt został sprowadzony
+do I/O: baza, wysyłka, raport.
+
+**1. Widać, ile wysłano i dlaczego nic nie poszło.** Skrypt pisze
+podsumowanie do `$GITHUB_STEP_SUMMARY`, więc jest ono na stronie przebiegu.
+Przykład dla sytuacji „nie wysłano, bo już przypomniano w tym cyklu”:
+
+```
+## Powiadomienia — przebieg dzienny
+
+**Nic do wysłania.**
+
+| Osoba | Subskrypcje | W terminie | Wysłano | Zbyt wcześnie | Już przypomniane | Usunięte |
+| --- | --- | --- | --- | --- | --- | --- |
+| Ja | 1 | 0 | 0 | 0 | 1 | 0 |
+```
+
+Osobne wiersze dla „Zbyt wcześnie” i „Już przypomniane” biorą się z tego, że
+to dwie różne przyczyny i trzeba je rozróżnić, żeby wiedzieć, czy coś jest
+zepsute.
+
+**2. Tryb testowy (`force`).** Nowe wejście w `workflow_dispatch`: wysyła
+powiadomienie próbne („To jest próba powiadomienia…”) niezależnie od terminów
+i **nie zapisuje `last_reminded_at`** — próba nie zużywa prawdziwego cyklu.
+W nagłówku podsumowania jest to wprost napisane.
+
+**3. Nieudana wysyłka nie zużywa już cyklu.** Wcześniej `last_reminded_at`
+zapisywało się po próbie wysyłki **nawet gdy wszystko padło** — czyli
+przypomnienie na cały cykl przepadało bez śladu. Teraz zapis jest tylko przy
+`sent > 0`. Sprawdzone: przy nieosiągalnym endpoincie żaden zapis nie leci.
+
+**4. Podpowiedzi przy awarii.** Gdy wysyłki padają, podsumowanie sugeruje
+sprawdzenie pary kluczy VAPID (jej zmiana unieważnia wszystkie subskrypcje).
+Gdy brak subskrypcji — gdzie je włączyć.
+
+### Błąd znaleziony przy weryfikacji
+
+Test integracyjny (mock Supabase + prawdziwe uruchomienie skryptu) wykrył, że
+`src/lib/reminders.js` importował moduły **bez rozszerzeń `.js`**. Vite i
+Vitest to tolerują, ale **Node uruchamiany wprost** (a tak działa workflow)
+nie — `node scripts/send-reminders.mjs` wywalał się na
+`ERR_MODULE_NOT_FOUND`. Bez tego testu wysypałoby się dopiero w CI, po
+wypchnięciu. Rozszerzenia dodane w całym łańcuchu (`reminders.js` i
+`lesionView.js`), z komentarzem, dlaczego muszą tam zostać.
+
+### Czego nie zmieniono (decyzja właściciela)
+
+**Raz dziennie wystarczy.** Bez drugiego crona, bez większej częstotliwości.
+`last_reminded_at` (jedno przypomnienie na cykl) zostaje.
+
+### Weryfikacja
+
+15 nowych testów jednostkowych + przelot skryptu przez lokalny mock Supabase
+w pięciu scenariuszach: po terminie, tryb próbny, termin jeszcze nie nadszedł,
+już przypomniane, znamię usunięte. Każdy wypisał poprawne podsumowanie, a
+żaden nie zapisał do bazy wtedy, kiedy nie powinien.

@@ -10,6 +10,15 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 
 ### Dodane
 
+- **Podsumowanie przebiegu przypomnień + tryb próbny.** Po każdym uruchomieniu
+  workflow „Powiadomienia o kontrolach” na stronie przebiegu widać, ile
+  powiadomień wysłano i **dlaczego nic nie poszło** (osobno „zbyt wcześnie”
+  i „już przypomniane w tym cyklu” — to dwie różne przyczyny). Ręczne
+  uruchomienie z opcją `force` wysyła powiadomienie próbne i **nie zużywa
+  cyklu** przypomnień. Logika przypomnień wyszła ze skryptu do
+  `src/lib/reminders.js` (15 testów) i korzysta z tego samego liczenia
+  terminów co Kontrole w aplikacji — wcześniej była drugą, nietestowaną kopią.
+
 - **Budżet UI jako test** (`e2e/ui-budget.spec.js`). Na 375×667 pilnuje, że
   nagłówek ≤ 130 px na każdym ekranie oraz że pierwszy wiersz listy i licznik
   „Zaległe” są nad linią zgięcia. Celowo pomiar, nie zrzut ekranu — liczby są
@@ -152,6 +161,15 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
   przewija się do panelu szczegółów.
 
 ### Naprawione
+
+- **Nieudana wysyłka przypomnień nie zużywa już cyklu.** `last_reminded_at`
+  zapisywało się po próbie wysyłki nawet wtedy, gdy **wszystkie** wysyłki
+  padły — a wtedy przypomnienie na cały cykl przepadało bez śladu. Teraz
+  zapis następuje tylko wtedy, gdy coś faktycznie wyszło.
+- **Skrypt przypomnień wywalał się uruchamiany wprost przez Node.** Brak
+  rozszerzeń `.js` w importach modułu przypomnień (`ERR_MODULE_NOT_FOUND`) —
+  Vite i Vitest to tolerują, Node nie. Znalezione testem integracyjnym
+  przed wypchnięciem; rozszerzenia dodane w całym łańcuchu importów.
 
 - **Mapa ciała połykała gest przewijania.** Przy skali 1 (bez przybliżenia)
   nie dało się przewinąć strony, zaczynając przesunięcie palcem od zdjęcia —

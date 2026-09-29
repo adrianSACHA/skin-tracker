@@ -50,6 +50,11 @@ zostaje podjęty, ticket przenosi się do własnego effortu (albo tu dostaje
 - **Naprawione przy przeglądzie (2026-09-29):** mapa połykała gest przewijania
   przy skali 1 (nie dało się przewinąć strony, łapiąc za zdjęcie); strzałki
   nawigacyjne zamienione na `<` / `>`.
+- **Ticket 11 zrobiony (2026-09-29).** Logika przypomnień w jednym miejscu
+  (`src/lib/reminders.js`, testowana), podsumowanie przebiegu widoczne na
+  stronie runu, tryb próbny `force` (nie zużywa cyklu). Przy weryfikacji
+  złapany błąd: brak rozszerzeń `.js` w importach → skrypt wywalał się po
+  uruchomieniem przez Node. Szczegóły: `issues/11-wysylka-diagnostyka.md`.
 
 ## Not yet specified (mgła)
 
@@ -79,11 +84,11 @@ zostaje podjęty, ticket przenosi się do własnego effortu (albo tu dostaje
 | 08 | task | [Nagłówek na telefonie zjadał 43% ekranu](issues/08-kompresja-naglowka.md) | resolved |
 | 09 | task | [Nawigacja na telefonie: zostawić, dolny pasek czy hamburger](issues/09-nawigacja-mobile.md) | needs-triage |
 | 10 | task | [Za małe cele dotykowe (piny, suwak, linki)](issues/10-cele-dotykowe.md) | needs-triage |
-| 11 | task | [Wysyłka przypomnień: nie widać, czy coś poszło](issues/11-wysylka-diagnostyka.md) | ready-for-agent |
+| 11 | task | [Wysyłka przypomnień: nie widać, czy coś poszło](issues/11-wysylka-diagnostyka.md) | resolved |
 
 ## Frontier
 
-Do wzięcia bez decyzji: **04**, **11** (`ready-for-agent`).
+Do wzięcia bez decyzji: **04** (`ready-for-agent`).
 Wymagają Twojej decyzji: **01** (format i zakres eksportu), **05** (zakres
 audytu), **09** (nawigacja na telefonie), **10** (które cele dotykowe
 naprawiamy i w jakiej kolejności).

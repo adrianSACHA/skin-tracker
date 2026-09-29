@@ -20,10 +20,10 @@ osób („Ja", „Syn").
 
 ## Jakość / stan repo
 
-- `npm run build` ✓, `npm test` → **86/86** ✓ (jednostkowe).
+- `npm run build` ✓, `npm test` → **101/101** ✓ (jednostkowe).
 - `npm run e2e` → **30/30** ✓ (Playwright, zmockowany Supabase, ~15 s),
   w tym **budżet UI** na 375×667 (`e2e/ui-budget.spec.js`).
-- Tracker: **12 effortów, 82 ticketów (+1 spec): 75 `resolved`, 6 otwartych
+- Tracker: **12 effortów, 82 ticketów (+1 spec): 76 `resolved`, 5 otwartych
   i 1 `wontfix` w `.scratch/backlog/`.
 
 ## Funkcje
@@ -46,7 +46,10 @@ osób („Ja", „Syn").
   zamockowany. Uruchamiany na `push`/PR i ręcznie; nie blokuje deployu.
 - **Przypomnienia:** workflow „Powiadomienia o kontrolach" — cron codziennie
   08:00 UTC (09:00 zimą / 10:00 latem, czasu PL) (+ ręczne „Run workflow").
-  Nadawcą jest GitHub Actions (koszt 0).
+  Nadawcą jest GitHub Actions (koszt 0). Po każdym przebiegu na stronie runu
+  jest **podsumowanie** (ile wysłano i dlaczego nic nie poszło); ręczne
+  uruchomienie z zaznaczonym **`force`** wysyła powiadomienie próbne i nie
+  zużywa cyklu przypomnień.
   ⚠️ GitHub wyłącza zaplanowane workflow po ~60 dniach bezczynności repo — wtedy
   uruchom go raz ręcznie.
 
@@ -72,7 +75,6 @@ Backlog żyje w **`.scratch/backlog/`**. Otwarte:
 | 05 | Audyt dostępności (a11y) | needs-triage |
 | 09 | Nawigacja na telefonie: zostawić / dolny pasek / hamburger | needs-triage |
 | 10 | Za małe cele dotykowe (piny 20 px, suwak 8 px, linki) | needs-triage |
-| 11 | Wysyłka przypomnień: brak sygnału „poszło/nie” + tryb testowy | ready-for-agent |
 
 Zamknięte: 02 („Usunięte” nie jest już zaległe), 03 (szukanie w Kontrolach),
 07 (znacznik przy „Kontrole” odświeża się sam), 08 (nagłówek na telefonie:
