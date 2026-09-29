@@ -90,7 +90,8 @@ export default function Layout({ children }) {
               <button
                 type="button"
                 onClick={handleInstallClick}
-                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-teal-200 bg-teal-50 px-2.5 text-sm font-medium text-teal-800 transition-colors hover:bg-teal-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-teal-800 dark:bg-teal-950/50 dark:text-teal-200 dark:hover:bg-teal-900/60"
+                aria-label="Zainstaluj aplikację"
+                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-1.5 rounded-md border border-teal-200 bg-teal-50 px-2.5 text-sm font-medium text-teal-800 transition-colors hover:bg-teal-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-teal-800 dark:bg-teal-950/50 dark:text-teal-200 dark:hover:bg-teal-900/60"
                 title="Dodaj aplikację do ekranu początkowego"
               >
                 <svg
@@ -103,7 +104,7 @@ export default function Layout({ children }) {
                 >
                   <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
                 </svg>
-                Zainstaluj
+                <span className="hidden sm:inline">Zainstaluj</span>
               </button>
             ) : null}
             <ThemeToggle />
@@ -116,25 +117,6 @@ export default function Layout({ children }) {
             </button>
           </div>
         </div>
-
-        {showInstallTip ? (
-          <div className="mx-auto max-w-4xl px-4 pb-3 lg:max-w-6xl">
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-teal-900 dark:border-teal-800 dark:bg-teal-950/40 dark:text-teal-100">
-              <span>
-                Aby zainstalować na iPhone/iPad: dotknij{' '}
-                <strong>Udostępnij</strong> (□↑), a potem{' '}
-                <strong>„Dodaj do ekranu początkowego"</strong>.
-              </span>
-              <button
-                type="button"
-                onClick={() => setShowInstallTip(false)}
-                className="min-h-[44px] rounded-md px-3 font-medium text-teal-800 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-200"
-              >
-                Zamknij
-              </button>
-            </div>
-          </div>
-        ) : null}
 
         {person ? (
           <nav className="mx-auto flex max-w-4xl flex-wrap gap-2 px-4 pb-2 lg:max-w-6xl">
@@ -157,6 +139,35 @@ export default function Layout({ children }) {
               ) : null}
             </NavLink>
           </nav>
+        ) : null}
+
+      </header>
+
+      <main className="mx-auto w-full max-w-4xl lg:max-w-6xl flex-1 px-4 py-6">
+        {children}
+      </main>
+      {/* Komunikaty o instalacji trzymamy NA DOLE, poza nagłówkiem: na telefonie
+          nagłówek zjadał 43% ekranu, zanim cokolwiek było widać (przycisk
+          „Zainstaluj” wypychał wiersz do dwóch linii, a baner dokładał 129 px).
+          Na krótkich ekranach `main` ma `flex-1`, więc i tak lądują przy dolnej
+          krawędzi. */}
+        {showInstallTip ? (
+          <div className="mx-auto max-w-4xl px-4 pb-3 lg:max-w-6xl">
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-teal-900 dark:border-teal-800 dark:bg-teal-950/40 dark:text-teal-100">
+              <span>
+                Aby zainstalować na iPhone/iPad: dotknij{' '}
+                <strong>Udostępnij</strong> (□↑), a potem{' '}
+                <strong>„Dodaj do ekranu początkowego"</strong>.
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowInstallTip(false)}
+                className="min-h-[44px] rounded-md px-3 font-medium text-teal-800 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-200"
+              >
+                Zamknij
+              </button>
+            </div>
+          </div>
         ) : null}
 
         {showInstallNudge && (canInstall || iosHint) ? (
@@ -186,11 +197,7 @@ export default function Layout({ children }) {
             </div>
           </div>
         ) : null}
-      </header>
 
-      <main className="mx-auto w-full max-w-4xl lg:max-w-6xl flex-1 px-4 py-6">
-        {children}
-      </main>
 
       <footer className="mx-auto w-full max-w-4xl lg:max-w-6xl px-4 py-6 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
         Narzędzie wyłącznie do dokumentacji i porównywania zdjęć w czasie. Nie

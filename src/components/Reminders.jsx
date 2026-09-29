@@ -282,26 +282,35 @@ export default function Reminders() {
         </p>
       </div>
 
-      {/* Onboarding: co zrobić, aby dostawać przypomnienia na telefon */}
-      {notificationsReady && !showFullPanel ? (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-teal-200 bg-teal-50/60 px-3 py-2 text-sm dark:border-teal-800 dark:bg-teal-950/20">
+      {/* Onboarding: co zrobić, aby dostawać przypomnienia na telefon.
+          Domyślnie ZWINIĘTY do jednej linii — pełna instrukcja zajmowała 297 px
+          i spychała listę kontroli poniżej linii zgięcia. Cała linia jest
+          przyciskiem, więc rozwinięcie to jedno dotknięcie. */}
+      {!showFullPanel ? (
+        <button
+          type="button"
+          onClick={() => setShowFullPanel(true)}
+          className="flex w-full flex-wrap items-center justify-between gap-2 rounded-xl border border-teal-200 bg-teal-50/60 px-3 py-2 text-left text-sm dark:border-teal-800 dark:bg-teal-950/20"
+        >
           <span className="inline-flex items-center gap-2 font-medium text-teal-900 dark:text-teal-100">
             <span
               aria-hidden="true"
-              className="text-green-600 dark:text-green-400"
+              className={
+                notificationsReady
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-slate-400 dark:text-slate-500'
+              }
             >
-              ✓
+              {notificationsReady ? '✓' : '○'}
             </span>
-            Powiadomienia w tle: włączone
+            {notificationsReady
+              ? 'Powiadomienia w tle: włączone'
+              : 'Powiadomienia w tle: jeszcze nieaktywne'}
           </span>
-          <button
-            type="button"
-            onClick={() => setShowFullPanel(true)}
-            className="min-h-[44px] rounded-md px-3 font-medium text-teal-800 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-200"
-          >
-            Szczegóły
-          </button>
-        </div>
+          <span className="font-medium text-teal-800 underline dark:text-teal-200">
+            {notificationsReady ? 'Szczegóły' : 'Skonfiguruj'}
+          </span>
+        </button>
       ) : (
       <div className="space-y-3 rounded-xl border border-teal-200 bg-teal-50/60 p-4 text-sm dark:border-teal-800 dark:bg-teal-950/20">
         <div>
@@ -394,15 +403,13 @@ export default function Reminders() {
           </p>
         ) : null}
 
-        {notificationsReady ? (
-          <button
-            type="button"
-            onClick={() => setShowFullPanel(false)}
-            className="min-h-[44px] rounded-md px-1 font-medium text-teal-800 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-200"
-          >
-            Ukryj
-          </button>
-        ) : null}
+        <button
+          type="button"
+          onClick={() => setShowFullPanel(false)}
+          className="min-h-[44px] rounded-md px-1 font-medium text-teal-800 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-200"
+        >
+          Ukryj
+        </button>
       </div>
       )}
 

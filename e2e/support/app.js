@@ -39,6 +39,23 @@ export async function loginAsDemo(page, credentials) {
 }
 
 /** Wchodzi w osobe o podanej nazwie (klik w karte na ekranie wyboru). */
+/**
+ * Udaje stan „aplikacja gotowa do instalacji” — czyli to, co na telefonie
+ * wysyła przeglądarka jako `beforeinstallprompt`.
+ *
+ * W przeglądarce używanej przez testy to zdarzenie nie leci, a właśnie w tym
+ * stanie nagłówek puchł do 285 px (przycisk „Zainstaluj” wypychał wiersz do
+ * dwóch linii, a pod nawigacją pojawiał się baner instalacji).
+ */
+export async function makeInstallable(page) {
+  await page.evaluate(() => {
+    const event = new Event('beforeinstallprompt')
+    event.prompt = async () => {}
+    event.userChoice = Promise.resolve({ outcome: 'accepted' })
+    window.dispatchEvent(event)
+  })
+}
+
 export async function openPerson(page, displayName) {
   await page.getByText(displayName, { exact: true }).click()
   await expect(page.getByRole('link', { name: 'Lista znamion' })).toBeVisible()
