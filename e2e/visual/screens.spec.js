@@ -1,3 +1,5 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import { expect, test } from '@playwright/test'
 import { mockSupabase } from '../support/mock-supabase.js'
 import {
@@ -16,9 +18,12 @@ import {
 //    `process.platform`, wiec Windows porownuje z `*-win32.png`, a CI (Linux)
 //    z `*-linux.png`. Dlatego zestaw jest zielony i lokalnie, i w CI, mimo ze
 //    czcionki i antyaliasing roznia sie miedzy systemami.
-//    Brakujacy baseline dla danej platformy Playwright po prostu ZAPISUJE
-//    (domyslne `updateSnapshots: 'missing'`) — dlatego pierwszy przebieg w CI
-//    jest zielony i tworzy artefakt do zacommitowania.
+//    Gdy brakuje wzorca dla danej platformy, test sie POMIJA (patrz
+//    `expectScreenshot` nizej). Bez tego pierwszy przebieg na Linuksie
+//    czerwienilby build na 7 testach, mimo ze nic nie jest zepsute — brakuje
+//    tylko punktu odniesienia. Wzorce dla Linuksa generuje sie osobno
+//    (workflow „Testy” -> `update_visual_baselines`), bo w CI brakujacy
+//    wzorzec jest BLEDEM, a nie „zapisz i idz dalej”.
 //    Instrukcja: README, sekcja „Testy" -> „Zrzuty ekranu".
 //
 // 2. CZAS JEST ZAMROZONY. Czesc ekranow pokazuje terminy liczone od „dzisiaj"
@@ -37,6 +42,50 @@ const FIXED_NOW = new Date('2026-06-15T10:00:00Z')
 const DETERMINISTIC = {
   deviceScaleFactor: 1,
   reducedMotion: 'reduce',
+}
+
+// Katalog ze wzorcami. Sciezka zgodna z domyslnym szablonem Playwrighta:
+// `{arg}{-projectName}{-snapshotSuffix}{ext}` -> `01-logowanie-chromium-win32.png`.
+const SNAPSHOT_DIR = path.join(
+  'e2e',
+  'visual',
+  'screens.spec.js-snapshots'
+)
+
+function snapshotPathFor(name, projectName) {
+  const base = name.replace(/\.png$/, '')
+  return path.join(
+    SNAPSHOT_DIR,
+    `${base}-${projectName}-${process.platform}.png`
+  )
+}
+
+// Zrzut ekranu, ale TYLKO gdy istnieje wzorzec dla biezacej platformy.
+//
+// Dlaczego: wzorce sa per-platforma (Windows/Linux), a w CI brakujacy
+// wzorzec jest BLEDEM (nie „zapisz i idz dalej”). Bez tej oslony pierwszy
+// przebieg na Linuksie czerwienilby build na 7 testach, mimo ze nic nie jest
+// zepsute — po prostu nie ma jeszcze z czym porownywac. Zamiast tego test
+// jawnie sie pomija z instrukcja, jak wygenerowac wzorce.
+//
+// Generowanie: `npm run e2e:visual:update` (lokalnie) albo workflow „Testy”
+// z zaznaczonym `update_visual_baselines` (Linux; wynik w artefakcie
+// `baseline-linux` do zacommitowania).
+async function expectScreenshot(page, name) {
+  const { project } = test.info()
+  const file = snapshotPathFor(name, project.name)
+  const generating = process.env.E2E_VISUAL_UPDATE === '1'
+
+  // Poza CI Playwright sam dopisuje brakujacy wzorzec, wiec nie blokujemy.
+  if (process.env.CI && !generating && !fs.existsSync(file)) {
+    test.skip(
+      true,
+      `Brak wzorca dla platformy ${process.platform}: ${file}. ` +
+        'Wygeneruj: npm run e2e:visual:update lub workflow „Testy” -> update_visual_baselines.'
+    )
+  }
+
+  await expect(page).toHaveScreenshot(name, { fullPage: true })
 }
 
 // Otwiera aplikacje z zamrozonym czasem i zalogowana sesja.
@@ -75,9 +124,7 @@ test.describe('Zrzuty ekranu', () => {
         page.getByRole('heading', { name: 'Zaloguj się' })
       ).toBeVisible()
 
-      await expect(page).toHaveScreenshot('01-logowanie.png', {
-        fullPage: true,
-      })
+      await expectScreenshot(page, '01-logowanie.png')
     })
 
     test('wybór osoby — karta z liczbami i „zaległe”', async ({ page }) => {
@@ -87,9 +134,7 @@ test.describe('Zrzuty ekranu', () => {
       await expect(page.getByText('zaległe')).toBeVisible()
       await expect(page.getByText('2 znamiona · 1 zdjęcie')).toBeVisible()
 
-      await expect(page).toHaveScreenshot('02-wybor-osoby.png', {
-        fullPage: true,
-      })
+      await expectScreenshot(page, '02-wybor-osoby.png')
     })
 
     test('lista znamion — filtry zwinięte i rozwinięte', async ({ page }) => {
@@ -98,15 +143,11 @@ test.describe('Zrzuty ekranu', () => {
       await openLesionList(page)
 
       await expect(page.getByRole('listitem').first()).toBeVisible()
-      await expect(page).toHaveScreenshot('03-lista-znamion.png', {
-        fullPage: true,
-      })
+      await expectScreenshot(page, '03-lista-znamion.png')
 
       await page.getByRole('button', { name: 'Filtry' }).click()
       await expect(page.locator('#sort-by')).toBeVisible()
-      await expect(page).toHaveScreenshot('04-lista-znamion-filtry.png', {
-        fullPage: true,
-      })
+      await expectScreenshot(page, '04-lista-znamion-filtry.png')
     })
 
     test('mapa ciała', async ({ page }) => {
@@ -114,9 +155,7 @@ test.describe('Zrzuty ekranu', () => {
       await openPerson(page, 'Ja')
 
       await expect(page.getByRole('button', { name: 'Tył-1 — Stabilne' })).toBeVisible()
-      await expect(page).toHaveScreenshot('05-mapa-ciala.png', {
-        fullPage: true,
-      })
+      await expectScreenshot(page, '05-mapa-ciala.png')
     })
   })
 
@@ -133,9 +172,7 @@ test.describe('Zrzuty ekranu', () => {
       await openPerson(page, 'Ja')
 
       await expect(page.getByRole('button', { name: 'Tył-1 — Stabilne' })).toBeVisible()
-      await expect(page).toHaveScreenshot('06-mapa-ciala-telefon.png', {
-        fullPage: true,
-      })
+      await expectScreenshot(page, '06-mapa-ciala-telefon.png')
     })
   })
 
@@ -153,9 +190,7 @@ test.describe('Zrzuty ekranu', () => {
       await expect(page.locator('html')).toHaveClass(/dark/)
       await expect(page.getByText('zaległe')).toBeVisible()
 
-      await expect(page).toHaveScreenshot('07-wybor-osoby-ciemny.png', {
-        fullPage: true,
-      })
+      await expectScreenshot(page, '07-wybor-osoby-ciemny.png')
     })
 
     test('lista znamion', async ({ page }) => {
@@ -164,9 +199,7 @@ test.describe('Zrzuty ekranu', () => {
       await openLesionList(page)
 
       await expect(page.getByRole('listitem').first()).toBeVisible()
-      await expect(page).toHaveScreenshot('08-lista-znamion-ciemny.png', {
-        fullPage: true,
-      })
+      await expectScreenshot(page, '08-lista-znamion-ciemny.png')
     })
   })
 })
