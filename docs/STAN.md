@@ -34,7 +34,7 @@ osób („Ja", „Syn").
 | **Telefon** | nagłówek ≤ 121 px (43% → 18% wysokości); komunikaty o instalacji na dole; panel przypomnień zwinięty; budżet UI pilnowany testem |
 | **Wybór osoby** | karta z liczbami (znamiona, zdjęcia, najbliższa kontrola + „zaległe” gdy minęła); zmiana nazwy i usunięcie osoby w menu „⋯” |
 | **Mapa ciała** | widoki ze słownika 17 okolic + własne nazwy; piny (dodaj / przesuń / edytuj); zdjęcie tła per widok (aparat lub plik); kontekst okolicy w nazwie znamienia; panel pina jako bottom sheet na telefonie |
-| **Znamię** | zdjęcia z edycją (obrót / odbicia) i kompresją; pomiar z obrysu (MediaPipe, geometria); notatki ABCDE; status; porównanie przeciąganym suwakiem; wykres rozmiaru; powiększanie zdjęć (lightbox) |
+| **Znamię** | zdjęcia z edycją (obrót / odbicia) i kompresją; pomiar z obrysu (MediaPipe, geometria); notatki ABCDE; status (zmiana z menu „⋯”); porównanie przeciąganym suwakiem; wykres rozmiaru; powiększanie zdjęć (lightbox) |
 | **Lista znamion** | filtr po statusie + sortowanie po terminie kontroli; stan w URL |
 | **Kontrole** | terminy, przesuwanie, ustawienia; panel „Przypomnienia na telefon" (instalacja + zgoda + push ze statusem); **3 poziomy przypomnień**: `.ics`, in‑app, **Web Push w tle** |
 | **PWA** | manifest + ikony, przycisk **„Zainstaluj"** (Android: prompt; iOS: instrukcja), service worker (obsługa push) |
@@ -75,7 +75,7 @@ Backlog żyje w **`.scratch/backlog/`**. Otwarte:
 | 05 | Audyt dostępności (a11y) | needs-triage |
 | 09 | Nawigacja na telefonie: zostawić / dolny pasek / hamburger | needs-triage |
 | 10 | Za małe cele dotykowe (piny 20 px, suwak 8 px, linki) | needs-triage |
-| 12 | Ekran znamienia: za dużo treści naraz (2244 px = 3,4 ekranu) | needs-triage |
+| 12 | Ekran znamienia: 3,4 → 2,9 ekranu; zostaje decyzja o zakładkach (B) | needs-info |
 
 Zamknięte: 02 („Usunięte” nie jest już zaległe), 03 (szukanie w Kontrolach),
 07 (znacznik przy „Kontrole” odświeża się sam), 08 (nagłówek na telefonie:

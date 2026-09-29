@@ -1,7 +1,7 @@
 # 12 — Ekran znamienia: za dużo treści naraz
 
 Type: task
-Status: needs-triage
+Status: needs-info
 Map: .scratch/backlog/map.md
 
 ## Problem
@@ -67,3 +67,38 @@ Zacząć od **A** (spójne z tym, co już jest w aplikacji, i usuwa najgłośnie
 element), a **B** rozważyć dopiero, jeśli po A nadal będzie za dużo.
 Po zmianie dołożyć pomiar do `e2e/ui-budget.spec.js` (wysokość ekranu
 znamienia), żeby zagęszczenie nie wróciło niezauważone.
+
+## Zrobione: A (2026-09-29)
+
+Akcje rzadkie i nieodwracalne przeniesione do menu „⋯” (wzorzec już używany
+w aplikacji — akcje osoby, ustawienia widoku, karty w Kontrolach):
+
+- **status** — 5 pozycji jako `menuitemradio`, bieżąca oznaczona ✓
+  (`OverflowMenu` dostał obsługę `item.checked` + `aria-checked`),
+- **usunięcie znamienia** — pozycja `danger`; potwierdzenie bez zmian.
+
+Sekcja **„Zarządzanie”** (186 px czerwonego bloku + akapit ostrzeżenia)
+zniknęła z ekranu. Informacja o interwale trafiła do linii meta
+(„Zdjęć: 3 · ostatnia: 20.05.2026 · kontrola co 6 tyg.”) zamiast osobnego
+akapitu z linkiem w rzędzie akcji. Przy okazji usunięto **15 pustych linii**
+zostałych w pliku po jakiejś wcześniejszej edycji.
+
+Zmierzony efekt (375×667, znamię z 3 zdjęciami):
+
+| | Przed | Po |
+| --- | --- | --- |
+| Wysokość ekranu | 2244 px | **1934 px** |
+| Ile ekranów | 3,4 | **2,9** |
+
+Czyli **−310 px**, ale to **nie rozwiązuje problemu**: sama treść (porównanie
+559 px + historia 410 px + trend 390 px) to nadal ~2 ekrany.
+
+Zabezpieczone nowym `e2e/lesion-detail.spec.js` (4 testy — ten ekran nie miał
+wcześniej **żadnego** pokrycia) z budżetem wysokości **≤ 2150 px**, czyli
+poniżej starej wartości: samo przywrócenie sekcji „Zarządzanie” wywali test.
+
+## Otwarte: B — czy dzielić ekran?
+
+Do decyzji właściciela: **zakładki** (np. Przegląd / Zdjęcia / Trend) czy
+**zostawić 2,9 ekranu**. Świadomie nie wprowadzam zwijanych paneli — ticket 06
+(`wontfix`) odrzucił wspólny wzorzec zwijania.

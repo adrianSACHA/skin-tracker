@@ -117,19 +117,32 @@ export default function OverflowMenu({ label, items, buttonClassName = '' }) {
               <button
                 key={item.key}
                 type="button"
-                role="menuitem"
+                // Pozycja z `checked` to wybór z listy (np. status) -
+                // wtedy rola `menuitemradio` i widoczny znacznik.
+                role={item.checked === undefined ? 'menuitem' : 'menuitemradio'}
+                aria-checked={
+                  item.checked === undefined ? undefined : Boolean(item.checked)
+                }
                 onClick={() => {
                   setOpen(false)
                   item.onSelect()
                 }}
                 className={[
-                  'block w-full px-3 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-300',
+                  'flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-300',
                   item.danger
                     ? 'text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/40'
                     : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700',
                 ].join(' ')}
               >
-                {item.label}
+                <span>{item.label}</span>
+                {item.checked ? (
+                  <span
+                    aria-hidden="true"
+                    className="text-teal-700 dark:text-teal-300"
+                  >
+                    ✓
+                  </span>
+                ) : null}
               </button>
             )
           )}

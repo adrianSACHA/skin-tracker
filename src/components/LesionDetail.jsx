@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   CartesianGrid,
   Line,
@@ -23,6 +23,7 @@ import LesionName from './LesionName'
 import PhotoUploadForm from './PhotoUploadForm'
 import CalendarReminderButton from './CalendarReminderButton'
 import ConfirmDialog from './ConfirmDialog'
+import OverflowMenu from './OverflowMenu'
 
 function TrashIcon() {
   return (
@@ -316,6 +317,25 @@ export default function LesionDetail() {
   const meta = statusMeta(lesion.status)
   const chrono = [...photos].reverse() // najnowsze na górze
 
+  // Akcje rzadkie i nieodwracalne trzymamy w menu „⋯” — nie zajmują miejsca
+  // i nie krzyczą na ekranie (usuwanie znamienia zdarza się raz na jakiś
+  // czas, a zmiana statusu jest tu, bo status i tak widać jako plakietkę).
+  const menuItems = [
+    ...STATUSES.map((s) => ({
+      key: `status-${s}`,
+      label: statusMeta(s).label,
+      checked: s === lesion.status,
+      onSelect: () => updateStatus(s),
+    })),
+    { key: 'sep', separator: true },
+    {
+      key: 'delete',
+      label: 'Usuń znamię',
+      danger: true,
+      onSelect: askDeleteLesion,
+    },
+  ]
+
   return (
     <div className="space-y-6">
       <button
@@ -350,23 +370,11 @@ export default function LesionDetail() {
             <span className="text-sm text-slate-500 dark:text-slate-400">
               Zdjęć: {photos.length}
               {lastDate ? ` · ostatnia: ${formatDate(lastDate)}` : ''}
+              {` · kontrola co ${intervalWeeks} tyg.`}
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <select
-            value={lesion.status}
-            onChange={(e) => updateStatus(e.target.value)}
-            aria-label="Zmień status znamienia"
-            className={`${inputClass} text-sm`}
-          >
-            {STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {statusMeta(s).label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <OverflowMenu label="Akcje znamienia" items={menuItems} />
       </div>
 
       {/* Akcje */}
@@ -378,33 +386,6 @@ export default function LesionDetail() {
         >
           {showUpload ? 'Zamknij formularz' : '+ Dodaj zdjęcie'}
         </button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <p className="text-sm text-slate-600 dark:text-slate-300">
-          Interwał kontroli:{' '}
-          <strong className="text-slate-800 dark:text-slate-100">
-            co {intervalWeeks} tyg.
-          </strong>{' '}
-          <Link
-            to={`/person/${personId}/list`}
-            className="text-teal-700 hover:underline dark:text-teal-300"
-          >
-            (zmień na liście znamion)
-          </Link>
-        </p>
 
         <CalendarReminderButton
           label={lesion.label}
@@ -653,25 +634,6 @@ export default function LesionDetail() {
 
         </>
       )}
-
-      {/* Zarządzanie (pkt 4) - wizualnie oddzielone, usuwanie tylko tutaj */}
-      <section className="mt-8 space-y-3 rounded-xl border border-red-200 bg-red-50/50 p-4 dark:border-red-900/60 dark:bg-red-950/20">
-        <h2 className="text-base font-semibold text-red-800 dark:text-red-200">
-          Zarządzanie
-        </h2>
-        <p className="text-sm text-red-800/80 dark:text-red-200/80">
-          Usunięcie znamienia usuwa też całą historię jego zdjęć (oraz pliki z
-          magazynu). Operacja jest nieodwracalna.
-        </p>
-        <button
-          type="button"
-          onClick={askDeleteLesion}
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-red-300 bg-white px-4 font-medium text-red-700 transition-colors hover:bg-red-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-200 dark:border-red-800 dark:bg-slate-900 dark:text-red-300 dark:hover:bg-red-950/40"
-        >
-          <TrashIcon />
-          Usuń znamię
-        </button>
-      </section>
 
       <p className="text-xs text-slate-500 dark:text-slate-400">
         Status „{meta.label}” to Twoja prywatna organizacja dokumentacji, nie
