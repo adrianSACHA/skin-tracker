@@ -42,6 +42,14 @@ zostaje podjęty, ticket przenosi się do własnego effortu (albo tu dostaje
   Szczegóły i pomiary: `issues/08-kompresja-naglowka.md`.
 - **Ticket 09 dodany (2026-09-29).** Decyzja o nawigacji na telefonie
   odłożona świadomie — najpierw zobaczyć efekt odchudzenia nagłówka.
+- **Tickety 10 i 11 dodane (2026-09-29).** 10: przegląd wszystkich ekranów na
+  375×667 — za małe cele dotykowe (najgorsze: piny 20 px, suwak porównania
+  8 px). 11: wysyłka przypomnień nie mówi wprost, czy coś poszła, i nie ma
+  trybu testowego. **Decyzja: raz dziennie wystarczy** — częstotliwości nie
+  zmieniamy.
+- **Naprawione przy przeglądzie (2026-09-29):** mapa połykała gest przewijania
+  przy skali 1 (nie dało się przewinąć strony, łapiąc za zdjęcie); strzałki
+  nawigacyjne zamienione na `<` / `>`.
 
 ## Not yet specified (mgła)
 
@@ -70,10 +78,13 @@ zostaje podjęty, ticket przenosi się do własnego effortu (albo tu dostaje
 | 07 | task | [Znacznik przy „Kontrole” nie odświeżał się po zmianie danych](issues/07-znacznik-nie-odswieza-sie.md) | resolved |
 | 08 | task | [Nagłówek na telefonie zjadał 43% ekranu](issues/08-kompresja-naglowka.md) | resolved |
 | 09 | task | [Nawigacja na telefonie: zostawić, dolny pasek czy hamburger](issues/09-nawigacja-mobile.md) | needs-triage |
+| 10 | task | [Za małe cele dotykowe (piny, suwak, linki)](issues/10-cele-dotykowe.md) | needs-triage |
+| 11 | task | [Wysyłka przypomnień: nie widać, czy coś poszło](issues/11-wysylka-diagnostyka.md) | ready-for-agent |
 
 ## Frontier
 
-Do wzięcia bez decyzji: **04** (`ready-for-agent`).
+Do wzięcia bez decyzji: **04**, **11** (`ready-for-agent`).
 Wymagają Twojej decyzji: **01** (format i zakres eksportu), **05** (zakres
-audytu), **09** (nawigacja na telefonie).
+audytu), **09** (nawigacja na telefonie), **10** (które cele dotykowe
+naprawiamy i w jakiej kolejności).
 Zrobione: **02**, **03**, **07**, **08** (`resolved`). Odrzucone: **06** (`wontfix`).

@@ -106,6 +106,13 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 
 ### Zmienione
 
+- **Strzałki nawigacyjne zamienione na zwykłe chevrony** — „← Mapa ciała”
+  na „< Mapa ciała”, „Otwórz mapę ciała →” na „Otwórz mapę ciała >”
+  (również powroty w szczegółach znamienia i separator kroków segmentatora).
+  Nie ruszane: `▴`/`▾` przy zwijanych panelach (to wskaźniki zwijania),
+  strzałka w zdaniu o zakresie rozmiaru na wykresie oraz `□↑` w instrukcji
+  instalacji na iPhone (opisuje ikonę Udostępnij).
+
 - **Nagłówek na telefonie: 286 → 121 px (43% → 18% wysokości ekranu).**
   Komunikaty o instalacji (baner „Zainstaluj aplikację…” i podpowiedź dla iOS)
   przeniesione z nagłówka na dół strony, przycisk „Zainstaluj” na wąskim
@@ -145,6 +152,13 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
   przewija się do panelu szczegółów.
 
 ### Naprawione
+
+- **Mapa ciała połykała gest przewijania.** Przy skali 1 (bez przybliżenia)
+  nie dało się przewinąć strony, zaczynając przesunięcie palcem od zdjęcia —
+  biblioteka zoomu przechwytywała gest, mimo że nie było czego przesuwać.
+  Teraz przesuwanie zdjęcia jest wyłączone przy skali 1 (i nadal wyłączone
+  przy przesuwaniu pina), a włączone po przybliżeniu — czyli działa tam,
+  gdzie ma sens. Zmierzone: przed 0 px przewinięcia, po 285 px.
 
 - **Znacznik przy „Kontrole” odświeża się sam.** Liczył się tylko przy zmianie
   osoby lub interwału, więc po zmianie statusu (albo dodaniu zdjęcia,

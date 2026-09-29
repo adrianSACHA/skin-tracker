@@ -21,9 +21,9 @@ osób („Ja", „Syn").
 ## Jakość / stan repo
 
 - `npm run build` ✓, `npm test` → **86/86** ✓ (jednostkowe).
-- `npm run e2e` → **27/27** ✓ (Playwright, zmockowany Supabase, ~15 s),
+- `npm run e2e` → **30/30** ✓ (Playwright, zmockowany Supabase, ~15 s),
   w tym **budżet UI** na 375×667 (`e2e/ui-budget.spec.js`).
-- Tracker: **12 effortów, 80 ticketów (+1 spec): 75 `resolved`, 4 otwarte
+- Tracker: **12 effortów, 82 ticketów (+1 spec): 75 `resolved`, 6 otwartych
   i 1 `wontfix` w `.scratch/backlog/`.
 
 ## Funkcje
@@ -71,6 +71,8 @@ Backlog żyje w **`.scratch/backlog/`**. Otwarte:
 | 04 | Testy wizualne w e2e (zrzuty; budżet już jest) | ready-for-agent |
 | 05 | Audyt dostępności (a11y) | needs-triage |
 | 09 | Nawigacja na telefonie: zostawić / dolny pasek / hamburger | needs-triage |
+| 10 | Za małe cele dotykowe (piny 20 px, suwak 8 px, linki) | needs-triage |
+| 11 | Wysyłka przypomnień: brak sygnału „poszło/nie” + tryb testowy | ready-for-agent |
 
 Zamknięte: 02 („Usunięte” nie jest już zaległe), 03 (szukanie w Kontrolach),
 07 (znacznik przy „Kontrole” odświeża się sam), 08 (nagłówek na telefonie:
