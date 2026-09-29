@@ -21,9 +21,10 @@ osób („Ja", „Syn").
 ## Jakość / stan repo
 
 - `npm run build` ✓, `npm test` → **101/101** ✓ (jednostkowe).
-- `npm run e2e` → **30/30** ✓ (Playwright, zmockowany Supabase, ~15 s),
-  w tym **budżet UI** na 375×667 (`e2e/ui-budget.spec.js`).
-- Tracker: **12 effortów, 82 ticketów (+1 spec): 76 `resolved`, 5 otwartych
+- `npm run e2e` → **38/38** ✓ (Playwright, zmockowany Supabase, ~20 s),
+  w tym **budżet UI** na 375×667 (`e2e/ui-budget.spec.js`) oraz **zrzuty
+  ekranu** (`e2e/visual/screens.spec.js`) — wzorce osobno dla Windows i CI.
+- Tracker: **12 effortów, 84 ticketów (+1 spec): 79 `resolved`, 4 otwartych
   i 1 `wontfix` w `.scratch/backlog/`.
 
 ## Funkcje
@@ -71,14 +72,13 @@ Backlog żyje w **`.scratch/backlog/`**. Otwarte:
 | #  | Temat | Status |
 | -- | ----- | ------ |
 | 01 | Eksport / kopia zapasowa danych | needs-triage |
-| 04 | Testy wizualne w e2e (zrzuty; budżet już jest) | ready-for-agent |
 | 05 | Audyt dostępności (a11y) | needs-triage |
 | 09 | Nawigacja na telefonie: zostawić / dolny pasek / hamburger | needs-triage |
 | 10 | Za małe cele dotykowe (piny 20 px, suwak 8 px, linki) | needs-triage |
 
 Zamknięte: 02 („Usunięte” nie jest już zaległe), 03 (szukanie w Kontrolach),
 07 (znacznik przy „Kontrole” odświeża się sam), 08 (nagłówek na telefonie:
-286 → 121 px). Odrzucone: 06 (`wontfix`).
+286 → 121 px), 04 (zrzuty ekranu w e2e — patrz „Jakość”). Odrzucone: 06 (`wontfix`).
 
 Najważniejsze: **01** — jedyny realny sposób ochrony dorobku przed utratą
 projektu Supabase.

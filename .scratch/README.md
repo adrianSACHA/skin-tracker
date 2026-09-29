@@ -1,7 +1,7 @@
 # Tracker — indeks effortów
 
 Issues/specy żyją jako pliki markdown w `.scratch/` (patrz
-`docs/agents/issue-tracker.md`). Stan na 2026-09-28.
+`docs/agents/issue-tracker.md`). Stan na 2026-09-29.
 
 | Effort | Tickety | Status |
 | --- | --- | --- |
@@ -15,10 +15,10 @@ Issues/specy żyją jako pliki markdown w `.scratch/` (patrz
 | `lista-znamion-ux` | 1 | domknięty (zastąpiony) |
 | `ux-inspekcja` | 8 | domknięty |
 | `ux-inspekcja-2` | 5 | domknięty |
-| `e2e-smoke-testy` | 3 | domknięty |
-| `backlog` | 11 (5 `resolved`) | **otwarte** — patrz `.scratch/backlog/` |
+| `e2e-smoke-testy` | 5 | domknięty |
+| `backlog` | 11 (6 `resolved`) | **otwarte** — patrz `.scratch/backlog/` |
 
-**Razem 82 ticketów (+1 spec): 76 `resolved`, 5 otwartych + 1 `wontfix` w `backlog`.**
+**Razem 84 ticketów (+1 spec): 79 `resolved`, 4 otwartych + 1 `wontfix` w `backlog`.**
 
 Otwarte pozycje mają etykiety z `docs/agents/triage-labels.md`
 (`needs-triage`, `ready-for-agent`, `wontfix`), więc od razu widać, co czeka

@@ -212,6 +212,31 @@ Przydatne: `npm run e2e:ui` (tryb interaktywny), `npm run e2e:report` (raport
 HTML z ostatniego przebiegu). W CI oba zestawy testów uruchamia workflow
 `.github/workflows/e2e.yml` (na `push` do `main`, na PR i ręcznie).
 
+#### Zrzuty ekranu (regresje wyglądu)
+
+Kilka ekranów jest porównywanych pikselowo (`e2e/visual/screens.spec.js`).
+Baseline jest **osobny dla każdej platformy** — Playwright domyślnie dokleja
+do nazwy pliku `process.platform`, więc repo trzyma `*-win32.png` (Windows)
+oraz `*-linux.png` (CI). Bez tego zrzuty z Windowsa nie zgadzałyby się z tym,
+co renderuje CI na Linuksie (inne czcionki), a testy czerwieniłyby się bez
+powodu.
+
+```bash
+npm run e2e:visual          # tylko zrzuty ekranu
+npm run e2e:visual:update   # świadoma aktualizacja wzorców
+```
+
+Zasady:
+
+- **Wzorzec aktualizuj tylko wtedy, gdy naprawdę zmienił się wygląd.**
+  Czerwony test to sygnał, nie przeszkoda do obejścia.
+- Brakujący wzorzec dla danej platformy Playwright **zapisuje** (i test
+  przechodzi). W ten sposób pierwszy przebieg w CI tworzy linuxowe wzorce —
+  pobierz z przebiegu artefakt `baseline-linux` i zacommituj go.
+- Czas jest **zamrożony** (`page.clock.setFixedTime`), bo część ekranów
+  pokazuje terminy liczone od „dzisiaj”. Bez tego wzorce psułyby się same
+  po kilku miesiącach.
+
 ---
 
 ## 4. Sekrety w GitHub Actions

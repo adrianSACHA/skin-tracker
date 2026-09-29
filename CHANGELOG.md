@@ -10,6 +10,21 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 
 ### Dodane
 
+- **Zrzuty ekranu w testach** (`e2e/visual/screens.spec.js`). 8 ekranów
+  porównywanych pikselowo: logowanie, wybór osoby (z plakietką „zaległe”),
+  lista znamion (filtry zwinięte i rozwinięte), mapa ciała (pulpit i 375×667)
+  oraz **tryb ciemny**. Baseline jest **osobny dla każdej platformy**
+  (`-win32.png` lokalnie, `-linux.png` w CI), więc zestaw jest zielony i na
+  Windowsie, i w CI — bez Dockera. Czas jest **zamrożony**
+  (`page.clock.setFixedTime`), bo ekrany pokazują terminy liczone od „dzisiaj”
+  — inaczej wzorce psułyby się same po kilku miesiącach. Tolerancja
+  `maxDiffPixelRatio: 0.01`. Instrukcja: README → „Testy” → „Zrzuty ekranu”.
+
+- **Naprawiony niestabilny test gestu zoomu.** `zoomIn()` mnoży skalę od
+  bieżącej wartości, a test oczekiwał dokładnie `scale(1.5` — gdy drugie
+  kliknięcie trafiało w trwającą animację, wychodziło `1.65` (około 1 czerwony
+  przebieg na 3). Teraz jedno kliknięcie, czekanie na koniec animacji i
+  asercja „skala > 1”.
 - **Podsumowanie przebiegu przypomnień + tryb próbny.** Po każdym uruchomieniu
   workflow „Powiadomienia o kontrolach” na stronie przebiegu widać, ile
   powiadomień wysłano i **dlaczego nic nie poszło** (osobno „zbyt wcześnie”

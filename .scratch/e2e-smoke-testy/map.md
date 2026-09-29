@@ -39,11 +39,26 @@ Cel nie jest „pełne pokrycie UI”, tylko: wyłapywanie regresji po refaktora
   łapie `*.spec.js`, więc bez tego Vitest próbował uruchamiać testy
   Playwrighta i czerwienił się na 5 plikach. (ticket 02)
 
+- **Zrzuty ekranu — zrobione (ticket 04).** Baseline **per-platforma**
+  (`-win32.png` / `-linux.png`, bo Playwright dokleja `process.platform`) —
+  dzięki temu zestaw jest zielony lokalnie na Windowsie i w CI na Linuksie,
+  bez Dockera. Czas **zamrożony** (`page.clock.setFixedTime`), bo ekrany
+  pokazują terminy liczone od „dzisiaj”. Tolerancja `maxDiffPixelRatio: 0.01`.
+  Brakujący wzorzec Playwright zapisuje, więc CI samo tworzy linuxowe
+  (artefakt `baseline-linux` do zacommitowania). 8 wzorców, w tym tryb
+  ciemny. Szczegóły: `issues/04-zrzuty-ekranu.md`.
+- **Niestabilny test zoomu — naprawiony (ticket 05).** `zoomIn()` mnoży od
+  bieżącej skali, a test asertował dokładne `scale(1.5` — przy trafieniu w
+  trwającą animację wychodziło `1.65` (~1 czerwony na 3 przebiegi). Teraz
+  jedno kliknięcie + czekanie na koniec animacji + asercja „skala > 1”.
+  Szczegóły: `issues/05-niestabilny-zoom.md`.
+
 ## Not yet specified (mgła)
 
 - Testy z prawdziwym (lokalnym) Supabase — czy warto, czy mock wystarczy.
-- Testy wizualne (porównywanie zrzutów ekranu) — naturalne rozszerzenie,
-  ale najpierw stabilność.
+- Porównywanie zrzutów **na Linuksie** działa od momentu zacommitowania
+  linuxowych wzorców z artefaktu `baseline-linux` (patrz ticket 04). Do tego
+  czasu CI jest zielone, ale nie porównuje niczego na Linuksie.
 - Ścieżka „Zrób zdjęcie” (aparat) — niewiele da się zasymulować; zostaje
   ręcznie.
 - Segmentator (MediaPipe) — ciężki i wolny, pomijamy w e2e.
@@ -61,8 +76,13 @@ Cel nie jest „pełne pokrycie UI”, tylko: wyłapywanie regresji po refaktora
 | 01 | task | [Playwright + mock Supabase + osobny config Vite](issues/01-harness.md) | — | resolved |
 | 02 | task | [Scenariusze smoke (18 testów)](issues/02-scenariusze.md) | 01 | resolved |
 | 03 | task | [Workflow CI (jednostkowe + e2e)](issues/03-ci.md) | 01, 02 | resolved |
+| 04 | task | [Zrzuty ekranu (regresje wyglądu)](issues/04-zrzuty-ekranu.md) | 02 | resolved |
+| 05 | task | [Niestabilny test gestu zoomu](issues/05-niestabilny-zoom.md) | — | resolved |
 
 ## Frontier
 
-Brak — wszystkie 3 tickety **resolved**. Łącznie **18 testów e2e** (przebieg
-~7 s) obok 69 testów jednostkowych.
+Brak otwartych ticketów. Łącznie **38 testów e2e** (30 zachowania + 8 zrzutów
+ekranu; przebieg ~20 s) obok 101 testów jednostkowych.
+
+Poza trackerem, do dokończenia: zebrać linuxowe wzorce z artefaktu
+`baseline-linux` pierwszego przebiegu w CI i zacommitować je (patrz ticket 04).

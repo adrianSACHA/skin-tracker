@@ -56,6 +56,13 @@ zostaje podjęty, ticket przenosi się do własnego effortu (albo tu dostaje
   złapany błąd: brak rozszerzeń `.js` w importach → skrypt wywalał się po
   uruchomieniem przez Node. Szczegóły: `issues/11-wysylka-diagnostyka.md`.
 
+- **Ticket 04 zrobiony (2026-09-29)** — zrzuty ekranu. Przeniesiony do
+  effortu testów (`.scratch/e2e-smoke-testy/issues/04-zrzuty-ekranu.md`):
+  baseline per-platforma (Windows/Linux, bez Dockera), zamrożony czas,
+  8 wzorców. Przy okazji naprawiony niestabilny test gestu zoomu
+  (ticket 05 tego effortu) — `zoomIn()` mnożył od bieżącej skali, a test
+  asertował dokładne `scale(1.5`.
+
 ## Not yet specified (mgła)
 
 - Import danych (odtworzenie kopii zapasowej na nowym projekcie). Zależy od

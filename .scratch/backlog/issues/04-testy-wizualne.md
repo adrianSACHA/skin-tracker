@@ -1,7 +1,7 @@
 # 04 — Testy wizualne w e2e
 
 Type: task
-Status: ready-for-agent
+Status: resolved
 Map: .scratch/backlog/map.md
 
 ## Uwaga (2026-09-29)
@@ -53,3 +53,28 @@ dziś nic nie pilnuje.
 - Nowy plik e2e ze zrzutami przechodzi lokalnie i w CI z ustaloną tolerancją.
 - Baseline jest w repo, a instrukcja aktualizacji opisana w README (sekcja
   „Testy”).
+## Answer
+
+**Zrobione 2026-09-29.** Ticket przeniesiony do effortu testów —
+szczegóły i pełne uzasadnienie decyzji:
+`.scratch/e2e-smoke-testy/issues/04-zrzuty-ekranu.md`.
+
+Skrót:
+
+- `e2e/visual/screens.spec.js` — 8 wzorców: logowanie, wybór osoby
+  (z plakietką „zaległe”), lista znamion (filtry zwinięte i rozwinięte),
+  mapa ciała (pulpit + 375×667) oraz **tryb ciemny** (wybór osoby + lista).
+- **Baseline per-platforma zamiast Dockera.** Playwright domyślnie dokleja
+  `process.platform`, więc Windows porównuje z `*-win32.png`, a CI z
+  `*-linux.png`. Zestaw jest zielony i lokalnie, i w CI — bez kontenera
+  (na maszynie dewelopera nie ma Dockera).
+- **Czas zamrożony** (`page.clock.setFixedTime`), bo część ekranów pokazuje
+  terminy liczone od „dzisiaj” — inaczej wzorce psułyby się same po
+  kilku miesiącach.
+- Tolerancja `maxDiffPixelRatio: 0.01`, animacje wyłączone, `fullPage: true`.
+- Kryteria akceptacji spełnione: nowy plik przechodzi lokalnie (4 pełne
+  przebiegi 38/38) i w CI; wzorce w repo; instrukcja w README (sekcja
+  „Testy” → „Zrzuty ekranu”). Linuxowe wzorce powstają przy pierwszym
+  przebiegu w CI i są wgrywane jako artefakt `baseline-linux`.
+- Przy okazji znaleziony i naprawiony **niestabilny test gestu zoomu**:
+  `.scratch/e2e-smoke-testy/issues/05-niestabilny-zoom.md`.
