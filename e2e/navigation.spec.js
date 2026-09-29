@@ -36,8 +36,15 @@ test.describe('Nawigacja i mapa ciała', () => {
 
     await page.getByRole('link', { name: /^Kontrole/ }).click()
     await expect(page).toHaveURL(/#\/person\/person-1\/reminders$/)
+    // UWAGA: React Router zmienia adres w `startTransition`, więc URL zmienia
+    // się ZANIM wyrenderuje się nowy ekran. Czekamy na ekran, nie na adres —
+    // inaczej przez chwilę w DOM są oba widoki (i np. dwa linki „Mapa ciała”:
+    // ten z nawigacji i breadcrumb listy znamion).
+    await expect(
+      page.getByRole('heading', { name: /^Kontrole/ })
+    ).toBeVisible()
 
-    await page.getByRole('link', { name: 'Mapa ciała' }).click()
+    await page.getByRole('link', { name: 'Mapa ciała', exact: true }).click()
     await expect(page).toHaveURL(/#\/person\/person-1$/)
   })
 

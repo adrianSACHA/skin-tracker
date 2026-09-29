@@ -657,7 +657,7 @@ export default function BodyMap() {
           onClick={() => setShowAddView(false)}
           className="inline-flex items-center text-sm font-medium text-teal-700 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-300"
         >
-          ← Mapa ciała
+          &lt; Mapa ciała
         </button>
         <div>
           <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
@@ -977,7 +977,12 @@ export default function BodyMap() {
           centerOnInit
           doubleClick={{ disabled: true }}
           wheel={{ step: 0.15 }}
-          panning={{ disabled: Boolean(moveModeId) }}
+          // Przesuwanie zdjęcia ma sens tylko wtedy, gdy jest przybliżone.
+    // Przy skali 1 mapa i tak nie ma czego przesuwać, a biblioteka
+    // przechwytuje wtedy gest — przez co NIE DAŁO SIĘ przewinąć strony
+    // zaczynając przesunięcie palcem od zdjęcia (zostawało „martwe”).
+    // Wyłączając pan przy skali 1, oddajemy gest przeglądarce.
+    panning={{ disabled: Boolean(moveModeId) || scale <= 1 }}
         >
           {(utils) => {
             const inv = 1 / scale // przeciwskala, żeby piny nie rosły przy zoomie

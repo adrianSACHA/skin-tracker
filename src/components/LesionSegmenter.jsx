@@ -491,7 +491,7 @@ export default function LesionSegmenter({ imageUrl, onApply, onCancel }) {
           1. Skala {haveScale ? '✓' : ''}
         </button>
         <span aria-hidden="true" className="text-slate-400">
-          →
+          &gt;
         </span>
         <button
           type="button"

@@ -48,15 +48,15 @@ export default function LesionDetail() {
 
   // Skąd przyszliśmy - żeby „Wróć" cofnęło do poprzedniego widoku.
   const backBySection = {
-    list: { to: `/person/${personId}/list`, label: '← Wróć do listy znamion' },
+    list: { to: `/person/${personId}/list`, label: '< Wróć do listy znamion' },
     reminders: {
       to: `/person/${personId}/reminders`,
-      label: '← Wróć do kontroli',
+      label: '< Wróć do kontroli',
     },
   }
   const back = backBySection[location.state?.from] || {
     to: `/person/${personId}`,
-    label: '← Wróć do mapy ciała',
+    label: '< Wróć do mapy ciała',
   }
 
   const [lesion, setLesion] = useState(null)

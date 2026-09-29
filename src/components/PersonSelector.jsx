@@ -284,7 +284,7 @@ export default function PersonSelector() {
                   </span>
                   <PersonSummaryLine summary={summaries[person.id]} />
                   <span className="mt-1 block text-sm text-teal-700 dark:text-teal-300">
-                    Otwórz mapę ciała →
+                    Otwórz mapę ciała &gt;
                   </span>
                 </button>
               )}

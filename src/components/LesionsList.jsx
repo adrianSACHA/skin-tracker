@@ -98,7 +98,7 @@ export default function LesionsList() {
           to={`/person/${personId}`}
           className="inline-flex items-center text-sm font-medium text-teal-700 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-300"
         >
-          ← Mapa ciała
+          &lt; Mapa ciała
         </Link>
         <h1 className="mt-1 text-xl font-semibold text-slate-800 dark:text-slate-100">
           Lista znamion
