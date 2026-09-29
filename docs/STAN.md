@@ -20,10 +20,10 @@ osób („Ja", „Syn").
 
 ## Jakość / stan repo
 
-- `npm run build` ✓, `npm test` → **85/85** ✓ (jednostkowe).
-- `npm run e2e` → **20/20** ✓ (Playwright, zmockowany Supabase, ~10 s).
-- Tracker: **12 effortów, 77 ticketów (+1 spec): 72 `resolved`, 5 otwartych**
-  w `.scratch/backlog/`.
+- `npm run build` ✓, `npm test` → **86/86** ✓ (jednostkowe).
+- `npm run e2e` → **24/24** ✓ (Playwright, zmockowany Supabase, ~15 s).
+- Tracker: **12 effortów, 78 ticketów (+1 spec): 74 `resolved`, 3 otwarte
+  i 1 `wontfix` w `.scratch/backlog/`.
 
 ## Funkcje
 
@@ -61,17 +61,16 @@ osób („Ja", „Syn").
 
 ## Otwarte / do rozważenia
 
-Backlog żyje w **`.scratch/backlog/`** — 5 otwartych ticketów, każdy z etykietą
-triage (ticket 02 jest już `resolved`).
+Backlog żyje w **`.scratch/backlog/`**. Otwarte:
 
 | #  | Temat | Status |
 | -- | ----- | ------ |
 | 01 | Eksport / kopia zapasowa danych | needs-triage |
-| 02 | Znamiona „Usunięte” wciąż liczą się jako zaległe | resolved |
-| 03 | Wyszukiwanie i sortowanie w Kontrolach | ready-for-agent |
 | 04 | Testy wizualne w e2e | ready-for-agent |
 | 05 | Audyt dostępności (a11y) | needs-triage |
-| 06 | Wspólny wzorzec zwijanych paneli | wontfix |
+
+Zamknięte: 02 („Usunięte” nie jest już zaległe), 03 (szukanie w Kontrolach),
+07 (znacznik przy „Kontrole” odświeża się sam). Odrzucone: 06 (`wontfix`).
 
 Najważniejsze: **01** — jedyny realny sposób ochrony dorobku przed utratą
 projektu Supabase.

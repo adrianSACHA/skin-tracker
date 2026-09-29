@@ -10,6 +10,11 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 
 ### Dodane
 
+- **Szukanie w Kontrolach.** Pole „Szukaj kontroli” (nazwa znamienia albo
+  okolica ciała) ze stanem w adresie (`?q=`), licznikiem „N z M” i osobnym
+  komunikatem, gdy nic nie pasuje. Pasek „Zaległe / W ciągu 30 dni” zostaje
+  całkowity, żeby zgadzał się ze znacznikiem przy „Kontrole”.
+
 - **Mapa ciała — widoki z pełnego słownika okolic.** 17 predefiniowanych okolic
   ciała (`src/lib/bodyAreas.js`) w dropdownie; można też dodać własną nazwę
   okolicy i zmienić istniejącą. `body_maps.view_name` trzyma klucz słownika albo
@@ -124,6 +129,18 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
   przewija się do panelu szczegółów.
 
 ### Naprawione
+
+- **Znacznik przy „Kontrole” odświeża się sam.** Liczył się tylko przy zmianie
+  osoby lub interwału, więc po zmianie statusu (albo dodaniu zdjęcia,
+  przesunięciu terminu) pokazywał starą liczbę aż do przeładowania — na
+  Kontrolach licznik na stronie i znacznik w nagłówku pokazywały dwie różne
+  wartości. Nowy sygnał `notifyDueChanged()` (`src/lib/dueSignal.js`) plus
+  przeliczanie przy zmianie ekranu i powrocie do aplikacji.
+- **Menu „⋯” nie wychodzi już za dół ekranu.** `OverflowMenu` pilnował tylko
+  pozycji poziomej, więc w Kontrolach (do 9 pozycji „Przesuń o N tyg.”)
+  dolne pozycje były nieosiągalne, gdy przycisk był nisko na ekranie —
+  pozycji `fixed` nie da się doscrollować stroną. Teraz menu wybiera stronę
+  z większą ilością miejsca i ogranicza wysokość do tego, co się mieści.
 
 - **Znamiona „Usunięte” przestały być zaległe.** Status „Usunięte” nie był
   nigdzie pomijany przy liczeniu terminów, więc oznaczone nim znamię dalej

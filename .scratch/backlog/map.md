@@ -30,6 +30,12 @@ zostaje podjęty, ticket przenosi się do własnego effortu (albo tu dostaje
   `src/lib/lesionView.js` (bez zmian w `buildRows`) użyty w znaczniku
   „Kontrole”, liście Kontroli, karcie osoby i skrypcie Web Push.
   Szczegóły: `issues/02-usuniete-nie-jest-zalegle.md`.
+- **Tickety 03 i 07 zrobione (2026-09-28).** 03: szukanie w Kontrolach
+  (stan w adresie, wspólny `filterByQuery`), bez sortowania — świadomie.
+  07: sygnał `notifyDueChanged()` + przeliczanie przy zmianie ekranu i
+  powrocie do aplikacji. Szczegóły: `issues/03-*.md`, `issues/07-*.md`.
+- **Znaleziony przy 03 i naprawiony:** `OverflowMenu` nie pilnował pionu,
+  więc dolne pozycje menu w Kontrolach były nieosiągalne.
 
 ## Not yet specified (mgła)
 
@@ -51,13 +57,14 @@ zostaje podjęty, ticket przenosi się do własnego effortu (albo tu dostaje
 | -- | ---- | ----- | ------ |
 | 01 | task | [Eksport / kopia zapasowa danych](issues/01-eksport-kopia-zapasowa.md) | needs-triage |
 | 02 | task | [Znamiona „Usunięte” wciąż liczą się jako zaległe](issues/02-usuniete-nie-jest-zalegle.md) | resolved |
-| 03 | task | [Wyszukiwanie i sortowanie w Kontrolach](issues/03-szukanie-w-kontrolach.md) | ready-for-agent |
+| 03 | task | [Wyszukiwanie i sortowanie w Kontrolach](issues/03-szukanie-w-kontrolach.md) | resolved |
 | 04 | task | [Testy wizualne w e2e](issues/04-testy-wizualne.md) | ready-for-agent |
 | 05 | task | [Audyt dostępności (a11y)](issues/05-audyt-a11y.md) | needs-triage |
 | 06 | task | [Wspólny wzorzec zwijanych paneli](issues/06-wspolny-zwijany-wzorzec.md) | wontfix |
+| 07 | task | [Znacznik przy „Kontrole” nie odświeżał się po zmianie danych](issues/07-znacznik-nie-odswieza-sie.md) | resolved |
 
 ## Frontier
 
-Do wzięcia bez decyzji: **03**, **04** (`ready-for-agent`).
+Do wzięcia bez decyzji: **04** (`ready-for-agent`).
 Wymagają Twojej decyzji: **01** (format i zakres eksportu), **05** (zakres audytu).
-Zrobione: **02** (`resolved`). Odrzucone: **06** (`wontfix`).
+Zrobione: **02**, **03**, **07** (`resolved`). Odrzucone: **06** (`wontfix`).
