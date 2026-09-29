@@ -41,6 +41,19 @@ jobs:
       - name: Testy e2e
         run: npm run e2e
 
+      # Zrzuty ekranu maja baseline PER-PLATFORMA (Playwright dokleja do
+      # nazwy pliku `process.platform`). Windowsowe leza w repo; linuxowe
+      # powstaja przy pierwszym przebiegu w CI — pobierz ten artefakt i
+      # zacommituj, zeby kolejne przebiegi porownywaly z nimi.
+      - name: Baseline zrzutow ekranu (Linux)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: baseline-linux
+          path: e2e/visual/screens.spec.js-snapshots/
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Raport z testow e2e (na wypadek bledu)
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4

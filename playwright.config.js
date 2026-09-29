@@ -24,7 +24,18 @@ export default defineConfig({
   workers: process.env.CI ? 2 : undefined,
   reporter: [['list'], ['html', { open: 'never' }]],
   timeout: 30_000,
-  expect: { timeout: 8_000 },
+  expect: {
+    timeout: 8_000,
+    // Zrzuty ekranu (e2e/visual): tolerancja na drobny szum antyaliasingu,
+    // ale nie na realna zmiane ukladu. Animacje wylaczone = determinizm.
+    // Baseline jest per-platforma (Playwright dokleja process.platform),
+    // wiec Windows i Linux maja wlasne pliki wzorcowe.
+    toHaveScreenshot: {
+      maxDiffPixelRatio: 0.01,
+      animations: 'disabled',
+      caret: 'hide',
+    },
+  },
 
   use: {
     baseURL: BASE_URL,
