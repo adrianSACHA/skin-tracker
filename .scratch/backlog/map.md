@@ -36,6 +36,12 @@ zostaje podjęty, ticket przenosi się do własnego effortu (albo tu dostaje
   powrocie do aplikacji. Szczegóły: `issues/03-*.md`, `issues/07-*.md`.
 - **Znaleziony przy 03 i naprawiony:** `OverflowMenu` nie pilnował pionu,
   więc dolne pozycje menu w Kontrolach były nieosiągalne.
+- **Ticket 08 zrobiony (2026-09-29).** Nagłówek na 375×667: 286 → 121 px
+  (baner instalacji na dół, „Zainstaluj” jako ikona, panel przypomnień
+  zwinięty domyślnie). Zabezpieczone budżetem `e2e/ui-budget.spec.js`.
+  Szczegóły i pomiary: `issues/08-kompresja-naglowka.md`.
+- **Ticket 09 dodany (2026-09-29).** Decyzja o nawigacji na telefonie
+  odłożona świadomie — najpierw zobaczyć efekt odchudzenia nagłówka.
 
 ## Not yet specified (mgła)
 
@@ -62,9 +68,12 @@ zostaje podjęty, ticket przenosi się do własnego effortu (albo tu dostaje
 | 05 | task | [Audyt dostępności (a11y)](issues/05-audyt-a11y.md) | needs-triage |
 | 06 | task | [Wspólny wzorzec zwijanych paneli](issues/06-wspolny-zwijany-wzorzec.md) | wontfix |
 | 07 | task | [Znacznik przy „Kontrole” nie odświeżał się po zmianie danych](issues/07-znacznik-nie-odswieza-sie.md) | resolved |
+| 08 | task | [Nagłówek na telefonie zjadał 43% ekranu](issues/08-kompresja-naglowka.md) | resolved |
+| 09 | task | [Nawigacja na telefonie: zostawić, dolny pasek czy hamburger](issues/09-nawigacja-mobile.md) | needs-triage |
 
 ## Frontier
 
 Do wzięcia bez decyzji: **04** (`ready-for-agent`).
-Wymagają Twojej decyzji: **01** (format i zakres eksportu), **05** (zakres audytu).
-Zrobione: **02**, **03**, **07** (`resolved`). Odrzucone: **06** (`wontfix`).
+Wymagają Twojej decyzji: **01** (format i zakres eksportu), **05** (zakres
+audytu), **09** (nawigacja na telefonie).
+Zrobione: **02**, **03**, **07**, **08** (`resolved`). Odrzucone: **06** (`wontfix`).

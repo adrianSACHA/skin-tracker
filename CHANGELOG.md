@@ -10,6 +10,13 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 
 ### Dodane
 
+- **Budżet UI jako test** (`e2e/ui-budget.spec.js`). Na 375×667 pilnuje, że
+  nagłówek ≤ 130 px na każdym ekranie oraz że pierwszy wiersz listy i licznik
+  „Zaległe” są nad linią zgięcia. Celowo pomiar, nie zrzut ekranu — liczby są
+  deterministyczne, więc nie zależą od czcionek i systemu (baseline z Windowsa
+  nie zgadza się z CI). Test wymusza stan „gotowe do instalacji”, bo bez tego
+  przechodziłby na zepsutym układzie.
+
 - **Szukanie w Kontrolach.** Pole „Szukaj kontroli” (nazwa znamienia albo
   okolica ciała) ze stanem w adresie (`?q=`), licznikiem „N z M” i osobnym
   komunikatem, gdy nic nie pasuje. Pasek „Zaległe / W ciągu 30 dni” zostaje
@@ -98,6 +105,15 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
   README.
 
 ### Zmienione
+
+- **Nagłówek na telefonie: 286 → 121 px (43% → 18% wysokości ekranu).**
+  Komunikaty o instalacji (baner „Zainstaluj aplikację…” i podpowiedź dla iOS)
+  przeniesione z nagłówka na dół strony, przycisk „Zainstaluj” na wąskim
+  ekranie to sama ikona (z `aria-label` i pełnym celem dotykowym), a panel
+  „Przypomnienia na telefon” na Kontrolach jest domyślnie zwinięty do jednej
+  linii (miał 297 px). Efekt: pierwsza kontrola na liście startuje na 366 px
+  zamiast 531, a licznik „Zaległe” na Kontrolach jest wreszcie nad linią
+  zgięcia (720 → 314 px).
 
 - **Mapa ciała — układ akcji:** zakładki widoków na samej górze; „+ Dodaj widok"
   w strefie zakładek, „+ Dodaj znamię" przy mapie (akcje rozdzielone).

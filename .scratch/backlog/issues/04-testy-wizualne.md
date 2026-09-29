@@ -4,6 +4,16 @@ Type: task
 Status: ready-for-agent
 Map: .scratch/backlog/map.md
 
+## Uwaga (2026-09-29)
+
+Część „liczbowa” tego ticketu **już istnieje**: `e2e/ui-budget.spec.js`
+mierzy budżet miejsca na 375×667 (nagłówek ≤ 130 px, pierwsza treść nad
+linią zgięcia). Powstał przy tickecie 08 i celowo nie jest zrzutem ekranu —
+liczby są deterministyczne, więc działają tak samo lokalnie i w CI.
+
+Zostaje druga część: **zrzuty ekranu** (`toHaveScreenshot`) dla regresji
+wyglądu, których pomiar nie złapie. Poniższy plan nadal aktualny.
+
 ## Problem
 
 Istniejące 18 testów e2e (`e2e/`) sprawdzają **treść i zachowanie**, ale nie

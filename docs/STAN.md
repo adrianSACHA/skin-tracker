@@ -1,6 +1,6 @@
 # Stan projektu — Skin Tracker
 
-> Krótki, aktualizowany ręcznie przegląd. Ostatnia aktualizacja: **2026-09-28**.
+> Krótki, aktualizowany ręcznie przegląd. Ostatnia aktualizacja: **2026-09-29**.
 > Szczegóły: `README.md` (jak uruchomić), `CONTEXT.md` (słownik domeny),
 > `CHANGELOG.md` (historia wdrożeń), `.scratch/README.md` (indeks ticketów).
 
@@ -21,14 +21,16 @@ osób („Ja", „Syn").
 ## Jakość / stan repo
 
 - `npm run build` ✓, `npm test` → **86/86** ✓ (jednostkowe).
-- `npm run e2e` → **24/24** ✓ (Playwright, zmockowany Supabase, ~15 s).
-- Tracker: **12 effortów, 78 ticketów (+1 spec): 74 `resolved`, 3 otwarte
+- `npm run e2e` → **27/27** ✓ (Playwright, zmockowany Supabase, ~15 s),
+  w tym **budżet UI** na 375×667 (`e2e/ui-budget.spec.js`).
+- Tracker: **12 effortów, 80 ticketów (+1 spec): 75 `resolved`, 4 otwarte
   i 1 `wontfix` w `.scratch/backlog/`.
 
 ## Funkcje
 
 | Obszar | Stan |
 | --- | --- |
+| **Telefon** | nagłówek ≤ 121 px (43% → 18% wysokości); komunikaty o instalacji na dole; panel przypomnień zwinięty; budżet UI pilnowany testem |
 | **Wybór osoby** | karta z liczbami (znamiona, zdjęcia, najbliższa kontrola + „zaległe” gdy minęła); zmiana nazwy i usunięcie osoby w menu „⋯” |
 | **Mapa ciała** | widoki ze słownika 17 okolic + własne nazwy; piny (dodaj / przesuń / edytuj); zdjęcie tła per widok (aparat lub plik); kontekst okolicy w nazwie znamienia; panel pina jako bottom sheet na telefonie |
 | **Znamię** | zdjęcia z edycją (obrót / odbicia) i kompresją; pomiar z obrysu (MediaPipe, geometria); notatki ABCDE; status; porównanie przeciąganym suwakiem; wykres rozmiaru; powiększanie zdjęć (lightbox) |
@@ -66,11 +68,13 @@ Backlog żyje w **`.scratch/backlog/`**. Otwarte:
 | #  | Temat | Status |
 | -- | ----- | ------ |
 | 01 | Eksport / kopia zapasowa danych | needs-triage |
-| 04 | Testy wizualne w e2e | ready-for-agent |
+| 04 | Testy wizualne w e2e (zrzuty; budżet już jest) | ready-for-agent |
 | 05 | Audyt dostępności (a11y) | needs-triage |
+| 09 | Nawigacja na telefonie: zostawić / dolny pasek / hamburger | needs-triage |
 
 Zamknięte: 02 („Usunięte” nie jest już zaległe), 03 (szukanie w Kontrolach),
-07 (znacznik przy „Kontrole” odświeża się sam). Odrzucone: 06 (`wontfix`).
+07 (znacznik przy „Kontrole” odświeża się sam), 08 (nagłówek na telefonie:
+286 → 121 px). Odrzucone: 06 (`wontfix`).
 
 Najważniejsze: **01** — jedyny realny sposób ochrony dorobku przed utratą
 projektu Supabase.
