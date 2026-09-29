@@ -45,10 +45,8 @@ Odrzucone alternatywy:
 - **Wysoka tolerancja** (`maxDiffPixelRatio` ~0.1) — test przestaje cokolwiek
   łapać, więc nie osiąga celu.
 
-Bootstrapping: brakujący wzorzec Playwright **zapisuje**, a test przechodzi
-(domyślne `updateSnapshots: 'missing'`). Dlatego pierwszy przebieg w CI tworzy
-linuxowe wzorce i **nie czerwieni CI** — workflow wgrywa je jako artefakt
-`baseline-linux` do zacommitowania. Windowsowe wzorce są w repo.
+Bootstrapping wzorców: patrz „Poprawka po pierwszym przebiegu w CI” na końcu
+— pierwsze założenie było błędne.
 
 ### 2. Czas zamrożony
 
@@ -90,8 +88,33 @@ pilnowało.
 - Dopisane skrypty `npm run e2e:visual` i `npm run e2e:visual:update`, sekcja
   „Zrzuty ekranu" w README oraz artefakt `baseline-linux` w CI.
 
-### Uwaga do zweryfikowania
+### Poprawka po pierwszym przebiegu w CI
 
-Linuxowe wzorce **nie istnieją jeszcze w repo** — powstaną przy pierwszym
-przebiegu w CI. Do tego czasu CI jest zielone (brakujący wzorzec jest zapisywany),
-ale zestaw porównuje na Linuksie dopiero od momentu zacommitowania artefaktu.
+Pierwsza wersja tego ticketu **błędnie zakładała**, że brakujący wzorzec w CI
+zostanie zapisany („zapisz i idź dalej”). Jest odwrotnie: w CI Playwright
+traktuje brak wzorca jako **błąd**. Pierwszy przebieg na Linuksie zaczerwienił
+build na 7 testach:
+
+```
+Error: A snapshot doesn't exist at .../01-logowanie-chromium-linux.png, writing actual.
+7 failed, 31 passed
+```
+
+Naprawione tak:
+
+- `expectScreenshot()` w `screens.spec.js` **pomija** test, gdy brak wzorca dla
+  bieżącej platformy, i podaje w komunikacie, jak go wygenerować. CI jest przez
+  to zielone, ale **nie udaje**, że cokolwiek porównuje.
+- Wzorce dla Linuksa generuje się **jawnie**: `workflow_dispatch` z opcją
+  `update_visual_baselines` (`playwright test visual --update-snapshots` +
+  `E2E_VISUAL_UPDATE=1`), wynik leci do artefaktu `baseline-linux`.
+
+Sprawdzone lokalnie w trzech wariantach:
+
+1. brak wzorca + `CI=1` → test **pominięty** (zielono),
+2. `CI=1` + `E2E_VISUAL_UPDATE=1` + `--update-snapshots` → wzorzec **zapisany**,
+3. regeneracja wzorca daje plik **bit w bit** identyczny z istniejącym
+   (hash `DA5B1AE8...`) — czyli porównanie jest zdeterminowane.
+
+Wniosek: nie zakładać zachowania narzędzia w CI — sprawdzić je (`CI=1` da się
+ustawić lokalnie).

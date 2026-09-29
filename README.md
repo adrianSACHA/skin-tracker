@@ -230,9 +230,14 @@ Zasady:
 
 - **Wzorzec aktualizuj tylko wtedy, gdy naprawdę zmienił się wygląd.**
   Czerwony test to sygnał, nie przeszkoda do obejścia.
-- Brakujący wzorzec dla danej platformy Playwright **zapisuje** (i test
-  przechodzi). W ten sposób pierwszy przebieg w CI tworzy linuxowe wzorce —
-  pobierz z przebiegu artefakt `baseline-linux` i zacommituj go.
+- **W CI brakujący wzorzec to błąd**, więc testy wizualne same się
+  **pomijają**, gdy nie ma wzorca dla danej platformy (dziś: Linux). Build
+  przez to nie czerwienieje, ale też nic nie porównuje — dlatego warto jak
+  najszybciej zacommitować wzorce dla Linuksa.
+- **Wygenerowanie wzorców dla Linuksa:** uruchom workflow „Testy” ręcznie
+  (`workflow_dispatch`) z zaznaczoną opcją **`update_visual_baselines`**,
+  pobierz artefakt `baseline-linux` i zacommituj pliki. Lokalnie robi to
+  `npm run e2e:visual:update`.
 - Czas jest **zamrożony** (`page.clock.setFixedTime`), bo część ekranów
   pokazuje terminy liczone od „dzisiaj”. Bez tego wzorce psułyby się same
   po kilku miesiącach.

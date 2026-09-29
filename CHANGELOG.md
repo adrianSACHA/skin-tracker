@@ -18,7 +18,11 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
   Windowsie, i w CI — bez Dockera. Czas jest **zamrożony**
   (`page.clock.setFixedTime`), bo ekrany pokazują terminy liczone od „dzisiaj”
   — inaczej wzorce psułyby się same po kilku miesiącach. Tolerancja
-  `maxDiffPixelRatio: 0.01`. Instrukcja: README → „Testy” → „Zrzuty ekranu”.
+  `maxDiffPixelRatio: 0.01`. Gdy brakuje wzorca dla danej platformy, test
+  **pomija się** — w CI brak wzorca jest błędem, a nie „zapisz i idź dalej”
+  (pierwszy przebieg na Linuksie zaczerwienił build na 7 testach, dopóki tego
+  nie złapano). Wzorce dla Linuksa generuje się ręcznie: workflow „Testy” →
+  `update_visual_baselines`. Instrukcja: README → „Testy” → „Zrzuty ekranu”.
 
 - **Naprawiony niestabilny test gestu zoomu.** `zoomIn()` mnoży skalę od
   bieżącej wartości, a test oczekiwał dokładnie `scale(1.5` — gdy drugie
