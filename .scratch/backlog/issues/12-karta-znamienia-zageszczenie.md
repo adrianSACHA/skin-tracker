@@ -1,7 +1,7 @@
 # 12 — Ekran znamienia: za dużo treści naraz
 
 Type: task
-Status: needs-info
+Status: resolved
 Map: .scratch/backlog/map.md
 
 ## Problem
@@ -97,8 +97,38 @@ Zabezpieczone nowym `e2e/lesion-detail.spec.js` (4 testy — ten ekran nie miał
 wcześniej **żadnego** pokrycia) z budżetem wysokości **≤ 2150 px**, czyli
 poniżej starej wartości: samo przywrócenie sekcji „Zarządzanie” wywali test.
 
-## Otwarte: B — czy dzielić ekran?
+## Zrobione: B — zakładki (2026-09-29)
 
-Do decyzji właściciela: **zakładki** (np. Przegląd / Zdjęcia / Trend) czy
-**zostawić 2,9 ekranu**. Świadomie nie wprowadzam zwijanych paneli — ticket 06
-(`wontfix`) odrzucił wspólny wzorzec zwijania.
+Treść podzielona na trzy zakładki: **Przegląd / Zdjęcia / Trend**, stan w
+adresie (`?tab=zdjecia`) — spójnie z filtrami listy znamion, więc zakładka
+przeżywa odświeżenie i można ją podlinkować. Wzorzec ARIA
+(`role="tablist"` / `tab` / `tabpanel`) z obsługą strzałek, Home i End.
+
+Zmierzone zawartości zakładek (375×667):
+
+| Zakładka | Zawartość |
+| --- | --- |
+| Przegląd (porównanie) | 499 px |
+| Zdjęcia (historia + ABCDE) | 378 px |
+| Trend (wykres) | 390 px |
+
+Przed zmianami cała treść renderowała się naraz: **1359 px**. Teraz największa
+zakładka to 499 px, czyli **2,7× mniej treści naraz**. Świadomie nie
+wprowadzam zwijanych paneli — ticket 06 (`wontfix`) odrzucił wspólny wzorzec
+zwijania.
+
+Budżet w `e2e/lesion-detail.spec.js` pilnuje **zawartości zakładki**
+(≤ 600 px), a nie wysokości strony: poza nią jest stały chrom aplikacji
+(~600 px), identyczny na każdym ekranie. Pilnowanie wysokości strony
+mieszałoby zmiany w chromie ze zmianami treści.
+
+## Answer
+
+A + B zrobione. Ekran: 2244 px i cztery sekcje widoczne naraz → trzy zakładki
+po ≤ 499 px zawartości, każda z własnym stanem w adresie. Doszło
+`e2e/lesion-detail.spec.js` (6 testów — ekran nie miał wcześniej żadnego
+pokrycia) oraz wzorzec zrzutu `09-znamie-przeglad`.
+
+**Konsekwencja, która wyszła z pomiaru:** Przegląd nadal wymaga ~0,6 ekranu
+przewijania, ale to zasługa **chromu** (nagłówek, stopka, powrót, tytuł, rząd
+akcji, pasek zakładek), nie treści znamienia → osobny ticket 13.

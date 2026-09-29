@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams, useParams } from 'react-router-dom'
 import {
   CartesianGrid,
   Line,
@@ -41,6 +41,14 @@ function TrashIcon() {
   )
 }
 
+// Sekcje ekranu znamienia. Trzymamy je w adresie (?tab=), tak jak filtry listy
+// znamion — dzięki temu działa „wstecz” i odświeżenie strony.
+const TABS = [
+  { key: 'przeglad', label: 'Przegląd' },
+  { key: 'zdjecia', label: 'Zdjęcia' },
+  { key: 'trend', label: 'Trend' },
+]
+
 export default function LesionDetail() {
   const { personId, lesionId } = useParams()
   const navigate = useNavigate()
@@ -69,6 +77,7 @@ export default function LesionDetail() {
   const [confirm, setConfirm] = useState(null) // { kind: 'lesion' | 'photo', photo? }
   const [deleting, setDeleting] = useState(false)
 
+  const [searchParams, setSearchParams] = useSearchParams()
   const [compareA, setCompareA] = useState(null) // id zdjęcia
   const [compareB, setCompareB] = useState(null)
   const [opacity, setOpacity] = useState(50)
@@ -336,8 +345,34 @@ export default function LesionDetail() {
     },
   ]
 
+  // Zakładka w adresie — spójnie z filtrami na liście znamion.
+  const tabParam = searchParams.get('tab')
+  const tab = TABS.some((t) => t.key === tabParam) ? tabParam : TABS[0].key
+
+  const setTab = (key) => {
+    const next = new URLSearchParams(searchParams)
+    if (key === TABS[0].key) next.delete('tab')
+    else next.set('tab', key)
+    setSearchParams(next, { replace: true })
+  }
+
+  // Strzałki / Home / End przełączają zakładki (wzorzec ARIA dla tablist).
+  const onTabKeyDown = (event) => {
+    const index = TABS.findIndex((t) => t.key === tab)
+    let next = null
+    if (event.key === 'ArrowRight') next = TABS[(index + 1) % TABS.length]
+    else if (event.key === 'ArrowLeft')
+      next = TABS[(index - 1 + TABS.length) % TABS.length]
+    else if (event.key === 'Home') next = TABS[0]
+    else if (event.key === 'End') next = TABS[TABS.length - 1]
+    if (!next) return
+    event.preventDefault()
+    setTab(next.key)
+    document.getElementById(`tab-${next.key}`)?.focus()
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <button
         type="button"
         onClick={goBack}
@@ -409,20 +444,56 @@ export default function LesionDetail() {
         />
       ) : null}
 
-      {/* Brak zdjęć */}
-      {photos.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
-          Brak zdjęć. Dodaj pierwsze zdjęcie powyżej.
-        </div>
-      ) : (
-        <>
-          {/* Porównanie (opacity slider) */}
-          {photos.length >= 2 ? (
+      {/* Zakładki sekcji ekranu. */}
+      <div
+        role="tablist"
+        aria-label="Sekcje znamienia"
+        onKeyDown={onTabKeyDown}
+        className="flex gap-1 rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900"
+      >
+        {TABS.map((t) => {
+          const active = t.key === tab
+          return (
+            <button
+              key={t.key}
+              id={`tab-${t.key}`}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              aria-controls={`panel-${t.key}`}
+              tabIndex={active ? 0 : -1}
+              onClick={() => setTab(t.key)}
+              className={[
+                'min-h-[44px] flex-1 rounded-lg px-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
+                active
+                  ? 'bg-teal-700 text-white dark:bg-teal-600'
+                  : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800',
+              ].join(' ')}
+            >
+              {t.label}
+            </button>
+          )
+        })}
+      </div>
+
+      <div
+        role="tabpanel"
+        id={`panel-${tab}`}
+        aria-labelledby={`tab-${tab}`}
+        className="space-y-4"
+      >
+        {/* PRZEGLĄD — porównanie zdjęć */}
+        {tab === 'przeglad' ? (
+          photos.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+              Brak zdjęć. Dodaj pierwsze zdjęcie powyżej.
+            </div>
+          ) : photos.length >= 2 ? (
             <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
               <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">
                 Porównanie zdjęć
               </h2>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label
                     htmlFor="compare-a"
@@ -517,9 +588,35 @@ export default function LesionDetail() {
                 </span>
               </div>
             </section>
-          ) : null}
+          ) : (
+            // Jedno zdjęcie — nie ma czego porównywać, ale pokazujemy je i
+            // mówimy wprost, co odblokuje suwak.
+            <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+              <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">
+                Porównanie zdjęć
+              </h2>
+              <div className="relative mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-xl border border-slate-200 bg-black/5 dark:border-slate-800 dark:bg-black/40">
+                <SignedImage
+                  path={photoA?.photo_url}
+                  alt={`Zdjęcie ${photoA ? formatDate(photoA.taken_at) : ''}`}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              </div>
+              <p className="text-sm text-slate-600 dark:text-slate-300">
+                To na razie jedyne zdjęcie tego znamienia. Gdy dodasz drugie,
+                pojawi się tu suwak do porównywania.
+              </p>
+            </section>
+          )
+        ) : null}
 
-          {/* Oś czasu zdjęć + ABCDE */}
+        {/* ZDJĘCIA — oś czasu + notatki ABCDE */}
+        {tab === 'zdjecia' ? (
+          photos.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+              Brak zdjęć. Dodaj pierwsze zdjęcie powyżej.
+            </div>
+          ) : (
           <section className="space-y-3">
             <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">
               Historia zdjęć
@@ -583,8 +680,12 @@ export default function LesionDetail() {
               ))}
             </ol>
           </section>
-          {/* Wykres rozmiaru */}
-          {sizeData.length >= 2 ? (
+          )
+        ) : null}
+
+        {/* TREND — wykres rozmiaru */}
+        {tab === 'trend' ? (
+          sizeData.length >= 2 ? (
             <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
               <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">
                 Trend rozmiaru (mm)
@@ -630,10 +731,14 @@ export default function LesionDetail() {
                 </>
               ) : null}
             </section>
-          ) : null}
-
-        </>
-      )}
+          ) : (
+            <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+              Trend pojawi się, gdy będą co najmniej dwa zdjęcia z zapisanym
+              rozmiarem (pomiar z obrysu).
+            </div>
+          )
+        ) : null}
+      </div>
 
       <p className="text-xs text-slate-500 dark:text-slate-400">
         Status „{meta.label}” to Twoja prywatna organizacja dokumentacji, nie

@@ -134,13 +134,17 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 
 ### Zmienione
 
-- **Ekran znamienia — akcje rzadkie w menu „⋯”.** Usuwanie znamienia i zmiana
-  statusu przeniesione z widoku do menu (status jako pozycje z ✓, `aria-checked`);
-  zniknęła stała czerwona sekcja „Zarządzanie” (186 px) i osobny akapit
-  o interwale w rzędzie akcji. Ekran z 2244 px → **1934 px** (3,4 → 2,9 ekranu
-  na 375×667). Nowe `e2e/lesion-detail.spec.js` (4 testy, ten ekran nie miał
-  pokrycia) pilnuje budżetu wysokości **≤ 2150 px** — poniżej starej wartości,
-  więc powrót czerwonego bloku od razu czerwieni test.
+- **Ekran znamienia — akcje rzadkie w menu „⋯” i podział na zakładki.**
+  Usuwanie znamienia i zmiana statusu przeniesione z widoku do menu (status
+  jako pozycje z ✓, `aria-checked`); zniknęła stała czerwona sekcja
+  „Zarządzanie” (186 px) i osobny akapit o interwale w rzędzie akcji.
+  Treść podzielona na zakładki **Przegląd / Zdjęcia / Trend** ze stanem
+  w adresie (`?tab=`), więc działa odświeżenie i podlinkowanie; wzorzec ARIA
+  z obsługą strzałek. Cała treść renderowała się naraz (1359 px) — teraz
+  największa zakładka to **499 px**. Doszło `e2e/lesion-detail.spec.js`
+  (6 testów — ekran nie miał wcześniej żadnego pokrycia) i wzorzec zrzutu
+  `09-znamie-przeglad`; budżet pilnuje zawartości zakładki (≤ 600 px),
+  bo wysokość strony zdominował stały chrom aplikacji (ticket 13).
 
 - **Strzałki nawigacyjne zamienione na zwykłe chevrony** — „← Mapa ciała”
   na „< Mapa ciała”, „Otwórz mapę ciała →” na „Otwórz mapę ciała >”

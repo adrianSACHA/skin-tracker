@@ -24,7 +24,7 @@ osób („Ja", „Syn").
 - `npm run e2e` → **38/38** ✓ (Playwright, zmockowany Supabase, ~20 s),
   w tym **budżet UI** na 375×667 (`e2e/ui-budget.spec.js`) oraz **zrzuty
   ekranu** (`e2e/visual/screens.spec.js`) — wzorce osobno dla Windows i CI.
-- Tracker: **12 effortów, 85 ticketów (+1 spec): 79 `resolved`, 5 otwartych
+- Tracker: **12 effortów, 86 ticketów (+1 spec): 80 `resolved`, 4 otwartych
   i 1 `wontfix` w `.scratch/backlog/`.
 
 ## Funkcje
@@ -34,7 +34,7 @@ osób („Ja", „Syn").
 | **Telefon** | nagłówek ≤ 121 px (43% → 18% wysokości); komunikaty o instalacji na dole; panel przypomnień zwinięty; budżet UI pilnowany testem |
 | **Wybór osoby** | karta z liczbami (znamiona, zdjęcia, najbliższa kontrola + „zaległe” gdy minęła); zmiana nazwy i usunięcie osoby w menu „⋯” |
 | **Mapa ciała** | widoki ze słownika 17 okolic + własne nazwy; piny (dodaj / przesuń / edytuj); zdjęcie tła per widok (aparat lub plik); kontekst okolicy w nazwie znamienia; panel pina jako bottom sheet na telefonie |
-| **Znamię** | zdjęcia z edycją (obrót / odbicia) i kompresją; pomiar z obrysu (MediaPipe, geometria); notatki ABCDE; status (zmiana z menu „⋯”); porównanie przeciąganym suwakiem; wykres rozmiaru; powiększanie zdjęć (lightbox) |
+| **Znamię** | zdjęcia z edycją (obrót / odbicia) i kompresją; pomiar z obrysu (MediaPipe, geometria); notatki ABCDE; status (menu „⋯”); zakładki Przegląd / Zdjęcia / Trend; porównanie przeciąganym suwakiem; wykres rozmiaru; powiększanie zdjęć (lightbox) |
 | **Lista znamion** | filtr po statusie + sortowanie po terminie kontroli; stan w URL |
 | **Kontrole** | terminy, przesuwanie, ustawienia; panel „Przypomnienia na telefon" (instalacja + zgoda + push ze statusem); **3 poziomy przypomnień**: `.ics`, in‑app, **Web Push w tle** |
 | **PWA** | manifest + ikony, przycisk **„Zainstaluj"** (Android: prompt; iOS: instrukcja), service worker (obsługa push) |
@@ -73,13 +73,14 @@ Backlog żyje w **`.scratch/backlog/`**. Otwarte:
 | -- | ----- | ------ |
 | 01 | Eksport / kopia zapasowa danych | needs-triage |
 | 05 | Audyt dostępności (a11y) | needs-triage |
-| 09 | Nawigacja na telefonie: zostawić / dolny pasek / hamburger | needs-triage |
 | 10 | Za małe cele dotykowe (piny 20 px, suwak 8 px, linki) | needs-triage |
-| 12 | Ekran znamienia: 3,4 → 2,9 ekranu; zostaje decyzja o zakładkach (B) | needs-info |
+| 13 | Chrom aplikacji zjada ~600 px każdego ekranu | needs-triage |
 
 Zamknięte: 02 („Usunięte” nie jest już zaległe), 03 (szukanie w Kontrolach),
 07 (znacznik przy „Kontrole” odświeża się sam), 08 (nagłówek na telefonie:
-286 → 121 px), 04 (zrzuty ekranu w e2e — patrz „Jakość”). Odrzucone: 06 (`wontfix`).
+286 → 121 px), 04 (zrzuty ekranu w e2e — patrz „Jakość”), 12 (ekran znamienia: akcje w menu
+„⋯” + zakładki). Odrzucone: 06 (`wontfix`), 09 (dolny pasek nie zmniejsza
+chromu — patrz ticket 13).
 
 Najważniejsze: **01** — jedyny realny sposób ochrony dorobku przed utratą
 projektu Supabase.

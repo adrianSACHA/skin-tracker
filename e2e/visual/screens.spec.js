@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { expect, test } from '@playwright/test'
-import { mockSupabase } from '../support/mock-supabase.js'
+import { makeData, mockSupabase } from '../support/mock-supabase.js'
 import {
   BASE_PATH,
   loginAsDemo,
@@ -86,6 +86,22 @@ async function expectScreenshot(page, name) {
   }
 
   await expect(page).toHaveScreenshot(name, { fullPage: true })
+}
+
+// Zdjęcie znamienia (kształt jak w tabeli `lesion_photos`).
+function photo(id, taken, size) {
+  return {
+    id,
+    lesion_id: 'lesion-1',
+    photo_url: `user-e2e-1/person-1/lesion-1/${id}.webp`,
+    taken_at: taken,
+    size_mm: size,
+    notes: null,
+    asymmetry: false,
+    border_irregular: false,
+    color_description: null,
+    evolution_notes: null,
+  }
 }
 
 // Otwiera aplikacje z zamrozonym czasem i zalogowana sesja.
@@ -173,6 +189,26 @@ test.describe('Zrzuty ekranu', () => {
 
       await expect(page.getByRole('button', { name: 'Tył-1 — Stabilne' })).toBeVisible()
       await expectScreenshot(page, '06-mapa-ciala-telefon.png')
+    })
+
+    test('ekran znamienia — zakładka Przegląd', async ({ page }) => {
+      // Zdjęcia są potrzebne, żeby porównanie w ogóle się wyrenderowało.
+      const data = makeData()
+      data.photos = [
+        photo('ph1', '2026-01-05', 5.0),
+        photo('ph2', '2026-03-02', 5.4),
+        photo('ph3', '2026-05-20', 6.1),
+      ]
+
+      await mockSupabase(page, { data })
+      await page.clock.setFixedTime(FIXED_NOW)
+      await loginAsDemo(page)
+      await page.goto(`${BASE_PATH}#/person/person-1/lesion/lesion-1`)
+
+      await expect(
+        page.getByRole('heading', { name: 'Porównanie zdjęć' })
+      ).toBeVisible()
+      await expectScreenshot(page, '09-znamie-przeglad.png')
     })
   })
 
