@@ -5,34 +5,55 @@ import {
   makeInstallable,
   openLesionList,
   openPerson,
+  useWideFont,
 } from './support/app.js'
 
 // Budżet miejsca na małym telefonie (iPhone SE: 375x667).
 //
-// To celowo NIE zrzut ekranu, a pomiar: zrzuty zależą od czcionek i
+// To celowo NIE zrzut ekranu, a pomiar — zrzuty zależą od czcionek i
 // antyaliasingu, więc baseline z Windowsa nie zgadza się z tym, co renderuje
-// CI na Linuksie (czerwone testy bez powodu). Liczby są deterministyczne
-// i wprost kodują to, o co chodzi: nagłówek nie może zjadać połowy ekranu,
-// a pierwsza treść ma być widoczna bez przewijania.
+// CI na Linuksie (czerwone testy bez powodu).
+//
+// Liczymy dwie rzeczy:
+//  1. WYSOKOŚĆ nagłówka — musi się mieścić w rozsądnym procencie ekranu.
+//  2. STRUKTURĘ — wiersz górny i nawigacja muszą być jednoliniowe. To jest
+//     odporniejsze na czcionki niż sam pikselaż: wysokość wiersza zależy od
+//     wysokości przycisków (44 px), a nie od szerokości tekstu.
+//
+// Historia: nagłówek miał 286 px, bo przy szerszej czcionce (DejaVu Sans na
+// Linuksie) i wiersz górny, i nawigacja zawijały się na dwie linie.
 const VIEWPORT = { width: 375, height: 667 }
 
-// 130 px to ~19% wysokości ekranu. Po odchudzeniu nagłówka wychodzi ~121 px,
-// więc limit zostawia zapas, ale wyłapuje powrót do 285 px.
-const MAX_HEADER_HEIGHT = 130
+// Jeden wiersz paska = py-3 (24) + przycisk 44 = 68 px. Zawinięcie daje ~104.
+const MAX_TOP_ROW_HEIGHT = 80
+// Jedna linia nawigacji = min-h-44 (44) + pb-2 (8) = 52 px. Zawinięcie daje 104.
+const MAX_NAV_HEIGHT = 60
+// 68 + 52 = 120 px zmierzone; zapas na drobne różnice.
+const MAX_HEADER_HEIGHT = 150
 
 test.use({ viewport: VIEWPORT })
 
-async function headerHeight(page) {
-  const box = await page.locator('header').boundingBox()
-  expect(box, 'nagłówek musi istnieć').not.toBeNull()
-  return Math.round(box.height)
+async function heights(page) {
+  return page.evaluate(() => {
+    const header = document.querySelector('header')
+    const topRow = header?.querySelector('div')
+    const nav = header?.querySelector('nav')
+    const px = (el) => (el ? Math.round(el.getBoundingClientRect().height) : null)
+    return { header: px(header), topRow: px(topRow), nav: px(nav) }
+  })
 }
 
 async function assertHeaderBudget(page, where) {
-  expect(
-    await headerHeight(page),
-    `nagłówek na ekranie: ${where}`
-  ).toBeLessThanOrEqual(MAX_HEADER_HEIGHT)
+  const h = await heights(page)
+  expect(h.topRow, `wiersz górny (${where}) — nie może się zawijać`).toBeLessThanOrEqual(
+    MAX_TOP_ROW_HEIGHT
+  )
+  if (h.nav !== null) {
+    expect(h.nav, `nawigacja (${where}) — nie może się zawijać`).toBeLessThanOrEqual(
+      MAX_NAV_HEIGHT
+    )
+  }
+  expect(h.header, `nagłówek (${where})`).toBeLessThanOrEqual(MAX_HEADER_HEIGHT)
 }
 
 async function assertAboveFold(page, locator, what) {
@@ -45,8 +66,8 @@ async function assertAboveFold(page, locator, what) {
 }
 
 test.describe('Budżet miejsca na małym telefonie', () => {
-  // Ten stan jest kluczowy: na telefonie PRZED instalacją przeglądarka wysyła
-  // `beforeinstallprompt` i właśnie wtedy nagłówek rósł do 285 px.
+  // Stan „gotowe do instalacji” to ten, w którym nagłówek puchł najbardziej:
+  // przycisk „Zainstaluj” dopychał wiersz, a pod nawigacją siadał baner.
   test('nagłówek mieści się w budżecie także z banerem instalacji', async ({
     page,
   }) => {
@@ -58,9 +79,8 @@ test.describe('Budżet miejsca na małym telefonie', () => {
     await openPerson(page, 'Ja')
     await assertHeaderBudget(page, 'mapa ciała')
 
-    // Od tego miejsca udajemy telefon gotowy do instalacji.
     await makeInstallable(page)
-    await expect(page.getByText('Zainstaluj aplikację', { exact: false })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Nie teraz' })).toBeVisible()
     await assertHeaderBudget(page, 'mapa ciała + instalacja')
 
     await openLesionList(page)
@@ -68,6 +88,23 @@ test.describe('Budżet miejsca na małym telefonie', () => {
 
     await page.getByRole('link', { name: /^Kontrole/ }).click()
     await assertHeaderBudget(page, 'Kontrole + instalacja')
+  })
+
+  test('nagłówek wytrzymuje szeroką czcionkę (jak w CI na Linuksie)', async ({
+    page,
+  }) => {
+    await mockSupabase(page)
+    await loginAsDemo(page)
+    await openPerson(page, 'Ja')
+    await makeInstallable(page)
+
+    // DejaVu Sans jest szersza niż system-ui z Windows — to ten przypadek
+    // przewracał test w CI.
+    await useWideFont(page)
+    await assertHeaderBudget(page, 'szeroka czcionka')
+
+    await openLesionList(page)
+    await assertHeaderBudget(page, 'szeroka czcionka + lista')
   })
 
   test('pierwszy wiersz listy znamion jest widoczny bez przewijania', async ({
@@ -95,10 +132,12 @@ test.describe('Budżet miejsca na małym telefonie', () => {
     await makeInstallable(page)
     await page.getByRole('link', { name: /^Kontrole/ }).click()
 
+    await assertAboveFold(page, page.getByText('Zaległe:'), 'licznik zaległości')
+    // Zwinięty panel powiadomień to przycisk (cała linia jest klikalna).
     await assertAboveFold(
       page,
-      page.getByText('Zaległe:'),
-      'licznik zaległości'
+      page.getByRole('button', { name: /Powiadomienia w tle/ }),
+      'zwinięty panel powiadomień'
     )
   })
 })

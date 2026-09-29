@@ -69,15 +69,15 @@ export default function Layout({ children }) {
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-3 lg:max-w-6xl">
+        <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3 lg:max-w-6xl">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 font-semibold text-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-300"
+            className="inline-flex min-w-0 items-center gap-2 font-semibold text-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-300"
           >
             <Logo size={24} />
-            Skin Tracker
+            <span className="truncate">Skin Tracker</span>
           </Link>
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex flex-shrink-0 items-center gap-2 text-sm">
             {person ? (
               <span className="hidden text-slate-600 sm:inline dark:text-slate-300">
                 Osoba:{' '}
@@ -119,12 +119,14 @@ export default function Layout({ children }) {
         </div>
 
         {person ? (
-          <nav className="mx-auto flex max-w-4xl flex-wrap gap-2 px-4 pb-2 lg:max-w-6xl">
+          <nav className="mx-auto flex max-w-4xl gap-2 px-4 pb-2 lg:max-w-6xl">
             <NavLink to={`/person/${person.id}`} end className={navClass}>
-              Mapa ciała
+              <span className="sm:hidden">Mapa</span>
+              <span className="hidden sm:inline">Mapa ciała</span>
             </NavLink>
             <NavLink to={`/person/${person.id}/list`} className={navClass}>
-              Lista znamion
+              <span className="sm:hidden">Znamiona</span>
+              <span className="hidden sm:inline">Lista znamion</span>
             </NavLink>
             <NavLink to={`/person/${person.id}/reminders`} className={navClass}>
               Kontrole

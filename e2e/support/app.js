@@ -3,6 +3,9 @@ import { BASE_PATH } from './constants.js'
 
 export { BASE_PATH }
 
+// Etykieta drugiej zakładki zależy od szerokości ekranu (patrz Layout).
+export const LIST_TAB = /^(Znamiona|Lista znamion)$/
+
 export const DEMO_EMAIL = 'demo@example.com'
 export const DEMO_PASSWORD = 'tajne-haslo'
 
@@ -47,6 +50,18 @@ export async function loginAsDemo(page, credentials) {
  * stanie nagłówek puchł do 285 px (przycisk „Zainstaluj” wypychał wiersz do
  * dwóch linii, a pod nawigacją pojawiał się baner instalacji).
  */
+/**
+ * Wymusza szeroką czcionkę — „czysty Linux” (DejaVu Sans) renderuje teksty
+ * szersze niż Windows (Segoe UI), co potrafiło zawijać nagłówek. Wymuszając
+ * ją w testach, sprawdzamy najgorszy przypadek na każdej maszynie.
+ */
+export async function useWideFont(page) {
+  await page.addStyleTag({
+    content:
+      'body, button, a, span, p, h1, h2, input, select { font-family: "DejaVu Sans", Verdana, sans-serif !important; }',
+  })
+}
+
 export async function makeInstallable(page) {
   await page.evaluate(() => {
     const event = new Event('beforeinstallprompt')
@@ -58,12 +73,12 @@ export async function makeInstallable(page) {
 
 export async function openPerson(page, displayName) {
   await page.getByText(displayName, { exact: true }).click()
-  await expect(page.getByRole('link', { name: 'Lista znamion' })).toBeVisible()
+  await expect(page.getByRole('link', { name: LIST_TAB })).toBeVisible()
 }
 
 /** Przechodzi do listy znamion wybranej osoby. */
 export async function openLesionList(page) {
-  await page.getByRole('link', { name: 'Lista znamion' }).click()
+  await page.getByRole('link', { name: LIST_TAB }).click()
   await expect(
     page.getByRole('heading', { name: 'Lista znamion' })
   ).toBeVisible()
