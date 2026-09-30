@@ -23,8 +23,21 @@ test.describe('Osoby', () => {
 
     // HashRouter: adres trzyma id osoby, więc odświeżenie nie gubi kontekstu.
     await expect(page).toHaveURL(/#\/person\/person-2$/)
-    await expect(page.getByText('Osoba:')).toBeVisible()
+    // W nagłówku widać, w czyjej dokumentacji jesteś — klikalne (zmiana osoby).
+    await expect(
+      page.getByRole('link', { name: /^Osoba: Syn/ })
+    ).toBeVisible()
     await expect(page.getByRole('link', { name: 'Mapa ciała' })).toBeVisible()
+
+    // Wskaźnik prowadzi do zmiany osoby (świadome przełączanie).
+    await page.getByRole('link', { name: /^Osoba: Syn/ }).click()
+    await expect(page.getByRole('heading', { name: 'Wybierz osobę' })).toBeVisible()
+
+    // Ticket 14, ustalenie 2: nawigacja jest związana z KONKRETNĄ osobą, więc
+    // na ekranie wyboru osoby jej nie ma. Wcześniej była widoczna i prowadziła
+    // do poprzednio wybranej osoby — na telefonie bez informacji, której.
+    await expect(page.locator('header nav')).toHaveCount(0)
+    await expect(page.getByRole('link', { name: /^Osoba:/ })).toHaveCount(0)
   })
 
   test('dodanie osoby pojawia się na liście', async ({ page }) => {

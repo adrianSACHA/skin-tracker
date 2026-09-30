@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { usePerson } from '../context/PersonContext'
 import { useDueReminders } from '../lib/useDueReminders'
@@ -20,6 +20,13 @@ function navClass({ isActive }) {
 export default function Layout({ children }) {
   const { person, setPerson } = usePerson()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // Nawigacja jest związana z KONKRETNĄ osobą (adresy zawierają jej id),
+  // więc pokazujemy ją tylko wewnątrz osoby. Na ekranie „Wybierz osobę”
+  // prowadziłaby do poprzednio wybranej osoby — a na telefonie nie było
+  // nawet widać, której (ticket 14, ustalenie 2).
+  const wOsobie = location.pathname.startsWith('/person/')
   const due = useDueReminders(person?.id)
   const { canInstall, iosHint, promptInstall } = useInstallPrompt()
   const [showInstallTip, setShowInstallTip] = useState(false)
@@ -78,14 +85,6 @@ export default function Layout({ children }) {
             <span className="truncate">Skin Tracker</span>
           </Link>
           <div className="flex flex-shrink-0 items-center gap-2 text-sm">
-            {person ? (
-              <span className="hidden text-slate-600 sm:inline dark:text-slate-300">
-                Osoba:{' '}
-                <strong className="dark:text-slate-100">
-                  {person.display_name}
-                </strong>
-              </span>
-            ) : null}
             {canInstall || iosHint ? (
               <button
                 type="button"
@@ -118,8 +117,22 @@ export default function Layout({ children }) {
           </div>
         </div>
 
-        {person ? (
-          <nav className="mx-auto flex max-w-4xl gap-2 px-4 pb-2 lg:max-w-6xl">
+        {person && wOsobie ? (
+          <nav className="mx-auto flex max-w-4xl flex-wrap items-center gap-2 px-4 pb-2 lg:max-w-6xl">
+            {/* W czyjej dokumentacji jesteś — widoczne TAKŻE na telefonie
+                (wcześniej nazwa osoby była ukryta poniżej 640 px) i klikalne,
+                żeby świadomie zmienić osobę. */}
+            <Link
+              to="/"
+              title="Zmień osobę"
+              aria-label={`Osoba: ${person.display_name}. Zmień osobę`}
+              className="inline-flex min-h-[44px] max-w-[9rem] items-center gap-1 rounded-md border border-slate-300 px-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              <span className="truncate">{person.display_name}</span>
+              <span aria-hidden="true" className="text-slate-400">
+                ▾
+              </span>
+            </Link>
             <NavLink to={`/person/${person.id}`} end className={navClass}>
               <span className="sm:hidden">Mapa</span>
               <span className="hidden sm:inline">Mapa ciała</span>
