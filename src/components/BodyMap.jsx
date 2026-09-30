@@ -93,6 +93,9 @@ export default function BodyMap() {
   const pointerRef = useRef(null) // start wciśnięcia - rozróżnia klik od przesuwania
   const [scale, setScale] = useState(1) // aktualna skala zoomu tła
   const [selectedId, setSelectedId] = useState(null) // wybrany pin -> panel akcji
+  // Id znamięcia utworzonego przed chwilą — wtedy panel proponuje dodanie
+  // pierwszego zdjęcia (ticket 14, ustalenie 4).
+  const [justCreatedId, setJustCreatedId] = useState(null)
   const [pulse, setPulse] = useState(null) // { id, n } - re-trigger animacji pinu
   const [hoveredId, setHoveredId] = useState(null) // tooltip przy pinie (desktop)
   const [editForm, setEditForm] = useState(null) // { label, status }
@@ -246,14 +249,18 @@ export default function BodyMap() {
     if (!pending || !pending.label.trim() || !currentMap) return
     setSavingPin(true)
 
-    const { error: insertError } = await supabase.from('lesions').insert({
-      person_id: personId,
-      body_map_id: currentMap.id,
-      label: pending.label.trim(),
-      pos_x: pending.pos_x,
-      pos_y: pending.pos_y,
-      status: 'new',
-    })
+    const { data: inserted, error: insertError } = await supabase
+      .from('lesions')
+      .insert({
+        person_id: personId,
+        body_map_id: currentMap.id,
+        label: pending.label.trim(),
+        pos_x: pending.pos_x,
+        pos_y: pending.pos_y,
+        status: 'new',
+      })
+      .select()
+      .single()
 
     setSavingPin(false)
 
@@ -266,6 +273,12 @@ export default function BodyMap() {
     notifyDueChanged()
     setPending(null)
     setAddMode(false)
+    // Otwieramy panel na nowym znamieniu od razu — wcześniej trzeba było
+    // samemu znaleźć pin na mapie i dopiero go kliknąć.
+    if (inserted?.id) {
+      setJustCreatedId(inserted.id)
+      setSelectedId(inserted.id)
+    }
     load()
   }
 
@@ -452,6 +465,7 @@ export default function BodyMap() {
 
   const closePanel = () => {
     setSelectedId(null)
+    setJustCreatedId(null)
     setEditForm(null)
     setMoveModeId(null)
   }
@@ -1207,6 +1221,13 @@ export default function BodyMap() {
               selectedLesion &&
               navigate(`/person/${personId}/lesion/${selectedLesion.id}`, {
                 state: { from: 'map' },
+              })
+            }
+            justCreated={selectedId === justCreatedId}
+            onAddFirstPhoto={() =>
+              selectedLesion &&
+              navigate(`/person/${personId}/lesion/${selectedLesion.id}`, {
+                state: { from: 'map', openUpload: true },
               })
             }
             onStartMove={() => {

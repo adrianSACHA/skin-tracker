@@ -16,6 +16,11 @@ export default function LesionInfoPanel({
   onStartEdit,
   onCancelEdit,
   onOpenDetail,
+  // Nowo utworzone znamię: znamię bez zdjęcia nie ma ani rozmiaru, ani
+  // porównania, więc zamiast „Zobacz pełną historię” proponujemy wprost
+  // pierwsze zdjęcie (ticket 14, ustalenie 4).
+  justCreated = false,
+  onAddFirstPhoto,
   onStartMove,
   moveModeId,
   onStatusChange,
@@ -173,9 +178,19 @@ export default function LesionInfoPanel({
         </div>
       ) : (
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={onOpenDetail} className={btnPrimary}>
-            Zobacz pełną historię
-          </button>
+          {justCreated ? (
+            <button
+              type="button"
+              onClick={onAddFirstPhoto}
+              className={btnPrimary}
+            >
+              Dodaj pierwsze zdjęcie
+            </button>
+          ) : (
+            <button type="button" onClick={onOpenDetail} className={btnPrimary}>
+              Zobacz pełną historię
+            </button>
+          )}
           <button
             type="button"
             onClick={onStartMove}

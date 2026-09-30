@@ -24,7 +24,7 @@ osób („Ja", „Syn").
 - `npm run e2e` → **38/38** ✓ (Playwright, zmockowany Supabase, ~20 s),
   w tym **budżet UI** na 375×667 (`e2e/ui-budget.spec.js`) oraz **zrzuty
   ekranu** (`e2e/visual/screens.spec.js`) — wzorce osobno dla Windows i CI.
-- Tracker: **12 effortów, 87 ticketów (+1 spec): 80 `resolved`, 5 otwartych
+- Tracker: **12 effortów, 87 ticketów (+1 spec): 81 `resolved`, 4 otwartych
   i 1 `wontfix` w `.scratch/backlog/`.
 
 ## Funkcje
@@ -33,8 +33,8 @@ osób („Ja", „Syn").
 | --- | --- |
 | **Telefon** | nagłówek ≤ 121 px (43% → 18% wysokości); nawigacja **tylko wewnątrz osoby** + klikalny wskaźnik osoby (także na telefonie); komunikaty o instalacji na dole; budżet UI pilnowany testem |
 | **Wybór osoby** | karta z liczbami (znamiona, zdjęcia, najbliższa kontrola + „zaległe” gdy minęła); zmiana nazwy i usunięcie osoby w menu „⋯” |
-| **Mapa ciała** | widoki ze słownika 17 okolic + własne nazwy; piny (dodaj / przesuń / edytuj); zdjęcie tła per widok (aparat lub plik); kontekst okolicy w nazwie znamienia; panel pina jako bottom sheet na telefonie |
-| **Znamię** | zdjęcia z edycją (obrót / odbicia) i kompresją; pomiar z obrysu (MediaPipe, geometria); notatki ABCDE; status (menu „⋯”); zakładki Przegląd / Zdjęcia / Trend; porównanie przeciąganym suwakiem; wykres rozmiaru; powiększanie zdjęć (lightbox) |
+| **Mapa ciała** | widoki ze słownika 17 okolic + własne nazwy; piny (dodaj / przesuń / edytuj; nowe znamię od razu proponuje pierwsze zdjęcie); zdjęcie tła per widok (aparat lub plik); kontekst okolicy w nazwie znamienia; panel pina jako bottom sheet na telefonie |
+| **Znamię** | zdjęcia z edycją (obrót / odbicia) i kompresją; pomiar z obrysu (MediaPipe, geometria); notatki ABCDE; status i eksport do kalendarza (menu „⋯”); zakładki Przegląd / Zdjęcia / Trend; porównanie przeciąganym suwakiem; wykres rozmiaru; powiększanie zdjęć (lightbox) |
 | **Kontrole** | **jedyna lista znamion** (od ticketu 14): liczniki zaległe / w ciągu 30 dni, wyszukiwanie, filtry (status, „pokaż usunięte”, sort, interwał) — stan w URL; terminy i przesuwanie; panel „Przypomnienia na telefon" (instalacja + zgoda + push ze statusem); **3 poziomy przypomnień**: `.ics`, in‑app, **Web Push w tle** |
 | **PWA** | manifest + ikony, przycisk **„Zainstaluj"** (Android: prompt; iOS: instrukcja), service worker (obsługa push) |
 

@@ -1,7 +1,7 @@
 # 14 — Architektura mobilna: mniej ekranów, jasny kontekst osoby
 
 Type: design
-Status: ready-for-agent
+Status: resolved
 Map: .scratch/backlog/map.md
 
 Zgłoszenie właściciela (2026-09-29), po sprawdzeniu aplikacji na telefonie.
@@ -167,21 +167,34 @@ usunięty; zrzuty ekranu listy zastąpione zrzutami Kontrol.
 więc zmiana całego nagłówka przechodziła. Zmienione na bezwzględne
 `maxDiffPixels: 200` (sprawdzone: po zmianie ta sama różnica jest wykrywana).
 
-## Zostało
+## Zrobione: 3 i 4 (2026-09-29)
 
-**Ustalenie 3 (jeden pas).** Do zrobienia: tytuł + „+ Dodaj zdjęcie" + `⋯`
-w jednym wierszu; „Do kalendarza" i „Zmień status" do `⋯` (wtedy
-`CalendarReminderButton` musi wystawić zwykłe pozycje menu — nie zagnieżdżamy
-menu w menu).
+**Ustalenie 3 — jeden pas u góry karty znamienia.** Zamiast trzech pasów
+(tytuł z `⋯`, rząd akcji, zakładki) jest jeden: tytuł + akcja główna + `⋯`.
+Do menu weszły **status** (już był) oraz **eksport do kalendarza** (`.ics` /
+Google / Outlook) — wcześniej osobny rozwijany przycisk obok. Żeby to nie było
+menu w menu, `CalendarReminderButton` został rozłożony: materiał kalendarza
+to teraz `src/lib/calendarActions.js` (zwykłe pozycje menu), a `OverflowMenu`
+dostał obsługę pozycji‑odnośników (prawdziwe `<a>`, więc działa środkowy
+przycisk i „kopiuj adres”). Na telefonie akcja główna jest ikoną,
+żeby nazwa znamienia została czytelna.
 
-**Ustalenie 4 (flow dodawania).** Rekomendacja: zostawić szybkie stawianie
-pinu, ale w panelu **nowo utworzonego** znamienia uczynić główną akcją
-„Dodaj pierwsze zdjęcie" (zamiast „Zobacz pełną historię"), prowadzącą do
-karty znamienia z **już otwartym** formularzem zdjęcia. Czyli:
-zaznacz → panel z jasnym następnym krokiem → zdjęcie. Bez wymuszania
-formularza na każdym pinie (mapowanie kilku znamion naraz zostaje szybkie),
-a „wprowadzasz dane" dostaje wyraźny początek — bo znamię bez zdjęcia nie ma
-ani rozmiaru, ani porównania.
+**Ustalenie 4 — dodanie znamienia prowadzi do pierwszego zdjęcia.**
+`savePending` w `BodyMap` używa teraz `.insert().select().single()`, żeby
+poznać id nowego znamienia, ustawia je jako wybrane (panel otwiera się od
+razu) i jako „nowo utworzone”. Wtedy panel proponuje wprost
+**„Dodaj pierwsze zdjęcie”** → karta znamienia z już otwartym formularzem
+(`state.openUpload`). Po zamknięciu panelu znamię zachowuje się jak każde
+inne („Zobacz pełną historię”). Mock Supabase honoruje teraz
+`Prefer: return=representation`, bez czego nie dałoby się tego przetestować.
+
+## Answer
+
+Wszystkie cztery ustalenia domknięte: dwa ekrany zamiast trzech, nawigacja
+tylko wewnątrz osoby z widocznym wskaźnikiem, jeden pas u góry karty
+znamienia, a dodanie znamienia kończy się krokiem „pierwsze zdjęcie”.
+Nowe testy: `e2e/lesion-add.spec.js` (2) i rozbudowany
+`e2e/lesion-detail.spec.js` (6). Zestaw: **43 e2e + 101 jednostkowych**.
 
 ## Znalezione przy okazji (naprawione)
 

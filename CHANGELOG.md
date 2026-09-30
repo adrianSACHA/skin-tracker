@@ -134,6 +134,22 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 
 ### Zmienione
 
+- **Karta znamienia: jeden pas u góry** (ticket 14, ustalenie 3). Były trzy:
+  tytuł z `⋯`, rząd akcji („+ Dodaj zdjęcie”, „Do kalendarza”) i pasek
+  zakładek. Teraz jest jeden: tytuł + akcja główna + `⋯`, a **status i eksport
+  do kalendarza** (`.ics` / Google / Outlook) są pozycjami menu. Na telefonie
+  akcja główna jest ikoną (jak w edycji zdjęcia), żeby nazwa znamienia
+  została czytelna. `OverflowMenu` umie teraz pozycje‑odnośniki (prawdziwe
+  `<a>`), a materiał kalendarza wyszedł do `src/lib/calendarActions.js`.
+
+- **Dodanie znamienia prowadzi do pierwszego zdjęcia** (ticket 14, ustalenie 4).
+  Po postawieniu pinu i zapisaniu nazwy panel otwiera się **od razu**, a jego
+  główną akcją jest „Dodaj pierwsze zdjęcie”, prowadzące do karty znamienia
+  z już otwartym formularzem. Wcześniej trzeba było samemu znaleźć nowy pin i
+  domyślić się, że dane wpisuje się gdzie indziej. Znamię bez zdjęcia nie ma
+  ani rozmiaru, ani porównania — stąd ten krok. Ponowne wejście w pin daje
+  zwykły panel („Zobacz pełną historię”).
+
 - **Dwa ekrany zamiast trzech: „Lista znamion” wchłonięta przez Kontrole**
   (ticket 14). Oba pokazywały to samo (nazwa, status, termin kontroli, link do
   szczegółów, szukanie), a Kontrole były nadzbiorem. Teraz Kontrole to jedyna

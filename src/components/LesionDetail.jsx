@@ -21,7 +21,7 @@ import SignedImage from './SignedImage'
 import StatusBadge from './StatusBadge'
 import LesionName from './LesionName'
 import PhotoUploadForm from './PhotoUploadForm'
-import CalendarReminderButton from './CalendarReminderButton'
+import { calendarActions } from '../lib/calendarActions'
 import ConfirmDialog from './ConfirmDialog'
 import OverflowMenu from './OverflowMenu'
 
@@ -335,7 +335,16 @@ export default function LesionDetail() {
       checked: s === lesion.status,
       onSelect: () => updateStatus(s),
     })),
-    { key: 'sep', separator: true },
+    { key: 'sep-actions', separator: true },
+    // Kalendarz był osobnym rozwijanym przyciskiem w rzędzie akcji; teraz są
+    // to zwykłe pozycje tego menu (patrz `src/lib/calendarActions.js`).
+    ...calendarActions({
+      label: lesion.label,
+      lastDate,
+      intervalWeeks,
+      leadDays,
+    }),
+    { key: 'sep-delete', separator: true },
     {
       key: 'delete',
       label: 'Usuń znamię',
@@ -389,9 +398,10 @@ export default function LesionDetail() {
         </div>
       ) : null}
 
-      {/* Nagłówek */}
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+      {/* Nagłówek i akcje w JEDNYM pasie (ticket 14, ustalenie 3). Wcześniej
+          były tu trzy pasy: tytuł z „⋯”, rząd akcji i pasek zakładek. */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
           <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
             <LesionName
               label={lesion.label}
@@ -399,7 +409,7 @@ export default function LesionDetail() {
               areaClassName="font-normal text-slate-400 dark:text-slate-500"
             />
           </h1>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
+          <div className="mt-1 flex flex-wrap items-center gap-2">
             <StatusBadge status={lesion.status} />
             <span className="text-sm text-slate-500 dark:text-slate-400">
               Zdjęć: {photos.length}
@@ -408,25 +418,46 @@ export default function LesionDetail() {
             </span>
           </div>
         </div>
-        <OverflowMenu label="Akcje znamienia" items={menuItems} />
-      </div>
 
-      {/* Akcje */}
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={() => setShowUpload((v) => !v)}
-          className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500"
-        >
-          {showUpload ? 'Zamknij formularz' : '+ Dodaj zdjęcie'}
-        </button>
-
-        <CalendarReminderButton
-          label={lesion.label}
-          lastDate={lastDate}
-          intervalWeeks={intervalWeeks}
-          leadDays={leadDays}
-        />
+        <div className="flex flex-shrink-0 items-center gap-2">
+          {/* Na telefonie akcja główna jest ikoną (jak w edycji zdjęcia) —
+              tytuł znamienia zostaje czytelny. */}
+          <button
+            type="button"
+            onClick={() => setShowUpload((v) => !v)}
+            aria-label={showUpload ? 'Zamknij formularz zdjęcia' : 'Dodaj zdjęcie'}
+            title={showUpload ? 'Zamknij formularz' : 'Dodaj zdjęcie'}
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-teal-700 px-3 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500"
+          >
+            {showUpload ? (
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="h-5 w-5"
+              >
+                <path d="m6 6 12 12M18 6 6 18" />
+              </svg>
+            ) : (
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="h-5 w-5"
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            )}
+            <span className="hidden sm:inline">
+              {showUpload ? 'Zamknij formularz' : 'Dodaj zdjęcie'}
+            </span>
+          </button>
+          <OverflowMenu label="Akcje znamienia" items={menuItems} />
+        </div>
       </div>
 
       {showUpload ? (

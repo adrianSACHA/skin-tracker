@@ -106,34 +106,26 @@ export default function OverflowMenu({ label, items, buttonClassName = '' }) {
           }}
           className="z-20 overflow-y-auto overscroll-contain rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800"
         >
-          {items.map((item) =>
-            item.separator ? (
-              <div
-                key={item.key}
-                role="separator"
-                className="my-1 h-px bg-slate-200 dark:bg-slate-700"
-              />
-            ) : (
-              <button
-                key={item.key}
-                type="button"
-                // Pozycja z `checked` to wybór z listy (np. status) -
-                // wtedy rola `menuitemradio` i widoczny znacznik.
-                role={item.checked === undefined ? 'menuitem' : 'menuitemradio'}
-                aria-checked={
-                  item.checked === undefined ? undefined : Boolean(item.checked)
-                }
-                onClick={() => {
-                  setOpen(false)
-                  item.onSelect()
-                }}
-                className={[
-                  'flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-300',
-                  item.danger
-                    ? 'text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/40'
-                    : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700',
-                ].join(' ')}
-              >
+          {items.map((item) => {
+            if (item.separator) {
+              return (
+                <div
+                  key={item.key}
+                  role="separator"
+                  className="my-1 h-px bg-slate-200 dark:bg-slate-700"
+                />
+              )
+            }
+
+            const itemClass = [
+              'flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-300',
+              item.danger
+                ? 'text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/40'
+                : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700',
+            ].join(' ')
+
+            const content = (
+              <>
                 <span>{item.label}</span>
                 {item.checked ? (
                   <span
@@ -143,9 +135,47 @@ export default function OverflowMenu({ label, items, buttonClassName = '' }) {
                     ✓
                   </span>
                 ) : null}
+              </>
+            )
+
+            // Pozycja będąca odnośnikiem zostaje PRAWDZIWYM linkiem
+            // (środkowy przycisk, „kopiuj adres”, otwarcie w nowej karcie).
+            if (item.href) {
+              return (
+                <a
+                  key={item.key}
+                  role="menuitem"
+                  href={item.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setOpen(false)}
+                  className={itemClass}
+                >
+                  {content}
+                </a>
+              )
+            }
+
+            return (
+              <button
+                key={item.key}
+                type="button"
+                // Pozycja z `checked` to wybór z listy (np. status) — wtedy
+                // rola `menuitemradio` i widoczny znacznik.
+                role={item.checked === undefined ? 'menuitem' : 'menuitemradio'}
+                aria-checked={
+                  item.checked === undefined ? undefined : Boolean(item.checked)
+                }
+                onClick={() => {
+                  setOpen(false)
+                  item.onSelect()
+                }}
+                className={itemClass}
+              >
+                {content}
               </button>
             )
-          )}
+          })}
         </div>
       ) : null}
     </div>

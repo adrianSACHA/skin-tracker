@@ -201,12 +201,21 @@ function handleRest(route, request, url, data) {
 
   if (method === 'POST') {
     const payload = request.postDataJSON()
+    const created = []
     for (const item of Array.isArray(payload) ? payload : [payload]) {
-      rows.push({
+      const row = {
         id: `${String(table).replace(/_/g, '-')}-${rows.length + 1}`,
         created_at: new Date().toISOString(),
         ...item,
-      })
+      }
+      rows.push(row)
+      created.push(row)
+    }
+    // `.insert().select()` prosi o zwrot wiersza (`Prefer:
+    // return=representation`) — bez tego nie da się poznać id nowego rekordu,
+    // a aplikacja go potrzebuje (np. żeby otworzyć nowo dodane znamię).
+    if ((request.headers().prefer || '').includes('return=representation')) {
+      return json(route, wantsObject(request) ? created[0] : created, 201)
     }
     return inserted(route)
   }
