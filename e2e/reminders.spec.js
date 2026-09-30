@@ -1,6 +1,11 @@
 import { expect, test } from '@playwright/test'
 import { mockSupabase } from './support/mock-supabase.js'
-import { loginAsDemo, openPerson, openReminders } from './support/app.js'
+import {
+  loginAsDemo,
+  openMenu,
+  openPerson,
+  openReminders,
+} from './support/app.js'
 
 // Ticket 02: znamię oznaczone jako „Usunięte” nie ma czego pilnować, więc
 // nie może już: zawyżać znacznika przy „Kontrole”, trafiać na listę Kontroli
@@ -38,7 +43,10 @@ test.describe('Znamiona „Usunięte”', () => {
 
     // Karta osoby: bez plakietki „zaległe”, z nowym najbliższym terminem
     // (2026-12-01 z ręcznej daty drugiego znamienia).
-    await page.getByRole('link', { name: 'Skin Tracker' }).click()
+    // Zmiana osoby jest w menu globalnym (logo przestało być odnośnikiem —
+    // prowadziło w to samo miejsce co wskaźnik osoby).
+    await openMenu(page)
+    await page.getByRole('menuitem', { name: /^Zmień osobę/ }).click()
     await expect(
       page.getByRole('heading', { name: 'Wybierz osobę' })
     ).toBeVisible()

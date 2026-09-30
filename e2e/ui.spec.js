@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { mockSupabase } from './support/mock-supabase.js'
-import { BASE_PATH, loginAsDemo } from './support/app.js'
+import { BASE_PATH, loginAsDemo, openMenu } from './support/app.js'
 
 test.describe('Motyw', () => {
   test.use({ colorScheme: 'light' })
@@ -11,7 +11,8 @@ test.describe('Motyw', () => {
 
     await expect(page.locator('html')).not.toHaveClass(/dark/)
 
-    await page.getByRole('button', { name: 'Włącz tryb ciemny' }).click()
+    await openMenu(page)
+    await page.getByRole('menuitem', { name: 'Motyw: ciemny' }).click()
     await expect(page.locator('html')).toHaveClass(/dark/)
 
     // Motyw trzymany w localStorage - reload nie może go zgubić.

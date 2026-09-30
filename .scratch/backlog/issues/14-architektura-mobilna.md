@@ -201,3 +201,37 @@ Nowe testy: `e2e/lesion-add.spec.js` (2) i rozbudowany
 `LesionInfoPanel` (panel pinu na mapie) odsyłał do usuniętej sekcji:
 „Usuń znamię w widoku szczegółów (sekcja «Zarządzanie»)" — a sekcję „Zarządzanie"
 zlikwidowano w tickecie 12 A. Poprawione na: „(menu «⋯» obok nazwy)".
+
+## Poprawka po przeglądzie właściciela (2026-09-29)
+
+Po wdrożeniu punktów 1–4 właściciel zauważył rzecz, której nie wychwycił żaden
+pomiar: w nagłówku są **dwa odnośniki prowadzące w to samo miejsce** — logo
+(„Skin Tracker") i wskaźnik osoby („Ja ▾") — oba do wyboru osoby. Do tego
+wiersz górny miał cztery kontrolki, mimo że obok (wiersz zakładek) było ~110 px
+luzu.
+
+Ustalone: **jeden wiersz nagłówka** — logo (na telefonie sam monogram) obok
+zakładek, cała reszta w menu.
+
+### Zrobione
+
+- **Nagłówek 113 → 61 px** (jeden wiersz): marka + zakładki Mapa/Kontrole + menu.
+- **Logo przestało być odnośnikiem** — koniec dublowania. „Do domu" prowadzi
+  zakładka Mapa, a osobę zmienia się **świadomie** z menu.
+- **Menu globalne** (ikona „≡", celowo inna niż „⋯", które w tej aplikacji
+  znaczy „akcje na tym obiekcie") zbiera: „Zmień osobę (Ja)", „Motyw: …",
+  „Zainstaluj aplikację" (gdy dostępne), „Wyloguj".
+- `OverflowMenu` dostał `visibleLabel` (nazwa osoby obok ikony — **nadal widać,
+  w czyjej dokumentacji jesteś**, co było celem ustalenia 2) oraz `icon`
+  (odróżnienie menu globalnego od akcji na obiekcie).
+- `ThemeToggle.jsx` usunięty — motyw jest pozycją menu.
+- Stały chrom ekranu: **276 → 199 → 147 px** (41% → 22% wysokości telefonu).
+- Zaktualizowane testy (`auth`, `person`, `ui`, `reminders`) i budżety:
+  `MAX_HEADER_HEIGHT` 150 → 90, budżet chromu ≤ **190 px**. Zrzuty ekranu
+  przegenerowane — zmiana nagłówka dotyczy każdego ekranu.
+
+### Czego pilnuje to na przyszłość
+
+Test w `e2e/person.spec.js` sprawdza, że na ekranie wyboru osoby **nie ma**
+nawigacji ani odnośnika do osoby, a etykieta menu pokazuje, kto jest wybrany.
+Budżet chromu (≤ 190 px) nie pozwoli wrócić do dwuwierszowego nagłówka.

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { usePerson } from '../context/PersonContext'
 import { useDueReminders } from '../lib/useDueReminders'
 import { useInstallPrompt } from '../lib/install'
 import { notifyOverdueOnce } from '../lib/reminderNotify'
-import ThemeToggle from './ThemeToggle'
 import Logo from './Logo'
+import OverflowMenu from './OverflowMenu'
+import { useTheme } from '../context/ThemeContext'
 
 function navClass({ isActive }) {
   return [
@@ -73,86 +74,88 @@ export default function Layout({ children }) {
     navigate('/')
   }
 
+  // Menu globalne (ikona „≡", nie „⋯" — „⋯" w tej aplikacji znaczy „akcje na
+  // tym obiekcie"). Zbiera wszystko, co nie jest nawigacją: zmianę osoby,
+  // motyw, instalację i wylogowanie.
+  const { theme, toggleTheme } = useTheme()
+  const menuItems = [
+    ...(person
+      ? [
+          {
+            key: 'person',
+            label: `Zmień osobę (${person.display_name})`,
+            onSelect: () => navigate('/'),
+          },
+          { key: 'sep-person', separator: true },
+        ]
+      : []),
+    {
+      key: 'theme',
+      label: theme === 'dark' ? 'Motyw: jasny' : 'Motyw: ciemny',
+      onSelect: toggleTheme,
+    },
+    ...(canInstall || iosHint
+      ? [
+          {
+            key: 'install',
+            label: 'Zainstaluj aplikację',
+            onSelect: handleInstallClick,
+          },
+        ]
+      : []),
+    { key: 'sep-end', separator: true },
+    { key: 'logout', label: 'Wyloguj', onSelect: handleSignOut },
+  ]
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-2 lg:max-w-6xl">
-          <Link
-            to="/"
-            className="inline-flex min-w-0 items-center gap-2 font-semibold text-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-300"
-          >
-            <Logo size={24} />
-            <span className="truncate">Skin Tracker</span>
-          </Link>
-          <div className="flex flex-shrink-0 items-center gap-2 text-sm">
-            {canInstall || iosHint ? (
-              <button
-                type="button"
-                onClick={handleInstallClick}
-                aria-label="Zainstaluj aplikację"
-                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-1.5 rounded-md border border-teal-200 bg-teal-50 px-2.5 text-sm font-medium text-teal-800 transition-colors hover:bg-teal-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-teal-800 dark:bg-teal-950/50 dark:text-teal-200 dark:hover:bg-teal-900/60"
-                title="Dodaj aplikację do ekranu początkowego"
-              >
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="h-4 w-4"
-                >
-                  <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
-                </svg>
-                <span className="hidden sm:inline">Zainstaluj</span>
-              </button>
-            ) : null}
-            <ThemeToggle />
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="min-h-[44px] rounded-md px-2 text-slate-500 transition-colors hover:text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-slate-400 dark:hover:text-slate-100"
-            >
-              Wyloguj
-            </button>
-          </div>
+        {/* JEDEN wiersz: marka + zakładki + menu globalne. Wcześniej były dwa
+            wiersze (marka z kontrolkami, potem pasek zakładek), a nazwa osoby
+            dublowała odnośnik logo — oba prowadziły do wyboru osoby. */}
+        <div className="mx-auto flex max-w-4xl items-center gap-1 px-4 py-2 lg:max-w-6xl">
+          {/* Marka bez odnośnika: „do domu" prowadzi zakładka Mapa, a zmianę
+              osoby ma się świadomie wybrać z menu. */}
+          <span className="inline-flex flex-shrink-0 items-center gap-2 font-semibold text-teal-800 dark:text-teal-300">
+            <Logo size={28} />
+            <span className="hidden sm:inline">Skin Tracker</span>
+          </span>
+
+          {person && wOsobie ? (
+            <nav className="ml-1 flex min-w-0 flex-1 items-center gap-1">
+              <NavLink to={`/person/${person.id}`} end className={navClass}>
+                <span className="sm:hidden">Mapa</span>
+                <span className="hidden sm:inline">Mapa ciała</span>
+              </NavLink>
+              <NavLink to={`/person/${person.id}/reminders`} className={navClass}>
+                Kontrole
+                {due.overdue > 0 ? (
+                  <span className="ml-2 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-semibold text-white">
+                    {due.overdue}
+                  </span>
+                ) : due.soon > 0 ? (
+                  <span className="ml-2 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-teal-100 px-1.5 text-xs font-semibold text-teal-800 dark:bg-teal-900 dark:text-teal-100">
+                    {due.soon}
+                  </span>
+                ) : null}
+              </NavLink>
+            </nav>
+          ) : (
+            <div className="flex-1" />
+          )}
+
+          <OverflowMenu
+            label={
+              person && wOsobie
+                ? `Menu. Osoba: ${person.display_name}`
+                : 'Menu aplikacji'
+            }
+            items={menuItems}
+            visibleLabel={person && wOsobie ? person.display_name : ''}
+            icon="≡"
+            buttonClassName="inline-flex min-h-[44px] flex-shrink-0 items-center gap-1.5 rounded-md border border-slate-300 px-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+          />
         </div>
-
-        {person && wOsobie ? (
-          <nav className="mx-auto flex max-w-4xl flex-wrap items-center gap-2 px-4 pb-2 lg:max-w-6xl">
-            {/* W czyjej dokumentacji jesteś — widoczne TAKŻE na telefonie
-                (wcześniej nazwa osoby była ukryta poniżej 640 px) i klikalne,
-                żeby świadomie zmienić osobę. */}
-            <Link
-              to="/"
-              title="Zmień osobę"
-              aria-label={`Osoba: ${person.display_name}. Zmień osobę`}
-              className="inline-flex min-h-[44px] max-w-[9rem] items-center gap-1 rounded-md border border-slate-300 px-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-            >
-              <span className="truncate">{person.display_name}</span>
-              <span aria-hidden="true" className="text-slate-400">
-                ▾
-              </span>
-            </Link>
-            <NavLink to={`/person/${person.id}`} end className={navClass}>
-              <span className="sm:hidden">Mapa</span>
-              <span className="hidden sm:inline">Mapa ciała</span>
-            </NavLink>
-
-            <NavLink to={`/person/${person.id}/reminders`} className={navClass}>
-              Kontrole
-              {due.overdue > 0 ? (
-                <span className="ml-2 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-semibold text-white">
-                  {due.overdue}
-                </span>
-              ) : due.soon > 0 ? (
-                <span className="ml-2 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-teal-100 px-1.5 text-xs font-semibold text-teal-800 dark:bg-teal-900 dark:text-teal-100">
-                  {due.soon}
-                </span>
-              ) : null}
-            </NavLink>
-          </nav>
-        ) : null}
-
       </header>
 
       <main className="mx-auto w-full max-w-4xl lg:max-w-6xl flex-1 px-4 py-4">

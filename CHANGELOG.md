@@ -134,6 +134,18 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 
 ### Zmienione
 
+- **Nagłówek to jeden wiersz: marka + zakładki + menu „≡"** (przegląd po
+  ticketcie 14). Wcześniej były dwa wiersze (marka z czterema kontrolkami,
+  pod nią pasek zakładek), a **nazwa osoby dublowała odnośnik logo** — oba
+  prowadziły do wyboru osoby. Teraz: logo (na telefonie sam monogram) obok
+  zakładek Mapa/Kontrole, a wszystko inne w **menu globalnym** (ikona „≡",
+  celowo inna niż „⋯", które w aplikacji znaczy „akcje na tym obiekcie"):
+  zmiana osoby, motyw, instalacja, wylogowanie. Logo przestało być
+  odnośnikiem — „do domu" prowadzi zakładka Mapa, a osobę zmienia się
+  świadomie z menu. Nagłówek **113 → 61 px**, stały chrom ekranu
+  **199 → 147 px** (z 276 px pierwotnie). Nazwa osoby nadal jest widoczna
+  (etykieta menu pokazuje, w czyjej dokumentacji jesteś).
+
 - **Stały chrom ekranu odchudzony** (ticket 13). Nagłówek, stopka i paddingi
   `main` to koszt ponoszony na **każdym** ekranie, więc każdy piksel liczy się
   tam wielokrotnie. Zmierzone na 375×667: **276 px → 199 px** (41% → 30%

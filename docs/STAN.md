@@ -31,7 +31,7 @@ osób („Ja", „Syn").
 
 | Obszar | Stan |
 | --- | --- |
-| **Telefon** | nagłówek ≤ 121 px (43% → 18% wysokości); nawigacja **tylko wewnątrz osoby** + klikalny wskaźnik osoby (także na telefonie); komunikaty o instalacji na dole; stały chrom 276 → **199 px** (41% → 30% ekranu); budżety UI i chromu pilnowane testami; **audyt dostępności (axe-core)** w `e2e/a11y.spec.js` |
+| **Telefon** | nagłówek **jednoliniowy, 61 px** (marka + zakładki + menu „≡"); nawigacja tylko wewnątrz osoby, zmiana osoby i motyw w menu; komunikaty o instalacji na dole; stały chrom 276 → **147 px** (41% → 22% ekranu); budżety UI i chromu pilnowane testami; **audyt dostępności (axe-core)** w `e2e/a11y.spec.js` |
 | **Wybór osoby** | karta z liczbami (znamiona, zdjęcia, najbliższa kontrola + „zaległe” gdy minęła); zmiana nazwy i usunięcie osoby w menu „⋯” |
 | **Mapa ciała** | widoki ze słownika 17 okolic + własne nazwy; piny (dodaj / przesuń / edytuj; nowe znamię od razu proponuje pierwsze zdjęcie); zdjęcie tła per widok (aparat lub plik); kontekst okolicy w nazwie znamienia; panel pina jako bottom sheet na telefonie |
 | **Znamię** | zdjęcia z edycją (obrót / odbicia) i kompresją; pomiar z obrysu (MediaPipe, geometria); notatki ABCDE; status i eksport do kalendarza (menu „⋯”); zakładki Przegląd / Zdjęcia / Trend; porównanie przeciąganym suwakiem; wykres rozmiaru; powiększanie zdjęć (lightbox) |

@@ -24,12 +24,13 @@ import {
 // Linuksie) i wiersz górny, i nawigacja zawijały się na dwie linie.
 const VIEWPORT = { width: 375, height: 667 }
 
-// Jeden wiersz paska = py-3 (24) + przycisk 44 = 68 px. Zawinięcie daje ~104.
+// Nagłówek to teraz JEDEN wiersz: py-2 (16) + 44 = 60 px zmierzone.
+// Zawinięcie nawigacji (szersza czcionka) dałoby ~104.
 const MAX_TOP_ROW_HEIGHT = 80
-// Jedna linia nawigacji = min-h-44 (44) + pb-2 (8) = 52 px. Zawinięcie daje 104.
+// Nawigacja siedzi w tym samym wierszu — jej wysokość to cele 44 px.
 const MAX_NAV_HEIGHT = 60
-// 68 + 52 = 120 px zmierzone; zapas na drobne różnice.
-const MAX_HEADER_HEIGHT = 150
+// Cały nagłówek jednoliniowy: 61 px zmierzone, zapas na drobne różnice.
+const MAX_HEADER_HEIGHT = 90
 
 test.use({ viewport: VIEWPORT })
 
@@ -151,11 +152,12 @@ test.describe('Budżet miejsca na małym telefonie', () => {
     // dlatego każdy piksel tutaj kosztuje na wszystkich ekranach naraz
     // (ticket 13).
     //
-    // Zmierzone na 375×667: przed 121 + 107 + 48 = 276 px (41% ekranu), po
-    // odchudzeniu 113 + 54 + 32 = 199 px (30%). Budżet leży PONIŻEJ starej
-    // wartości, więc powrót do poprzedniej stopki czy paddingów od razu
-    // wywali ten test. Zapas na szerszą czcionkę w CI (stopka może złamać
-    // się na trzecią linię).
+    // Zmierzone na 375×667: pierwotnie 121 + 107 + 48 = 276 px (41% ekranu),
+    // po odchudzeniu stopki i paddingów 199 px, a po przejściu nagłówka na
+    // JEDEN wiersz (marka + zakładki + menu „≡") **147 px (22%)**.
+    // Budżet leży poniżej poprzedniego stanu, więc powrót do dwóch wierszy,
+    // starej stopki czy paddingów od razu wywali ten test. Zapas na szerszą
+    // czcionkę w CI (stopka może złamać się na trzecią linię).
     await mockSupabase(page)
     await loginAsDemo(page)
     await openPerson(page, 'Ja')
@@ -178,6 +180,6 @@ test.describe('Budżet miejsca na małym telefonie', () => {
 
     const razem = chrom.naglowek + chrom.stopka + chrom.padding
     expect(razem, `stały chrom ekranu: ${JSON.stringify(chrom)}`)
-      .toBeLessThanOrEqual(240)
+      .toBeLessThanOrEqual(190)
   })
 })

@@ -1,9 +1,11 @@
 import { expect, test } from '@playwright/test'
 import { mockSupabase } from './support/mock-supabase.js'
 import {
+  MENU_BUTTON,
   expectLoginScreen,
   loginAsDemo,
   openApp,
+  openMenu,
   submitLogin,
 } from './support/app.js'
 
@@ -19,6 +21,7 @@ test.describe('Dostęp do aplikacji', () => {
 
     // Nawigacja i stopka należą do zalogowanej części aplikacji.
     await expect(page.getByRole('button', { name: 'Wyloguj' })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: MENU_BUTTON })).toHaveCount(0)
     await expect(page.getByRole('link', { name: 'Mapa ciała' })).toHaveCount(0)
     await expect(page.getByRole('link', { name: 'Kontrole' })).toHaveCount(0)
     // Stopka z zastrzeżeniem „nie diagnozuje” też jest tylko po zalogowaniu.
@@ -49,14 +52,17 @@ test.describe('Dostęp do aplikacji', () => {
 
     await expect(page.getByText('Ja', { exact: true })).toBeVisible()
     await expect(page.getByText('Syn', { exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Wyloguj' })).toBeVisible()
+    // Wylogowanie mieszka w menu globalnym (nagłówek ma jeden wiersz).
+    await openMenu(page)
+    await expect(page.getByRole('menuitem', { name: 'Wyloguj' })).toBeVisible()
   })
 
   test('wylogowanie wraca na ekran logowania', async ({ page }) => {
     await mockSupabase(page)
     await loginAsDemo(page)
 
-    await page.getByRole('button', { name: 'Wyloguj' }).click()
+    await openMenu(page)
+    await page.getByRole('menuitem', { name: 'Wyloguj' }).click()
 
     await expectLoginScreen(page)
     await expect(page.getByText('Ja', { exact: true })).toHaveCount(0)

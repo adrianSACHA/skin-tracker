@@ -12,8 +12,18 @@ import { useEffect, useRef, useState } from 'react'
 // Dlatego wybieramy stronę z większą ilością miejsca i ograniczamy wysokość
 // do tego, co faktycznie się mieści.
 //
-// `items`: [{ key, label, onSelect, danger? } | { key, separator: true }]
-export default function OverflowMenu({ label, items, buttonClassName = '' }) {
+// `items`: [{ key, label, onSelect, href?, checked?, danger? } | { key, separator: true }]
+//
+// `visibleLabel` pokazuje tekst obok ikony (np. nazwę osoby przy menu
+// globalnym), a `icon` pozwala odróżnić menu globalne („≡") od akcji na
+// obiekcie („⋯").
+export default function OverflowMenu({
+  label,
+  items,
+  buttonClassName = '',
+  visibleLabel = '',
+  icon = '⋯',
+}) {
   const [open, setOpen] = useState(false)
   const [pos, setPos] = useState(null)
   const wrapRef = useRef(null)
@@ -90,7 +100,10 @@ export default function OverflowMenu({ label, items, buttonClassName = '' }) {
           'flex h-11 w-11 items-center justify-center rounded-lg border border-slate-300 bg-white text-xl leading-none text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
         }
       >
-        ⋯
+        {visibleLabel ? (
+          <span className="max-w-[6rem] truncate">{visibleLabel}</span>
+        ) : null}
+        {icon}
       </button>
       {open && pos ? (
         <div
