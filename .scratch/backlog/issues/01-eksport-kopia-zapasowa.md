@@ -1,7 +1,7 @@
 # 01 — Eksport / kopia zapasowa danych
 
 Type: task
-Status: needs-triage
+Status: wontfix
 Map: .scratch/backlog/map.md
 
 ## Problem
@@ -57,3 +57,42 @@ Sugerowana kolejność: **A → (później) B**; C co najwyżej jako dodatek do 
 - Da się pobrać jeden plik z metadanymi i zdjęciami wybranej osoby.
 - Struktura plików jest na tyle jasna, że da się ją odtworzyć ręcznie.
 - Aplikacja nie diagnozuje i nie doradza — eksport to tylko kopia.
+
+## Answer — `wontfix` (2026-09-30)
+
+**Decyzja właściciela: nie robimy kopii.**
+
+Sprawdzone przed decyzją (żeby nie odrzucać czegoś niewykonalnego):
+
+- W bazie trzymamy **ścieżki** do zdjęć (`{konto}/{osoba}/{znamię}/{plik}`),
+  nie adresy — adres podpisany powstaje dopiero przy wyświetlaniu. Wiersze są
+  więc przenośne **dosłownie**: id, daty, rozmiary, notatki, ABCDE.
+- Od konta zależą tylko **dwie** rzeczy: `owner_user_id` i pierwszy segment
+  ścieżki pliku. Czyli przywrócenie u siebie nie wymaga żadnego przepisywania,
+  a przeniesienie na inne konto — jednego.
+- Czyli eksport/import **dałoby się zrobić** (~1 h + ~1 h). Odrzucone nie z
+  powodu technicznego, a z powodu wartości: to ubezpieczenie, którego
+  właściciel nie chce opłacać.
+
+Świadomie przyjęte ryzyko: dokumentacja żyje **wyłącznie** w jednym darmowym
+projekcie Supabase. Darmowy plan **nie robi kopii zapasowych** (to funkcja
+płatna), więc nieudane „Usuń osobę" (kasuje też pliki) oraz utrata dostępu do
+konta są nieodwracalne.
+
+### Jeśli temat wróci — od czego zacząć
+
+Nie od UI w aplikacji: przywracanie robi się raz na rok i z komputera, więc
+właściwą formą jest **skrypt** (`npm run kopia` / `npm run przywroc`, klucz
+`service_role`, wzorzec już jest w `scripts/send-reminders.mjs`). Skrypt
+dodatkowo potrafi przywrócić do **innego projektu**, czego UI w przeglądarce
+nie zrobi. Format pliku, który jest jednocześnie odtwarzalny:
+
+```
+skin-tracker-kopia-YYYY-MM-DD.zip
+├── manifest.json   # wersja formatu, data, projekt, liczby wierszy
+├── dane.json       # 4 tabele, wiersz w wiersz, z oryginalnymi id
+└── pliki/          # dokładnie układ bucketu
+```
+
+Powiązane: tańsza alternatywa na **najczęstszą** pomyłkę (nieodwracalne
+usunięcie osoby) to odwracalne kasowanie — patrz ticket 15.

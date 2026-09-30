@@ -70,17 +70,15 @@ Backlog żyje w **`.scratch/backlog/`**. Otwarte:
 
 | #  | Temat | Status |
 | -- | ----- | ------ |
-| 01 | Eksport / kopia zapasowa danych | needs-triage |
-
 | 10 | Za małe cele dotykowe (piny 20 px, suwak 8 px, linki) | needs-triage |
-
-| 14 | Architektura mobilna: mniej ekranów, jasny kontekst osoby | needs-info |
+| 15 | Odwracalne usunięcie osoby (archiwum zamiast kasowania) | needs-triage |
 
 Zamknięte: 02 („Usunięte” nie jest już zaległe), 03 (szukanie w Kontrolach),
 07 (znacznik przy „Kontrole” odświeża się sam), 08 (nagłówek na telefonie:
 286 → 121 px), 04 (zrzuty ekranu w e2e — patrz „Jakość”), 12 (ekran znamienia: akcje w menu
 „⋯” + zakładki), 13 (stały chrom ekranu: 276 → 199 px), 14 (architektura mobilna), 05 (audyt dostępności — axe-core + naprawa kontrastów). Odrzucone: 06 (`wontfix`), 09 (dolny pasek nie zmniejsza
-chromu — przenosi te same piksele z góry na dół).
+chromu — przenosi te same piksele z góry na dół), 01 (kopia zapasowa — świadomie
+odrzucona).
 
 Najważniejsze: **01** — jedyny realny sposób ochrony dorobku przed utratą
 projektu Supabase.
