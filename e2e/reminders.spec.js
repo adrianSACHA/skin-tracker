@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { mockSupabase } from './support/mock-supabase.js'
-import { loginAsDemo, openPerson } from './support/app.js'
+import { loginAsDemo, openPerson, openReminders } from './support/app.js'
 
 // Ticket 02: znamię oznaczone jako „Usunięte” nie ma czego pilnować, więc
 // nie może już: zawyżać znacznika przy „Kontrole”, trafiać na listę Kontroli
@@ -49,7 +49,7 @@ test.describe('Znamiona „Usunięte”', () => {
     await expect(page.getByText('2 znamiona · 1 zdjęcie')).toBeVisible()
   })
 
-  test('„Usunięte” zostają na liście znamion (filtr statusu działa)', async ({
+  test('„Usunięte” pokazuje przełącznik, a filtr statusu trafia do adresu', async ({
     page,
   }) => {
     await mockSupabase(page)
@@ -60,21 +60,24 @@ test.describe('Znamiona „Usunięte”', () => {
     await page.locator('#quick-status').selectOption('removed')
     await expect(page.getByText('Zmiany zapisane')).toBeVisible()
 
-    await page.getByRole('link', { name: 'Lista znamion' }).click()
-    await expect(
-      page.getByRole('heading', { name: 'Lista znamion' })
-    ).toBeVisible()
+    await openReminders(page)
 
-    // Nadal widoczne (lista pokazuje całą dokumentację)...
-    await expect(page.getByText('Tył-1')).toBeVisible()
+    // Kontekst okolicy przy nadpisanej nazwie (przeniesione z dawnej listy).
+    await expect(page.getByText('Tył · ')).toBeVisible()
 
-    // ...i da się je wyfiltrować po statusie „Usunięte”.
+    // Domyślnie „Usunięte” nie ma na liście — nie ma czego kontrolować.
+    await expect(page.getByText('Tył-1')).toHaveCount(0)
+
+    // Przełącznik w filtrach je pokazuje (to jedyne miejsce, gdzie zostały).
     await page.getByRole('button', { name: 'Filtry' }).click()
-    await page.getByRole('checkbox', { name: 'Usunięte' }).click()
+    await page.getByRole('checkbox', { name: /Pokaż znamiona/ }).click()
+    await expect(page.getByText('Tył-1')).toBeVisible()
+    await expect(page.getByText('usunięte — bez kontroli')).toBeVisible()
+
+    // Filtr statusu „Usunięte” zapisuje się w adresie.
+    await page.getByRole('checkbox', { name: 'Usunięte', exact: true }).click()
     await expect(page).toHaveURL(/status=removed/)
     await expect(page.getByText('Tył-1')).toBeVisible()
-    // Drugie znamię ma inny status, więc wypada z filtra.
-    await expect(page.getByText('Kark — znamię przy włosach')).toHaveCount(0)
   })
 })
 

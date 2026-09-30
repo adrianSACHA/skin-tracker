@@ -28,24 +28,21 @@ test.describe('Nawigacja i mapa ciała', () => {
   })
 
   test('zakładki przełączają widoki i trzymają adres', async ({ page }) => {
-    await page.getByRole('link', { name: 'Lista znamion' }).click()
-    await expect(page).toHaveURL(/#\/person\/person-1\/list$/)
-    await expect(
-      page.getByRole('heading', { name: 'Lista znamion' })
-    ).toBeVisible()
-
+    // Nawigacja ma dwie pozycje: Mapa ciała i Kontrole (ticket 14 — „Lista
+    // znamion” została wchłonięta przez Kontrole).
     await page.getByRole('link', { name: /^Kontrole/ }).click()
     await expect(page).toHaveURL(/#\/person\/person-1\/reminders$/)
-    // UWAGA: React Router zmienia adres w `startTransition`, więc URL zmienia
-    // się ZANIM wyrenderuje się nowy ekran. Czekamy na ekran, nie na adres —
-    // inaczej przez chwilę w DOM są oba widoki (i np. dwa linki „Mapa ciała”:
-    // ten z nawigacji i breadcrumb listy znamion).
     await expect(
       page.getByRole('heading', { name: /^Kontrole/ })
     ).toBeVisible()
 
-    await page.getByRole('link', { name: 'Mapa ciała', exact: true }).click()
+    // UWAGA: React Router zmienia adres w `startTransition`, więc URL zmienia
+    // się ZANIM wyrenderuje się nowy ekran. Czekamy na ekran, nie na adres.
+    await page.getByRole('link', { name: /^(Mapa|Mapa ciała)$/ }).click()
     await expect(page).toHaveURL(/#\/person\/person-1$/)
+    await expect(
+      page.getByRole('heading', { name: 'Mapa ciała — Ja' })
+    ).toBeVisible()
   })
 
   test('nieznany adres nie wywala aplikacji', async ({ page }) => {

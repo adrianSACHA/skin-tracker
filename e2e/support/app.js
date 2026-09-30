@@ -4,7 +4,9 @@ import { BASE_PATH } from './constants.js'
 export { BASE_PATH }
 
 // Etykieta drugiej zakładki zależy od szerokości ekranu (patrz Layout).
-export const LIST_TAB = /^(Znamiona|Lista znamion)$/
+// Nawigacja ma teraz dwie pozycje (lista znamion została wchłonięta przez
+// Kontrole — ticket 14). Na telefonie etykiety są krótsze.
+export const REMINDERS_TAB = /^Kontrole/
 
 export const DEMO_EMAIL = 'demo@example.com'
 export const DEMO_PASSWORD = 'tajne-haslo'
@@ -73,13 +75,13 @@ export async function makeInstallable(page) {
 
 export async function openPerson(page, displayName) {
   await page.getByText(displayName, { exact: true }).click()
-  await expect(page.getByRole('link', { name: LIST_TAB })).toBeVisible()
+  await expect(page.getByRole('link', { name: REMINDERS_TAB })).toBeVisible()
 }
 
-/** Przechodzi do listy znamion wybranej osoby. */
-export async function openLesionList(page) {
-  await page.getByRole('link', { name: LIST_TAB }).click()
+/** Przechodzi do Kontrol wybranej osoby (jedyna lista znamion). */
+export async function openReminders(page) {
+  await page.getByRole('link', { name: REMINDERS_TAB }).click()
   await expect(
-    page.getByRole('heading', { name: 'Lista znamion' })
+    page.getByRole('heading', { name: /^Kontrole/ })
   ).toBeVisible()
 }

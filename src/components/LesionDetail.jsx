@@ -57,7 +57,6 @@ export default function LesionDetail() {
 
   // Skąd przyszliśmy - żeby „Wróć" cofnęło do poprzedniego widoku.
   const backBySection = {
-    list: { to: `/person/${personId}/list`, label: '< Wróć do listy znamion' },
     reminders: {
       to: `/person/${personId}/reminders`,
       label: '< Wróć do kontroli',
@@ -81,7 +80,7 @@ export default function LesionDetail() {
   const [compareA, setCompareA] = useState(null) // id zdjęcia
   const [compareB, setCompareB] = useState(null)
   const [opacity, setOpacity] = useState(50)
-  // Interwał kontroli jest ustawiany w JEDNYM miejscu (lista znamion) - tutaj
+  // Interwał kontroli jest ustawiany w JEDNYM miejscu (Kontrole) — tutaj
   // tylko odczytujemy wartość, żeby nie było dwóch rozjeżdżających się pól.
   const [intervalWeeks] = useIntervalWeeks(personId)
   const [leadDays, setLeadDays] = useState(7)

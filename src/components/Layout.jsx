@@ -137,10 +137,7 @@ export default function Layout({ children }) {
               <span className="sm:hidden">Mapa</span>
               <span className="hidden sm:inline">Mapa ciała</span>
             </NavLink>
-            <NavLink to={`/person/${person.id}/list`} className={navClass}>
-              <span className="sm:hidden">Znamiona</span>
-              <span className="hidden sm:inline">Lista znamion</span>
-            </NavLink>
+
             <NavLink to={`/person/${person.id}/reminders`} className={navClass}>
               Kontrole
               {due.overdue > 0 ? (

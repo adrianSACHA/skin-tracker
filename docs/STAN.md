@@ -31,12 +31,11 @@ osób („Ja", „Syn").
 
 | Obszar | Stan |
 | --- | --- |
-| **Telefon** | nagłówek ≤ 121 px (43% → 18% wysokości); komunikaty o instalacji na dole; panel przypomnień zwinięty; budżet UI pilnowany testem |
+| **Telefon** | nagłówek ≤ 121 px (43% → 18% wysokości); nawigacja **tylko wewnątrz osoby** + klikalny wskaźnik osoby (także na telefonie); komunikaty o instalacji na dole; budżet UI pilnowany testem |
 | **Wybór osoby** | karta z liczbami (znamiona, zdjęcia, najbliższa kontrola + „zaległe” gdy minęła); zmiana nazwy i usunięcie osoby w menu „⋯” |
 | **Mapa ciała** | widoki ze słownika 17 okolic + własne nazwy; piny (dodaj / przesuń / edytuj); zdjęcie tła per widok (aparat lub plik); kontekst okolicy w nazwie znamienia; panel pina jako bottom sheet na telefonie |
 | **Znamię** | zdjęcia z edycją (obrót / odbicia) i kompresją; pomiar z obrysu (MediaPipe, geometria); notatki ABCDE; status (menu „⋯”); zakładki Przegląd / Zdjęcia / Trend; porównanie przeciąganym suwakiem; wykres rozmiaru; powiększanie zdjęć (lightbox) |
-| **Lista znamion** | filtr po statusie + sortowanie po terminie kontroli; stan w URL |
-| **Kontrole** | terminy, przesuwanie, ustawienia; panel „Przypomnienia na telefon" (instalacja + zgoda + push ze statusem); **3 poziomy przypomnień**: `.ics`, in‑app, **Web Push w tle** |
+| **Kontrole** | **jedyna lista znamion** (od ticketu 14): liczniki zaległe / w ciągu 30 dni, wyszukiwanie, filtry (status, „pokaż usunięte”, sort, interwał) — stan w URL; terminy i przesuwanie; panel „Przypomnienia na telefon" (instalacja + zgoda + push ze statusem); **3 poziomy przypomnień**: `.ics`, in‑app, **Web Push w tle** |
 | **PWA** | manifest + ikony, przycisk **„Zainstaluj"** (Android: prompt; iOS: instrukcja), service worker (obsługa push) |
 
 ## Automatyzacja (GitHub)

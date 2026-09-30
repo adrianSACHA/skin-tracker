@@ -10,7 +10,15 @@ import {
   todayYMD,
 } from '../lib/date'
 import { useIntervalWeeks } from '../lib/interval'
-import { dueRows, filterByQuery } from '../lib/lesionView'
+import {
+  buildRows,
+  dueRows,
+  filterByQuery,
+  filterByStatus,
+  sortRows,
+  sortRowsByNext,
+} from '../lib/lesionView'
+import { STATUSES, statusMeta } from '../lib/status'
 import { readListParams, buildListParams } from '../lib/listParams'
 import {
   isNotifyOnOpenEnabled,
@@ -35,14 +43,24 @@ const SOON_DAYS = 30 // horyzont "wkrótce" w pasku podsumowania
 export default function Reminders() {
   const { personId } = useParams()
   const navigate = useNavigate()
-  const [intervalWeeks] = useIntervalWeeks(personId)
+  const [intervalWeeks, setIntervalWeeks] = useIntervalWeeks(personId)
   // Szukanie trzymamy w adresie (jak na liście znamion), więc przeżywa
   // odświeżenie i działa „wstecz”.
   const [searchParams, setSearchParams] = useSearchParams()
-  const { q: query } = useMemo(
-    () => readListParams(searchParams),
-    [searchParams]
-  )
+  // Filtry i sortowanie trzymamy w adresie tak samo jak dawne „Lista znamion”
+  // (ticket 14: tamten ekran został wchłonięty przez Kontrole).
+  const {
+    q: query,
+    statuses: selectedStatuses,
+    sort: sortBy,
+  } = useMemo(() => readListParams(searchParams), [searchParams])
+
+  // Filtry zwijane — domyślnie schowane, żeby lista i licznik zaległości
+  // zostały nad linią zgięcia (pilnuje tego `e2e/ui-budget.spec.js`).
+  const [showFilters, setShowFilters] = useState(false)
+  // Znamiona „Usunięte” są domyślnie ukryte (nie ma czego kontrolować), ale
+  // to jedyne miejsce, gdzie można je jeszcze zobaczyć — stąd przełącznik.
+  const [showRemoved, setShowRemoved] = useState(false)
 
   const [person, setPerson] = useState(null)
   const [lesions, setLesions] = useState([])
@@ -111,6 +129,7 @@ export default function Reminders() {
 
   const rows = useMemo(() => {
     // Bez znamion „Usunięte” - nie ma czego kontrolować ani o czym przypominać.
+    // Te wiersze karmią LICZNIKI (zaległe / wkrótce) i są niezależne od filtrów.
     const built = dueRows(lesions, { intervalWeeks, today: todayYMD() })
     const mapped = built.map((row) => ({
       ...row,
@@ -122,8 +141,27 @@ export default function Reminders() {
     return mapped.sort((a, b) => a.next.localeCompare(b.next))
   }, [lesions, intervalWeeks, leadDays])
 
-  // Szukanie po nazwie znamienia albo okolicy (ta sama funkcja co lista).
-  const visibleRows = useMemo(() => filterByQuery(rows, query), [rows, query])
+  // Podstawa listy: to samo, ale na życzenie także „Usunięte” — wtedy
+  // `buildRows`, bo `dueRows` je odsiewa (patrz komentarz w lesionView.js).
+  const podstawa = useMemo(() => {
+    const built = showRemoved
+      ? buildRows(lesions, { intervalWeeks, today: todayYMD() })
+      : dueRows(lesions, { intervalWeeks, today: todayYMD() })
+    return built.map((row) => ({
+      ...row,
+      daysLeft: row.daysUntilNext,
+      snoozed: Boolean(row.lesion.next_check_at),
+      remindOn: addDaysYMD(row.next, -leadDays),
+      usuniete: row.lesion.status === 'removed',
+    }))
+  }, [lesions, intervalWeeks, leadDays, showRemoved])
+
+  // Filtr statusu + szukanie + sortowanie (ten sam szew co dawna lista znamion).
+  const visibleRows = useMemo(() => {
+    const poStatusie = filterByStatus(podstawa, selectedStatuses)
+    const poSzukaniu = filterByQuery(poStatusie, query)
+    return sortBy === 'status' ? sortRows(poSzukaniu) : sortRowsByNext(poSzukaniu)
+  }, [podstawa, selectedStatuses, query, sortBy])
 
   // Pole podąża za adresem (np. „wstecz”), ale nie nadpisuje tego, co
   // właśnie wpisujesz — porównujemy po przycięciu.
@@ -131,11 +169,29 @@ export default function Reminders() {
     setSearchInput((prev) => (prev.trim() === query ? prev : query))
   }, [query])
 
+  const setListParams = ({
+    statuses = selectedStatuses,
+    sort = sortBy,
+    q = query,
+  } = {}) => {
+    setSearchParams(buildListParams({ statuses, sort, q }), { replace: true })
+  }
+
   const changeQuery = (value) => {
     setSearchInput(value)
-    // Ten ekran używa wyłącznie `q` — nie ma tu filtra statusu ani sortowania.
-    setSearchParams(buildListParams({ q: value }), { replace: true })
+    setListParams({ q: value })
   }
+
+  const toggleStatus = (status) => {
+    const statuses = selectedStatuses.includes(status)
+      ? selectedStatuses.filter((s) => s !== status)
+      : [...selectedStatuses, status]
+    setListParams({ statuses })
+  }
+
+  const clearStatuses = () => setListParams({ statuses: [] })
+
+  const changeSort = (value) => setListParams({ sort: value })
 
   const summary = useMemo(() => {
     let overdue = 0
@@ -466,19 +522,109 @@ export default function Reminders() {
         </span>
       </div>
 
-      {!loading && rows.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-2">
-          <input
-            type="search"
-            value={searchInput}
-            onChange={(e) => changeQuery(e.target.value)}
-            placeholder="Szukaj po nazwie lub okolicy…"
-            aria-label="Szukaj kontroli"
-            className="min-h-[44px] min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
-          />
-          <span className="text-xs text-slate-500 dark:text-slate-400">
-            {visibleRows.length} z {rows.length}
+      {!loading && podstawa.length > 0 ? (
+        <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="search"
+              value={searchInput}
+              onChange={(e) => changeQuery(e.target.value)}
+              placeholder="Szukaj po nazwie lub okolicy…"
+              aria-label="Szukaj kontroli"
+              className="min-h-[44px] min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+            />
+            <button
+              type="button"
+              onClick={() => setShowFilters((v) => !v)}
+              aria-expanded={showFilters}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            >
+              Filtry
+              {selectedStatuses.length > 0 ? (
+                <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-teal-700 px-1.5 text-xs font-semibold text-white dark:bg-teal-600">
+                  {selectedStatuses.length}
+                </span>
+              ) : null}
+              <span aria-hidden="true" className="text-slate-400">
+                {showFilters ? '▴' : '▾'}
+              </span>
+            </button>
+          </div>
+          <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
+            {visibleRows.length} z {podstawa.length} ·{' '}
+            {sortBy === 'status' ? 'wg pilności' : 'wg terminu'}
           </span>
+
+          {showFilters ? (
+            <div className="mt-3 space-y-3">
+              <fieldset>
+                <legend className="mb-2 font-medium text-slate-700 dark:text-slate-200">
+                  Status
+                </legend>
+                <div className="flex flex-wrap gap-2">
+                  {STATUSES.map((s) => {
+                    const meta = statusMeta(s)
+                    const checked = selectedStatuses.includes(s)
+                    return (
+                      <label
+                        key={s}
+                        className={`flex min-h-[44px] cursor-pointer items-center gap-2 rounded-full border px-3 transition-colors ${
+                          checked
+                            ? 'border-teal-600 bg-teal-50 text-teal-800 dark:border-teal-400 dark:bg-teal-950 dark:text-teal-200'
+                            : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleStatus(s)}
+                          className="h-4 w-4 rounded border-slate-300 text-teal-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-600 dark:bg-slate-800"
+                        />
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{ backgroundColor: meta.dot }}
+                          aria-hidden="true"
+                        />
+                        {meta.label}
+                      </label>
+                    )
+                  })}
+                  {selectedStatuses.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={clearStatuses}
+                      className="min-h-[44px] rounded-full px-3 text-sm font-medium text-teal-700 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-300"
+                    >
+                      Wyczyść
+                    </button>
+                  ) : null}
+                </div>
+              </fieldset>
+
+              <label className="flex min-h-[44px] cursor-pointer items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={showRemoved}
+                  onChange={(e) => setShowRemoved(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-teal-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-600 dark:bg-slate-800"
+                />
+                Pokaż znamiona „Usunięte”
+              </label>
+
+              <div className="flex items-center gap-2">
+                <label htmlFor="sort-by">Sortuj</label>
+                <select
+                  id="sort-by"
+                  value={sortBy}
+                  onChange={(e) => changeSort(e.target.value)}
+                  className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                >
+                  <option value="next">Termin kontroli (najpilniejsze)</option>
+                  <option value="status">Status (pilność)</option>
+                </select>
+              </div>
+            </div>
+          ) : null}
         </div>
       ) : null}
 
@@ -486,7 +632,7 @@ export default function Reminders() {
         <p className="text-sm text-slate-500 dark:text-slate-400">
           Wczytywanie kontroli…
         </p>
-      ) : rows.length === 0 ? (
+      ) : podstawa.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
           Brak znamion. Dodaj je na mapie ciała, aby planować kontrole.
         </div>
@@ -496,7 +642,7 @@ export default function Reminders() {
         </div>
       ) : (
         <ul className="space-y-3">
-          {visibleRows.map(({ lesion, last, next, daysLeft, overdue, snoozed, remindOn }) => (
+          {visibleRows.map(({ lesion, last, next, daysLeft, overdue, snoozed, remindOn, usuniete }) => (
             <li
               key={lesion.id}
               className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
@@ -528,25 +674,36 @@ export default function Reminders() {
                 </div>
 
                 <div className="text-right text-sm">
-                  <p
-                    className={
-                      overdue
-                        ? 'font-semibold text-red-700 dark:text-red-300'
-                        : 'font-semibold text-slate-800 dark:text-slate-100'
-                    }
-                  >
-                    {overdue
-                      ? `zaległe ${Math.abs(daysLeft)} dni`
-                      : daysLeft === 0
-                        ? 'dziś'
-                        : `za ${daysLeft} dni`}
-                  </p>
-                  <p className="text-slate-500 dark:text-slate-400">
-                    {formatDate(next)} · przypomnienie {formatDate(remindOn)}
-                  </p>
+                  {usuniete ? (
+                    // „Usunięte” nie ma czego pilnować, więc nie pokazujemy
+                    // odliczania ani przypomnienia (patrz `dueRows`).
+                    <p className="text-slate-500 dark:text-slate-400">
+                      usunięte — bez kontroli
+                    </p>
+                  ) : (
+                    <>
+                      <p
+                        className={
+                          overdue
+                            ? 'font-semibold text-red-700 dark:text-red-300'
+                            : 'font-semibold text-slate-800 dark:text-slate-100'
+                        }
+                      >
+                        {overdue
+                          ? `zaległe ${Math.abs(daysLeft)} dni`
+                          : daysLeft === 0
+                            ? 'dziś'
+                            : `za ${daysLeft} dni`}
+                      </p>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        {formatDate(next)} · przypomnienie {formatDate(remindOn)}
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
 
+              {usuniete ? null : (
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
@@ -584,6 +741,7 @@ export default function Reminders() {
                   ]}
                 />
               </div>
+              )}
             </li>
           ))}
         </ul>
@@ -607,18 +765,21 @@ export default function Reminders() {
           <span>dni przed kontrolą</span>
         </div>
 
-        <p className="text-slate-600 dark:text-slate-300">
-          Interwał kontroli:{' '}
-          <strong className="text-slate-800 dark:text-slate-100">
-            co {intervalWeeks} tyg.
-          </strong>{' '}
-          <Link
-            to={`/person/${personId}/list`}
-            className="text-teal-700 hover:underline dark:text-teal-300"
-          >
-            (zmień na liście znamion)
-          </Link>
-        </p>
+        <div className="flex items-center gap-2">
+          <label htmlFor="interval-weeks">Interwał kontroli</label>
+          <input
+            id="interval-weeks"
+            type="number"
+            min="1"
+            max="52"
+            value={intervalWeeks}
+            onChange={(e) =>
+              setIntervalWeeks(Math.max(1, Number(e.target.value) || 1))
+            }
+            className="min-h-[44px] w-20 rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          />
+          <span>tyg.</span>
+        </div>
 
         {notificationsSupported() ? (
           <label className="flex items-center gap-2">

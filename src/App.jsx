@@ -1,10 +1,9 @@
 import { lazy, Suspense } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import AuthGate from './components/AuthGate'
 import Layout from './components/Layout'
 import PersonSelector from './components/PersonSelector'
 import BodyMap from './components/BodyMap'
-import LesionsList from './components/LesionsList'
 import Reminders from './components/Reminders'
 import { PersonProvider } from './context/PersonContext'
 import AppToaster from './components/AppToaster'
@@ -32,7 +31,10 @@ export default function App() {
               {/* Zagnieżdżone trasy pod osobą - czytelna hierarchia */}
               <Route path="/person/:personId">
                 <Route index element={<BodyMap />} />
-                <Route path="list" element={<LesionsList />} />
+                {/* „Lista znamion” została wchłonięta przez Kontrole (ticket 14):
+                    stary adres przekierowujemy, żeby zakładki i historia
+                    przeglądarki dalej działały. */}
+                <Route path="list" element={<Navigate to="reminders" replace />} />
                 <Route path="reminders" element={<Reminders />} />
                 <Route path="lesion/:lesionId" element={<LesionDetail />} />
               </Route>

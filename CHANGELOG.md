@@ -134,6 +134,19 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 
 ### Zmienione
 
+- **Dwa ekrany zamiast trzech: „Lista znamion” wchłonięta przez Kontrole**
+  (ticket 14). Oba pokazywały to samo (nazwa, status, termin kontroli, link do
+  szczegółów, szukanie), a Kontrole były nadzbiorem. Teraz Kontrole to jedyna
+  lista: doszły filtry (status, sortowanie, **„Pokaż znamiona Usunięte”** —
+  domyślnie ukryte, bo nie ma czego kontrolować) i interwał kontroli, który
+  wcześniej był na liście. Stary adres `/person/:id/list` przekierowuje na
+  Kontrole. Nawigacja schodzi z trzech pozycji do dwóch.
+- **Nawigacja tylko wewnątrz osoby.** Na ekranie „Wybierz osobę” zakładki
+  były widoczne i prowadziły do **poprzednio** wybranej osoby — a na telefonie
+  nie było widać, której (nazwa osoby miała `hidden sm:inline`). Teraz
+  nawigacja pojawia się dopiero wewnątrz osoby, a w jej linii jest klikalny
+  wskaźnik („Ja ▾”), widoczny także na telefonie, prowadzący do zmiany osoby.
+
 - **Ekran znamienia — akcje rzadkie w menu „⋯” i podział na zakładki.**
   Usuwanie znamienia i zmiana statusu przeniesione z widoku do menu (status
   jako pozycje z ✓, `aria-checked`); zniknęła stała czerwona sekcja
@@ -192,6 +205,13 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
   przewija się do panelu szczegółów.
 
 ### Naprawione
+
+- **Testy zrzutów ekranu przepuszczały realne zmiany.** Tolerancja
+  `maxDiffPixelRatio: 0.01` przy `fullPage: true` dawała ~13 000 px zapasu na
+  wysokiej stronie, więc **cała zmiana nagłówka** mieściła się w tolerancji i
+  test jej nie łapał (sprawdzone: zmiana wykrywana dopiero po zejściu na
+  bezwzględne `maxDiffPixels: 200`). To dokładnie ostrzeżenie z ticketu 04 —
+  tyle że zrealizowane w praktyce.
 
 - **Panel pinu na mapie odsyłał do nieistniejącej sekcji.** Po przeniesieniu
   usuwania znamienia do menu „⋯” (ticket 12 A) podpowiedź w panelu pinu nadal

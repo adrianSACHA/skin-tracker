@@ -5,7 +5,7 @@ import { makeData, mockSupabase } from '../support/mock-supabase.js'
 import {
   BASE_PATH,
   loginAsDemo,
-  openLesionList,
+  openReminders,
   openPerson,
 } from '../support/app.js'
 
@@ -153,17 +153,17 @@ test.describe('Zrzuty ekranu', () => {
       await expectScreenshot(page, '02-wybor-osoby.png')
     })
 
-    test('lista znamion — filtry zwinięte i rozwinięte', async ({ page }) => {
+    test('Kontrole — filtry zwinięte i rozwinięte', async ({ page }) => {
       await openAppForShot(page)
       await openPerson(page, 'Ja')
-      await openLesionList(page)
+      await openReminders(page)
 
       await expect(page.getByRole('listitem').first()).toBeVisible()
-      await expectScreenshot(page, '03-lista-znamion.png')
+      await expectScreenshot(page, '03-kontrole.png')
 
       await page.getByRole('button', { name: 'Filtry' }).click()
       await expect(page.locator('#sort-by')).toBeVisible()
-      await expectScreenshot(page, '04-lista-znamion-filtry.png')
+      await expectScreenshot(page, '04-kontrole-filtry.png')
     })
 
     test('mapa ciała', async ({ page }) => {
@@ -229,13 +229,13 @@ test.describe('Zrzuty ekranu', () => {
       await expectScreenshot(page, '07-wybor-osoby-ciemny.png')
     })
 
-    test('lista znamion', async ({ page }) => {
+    test('Kontrole', async ({ page }) => {
       await openAppForShot(page)
       await openPerson(page, 'Ja')
-      await openLesionList(page)
+      await openReminders(page)
 
       await expect(page.getByRole('listitem').first()).toBeVisible()
-      await expectScreenshot(page, '08-lista-znamion-ciemny.png')
+      await expectScreenshot(page, '08-kontrole-ciemny.png')
     })
   })
 })

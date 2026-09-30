@@ -1,7 +1,7 @@
 # 14 — Architektura mobilna: mniej ekranów, jasny kontekst osoby
 
 Type: design
-Status: needs-info
+Status: ready-for-agent
 Map: .scratch/backlog/map.md
 
 Zgłoszenie właściciela (2026-09-29), po sprawdzeniu aplikacji na telefonie.
@@ -136,15 +136,52 @@ ma kliknąć „Zobacz pełną historię".
 
 ---
 
-## Do decyzji właściciela
+## Decyzje właściciela (2026-09-29)
 
-1. **Ustalenie 1:** likwidujemy „Listę znamion" (opcja B), zostawiamy dwa ekrany
-   (A), czy likwidujemy „Kontrole" (C)?
-2. **Ustalenie 2:** minimalny wariant A (ukryć nawigację na wyborze osoby +
-   pokazać osobę na telefonie), czy pełny model A/B?
-3. **Ustalenie 3:** jeden pas u góry (A), „Dodaj zdjęcie" w zakładce (B), czy
-   tylko przenieść kalendarz (C)?
-4. **Ustalenie 4:** czy po postawieniu pinu dodajemy krok „wprowadź dane"?
+1. **Zlikwidować „Listę znamion"** → opcja B (zostają Mapa + Kontrole).
+2. **Minimalny wariant A** — ukryć nawigację na ekranie wyboru osoby i pokazać
+   osobę na telefonie.
+3. **Jeden pas u góry** karty znamienia → opcja A.
+4. „nie wiem, co lepiej" → decyzja po rekomendacji (patrz niżej).
+
+## Zrobione
+
+**Ustalenie 2 (minimalny wariant A).** Nawigacja pojawia się **tylko**
+wewnątrz osoby (`location.pathname` zaczyna się od `/person/`), a jej pierwszym
+elementem jest klikalny wskaźnik osoby („Ja ▾", `aria-label` „Osoba: … Zmień
+osobę”) prowadzący na ekran wyboru. Wskaźnik jest widoczny **także na
+telefonie** (wcześniej nazwa osoby miała `hidden sm:inline`).
+Zabezpieczone testem w `e2e/person.spec.js` — to była ochrona przed dodaniem
+znamienia do nie tej osoby, nie kosmetyka.
+
+**Ustalenie 1 (opcja B).** Kontrole są jedyną listą znamion: doszły filtry
+(status jako chipsy, sortowanie, interwał kontroli) i przełącznik **„Pokaż
+znamiona Usunięte"** (domyślnie ukryte, bo nie ma czego kontrolować — a to
+jedyne miejsce, gdzie jeszcze je widać). `LesionsList.jsx` usunięty, stary
+adres `/person/:id/list` przekierowuje na Kontrole, nawigacja ma dwie pozycje.
+Testy listy przeniesione do `e2e/reminders.spec.js`; `e2e/lesions.spec.js`
+usunięty; zrzuty ekranu listy zastąpione zrzutami Kontrol.
+
+**Znalezione przy okazji:** testy zrzutów ekranu **przepuszczały realne zmiany**
+— `maxDiffPixelRatio: 0.01` przy `fullPage: true` dawał ~13 000 px tolerancji,
+więc zmiana całego nagłówka przechodziła. Zmienione na bezwzględne
+`maxDiffPixels: 200` (sprawdzone: po zmianie ta sama różnica jest wykrywana).
+
+## Zostało
+
+**Ustalenie 3 (jeden pas).** Do zrobienia: tytuł + „+ Dodaj zdjęcie" + `⋯`
+w jednym wierszu; „Do kalendarza" i „Zmień status" do `⋯` (wtedy
+`CalendarReminderButton` musi wystawić zwykłe pozycje menu — nie zagnieżdżamy
+menu w menu).
+
+**Ustalenie 4 (flow dodawania).** Rekomendacja: zostawić szybkie stawianie
+pinu, ale w panelu **nowo utworzonego** znamienia uczynić główną akcją
+„Dodaj pierwsze zdjęcie" (zamiast „Zobacz pełną historię"), prowadzącą do
+karty znamienia z **już otwartym** formularzem zdjęcia. Czyli:
+zaznacz → panel z jasnym następnym krokiem → zdjęcie. Bez wymuszania
+formularza na każdym pinie (mapowanie kilku znamion naraz zostaje szybkie),
+a „wprowadzasz dane" dostaje wyraźny początek — bo znamię bez zdjęcia nie ma
+ani rozmiaru, ani porównania.
 
 ## Znalezione przy okazji (naprawione)
 

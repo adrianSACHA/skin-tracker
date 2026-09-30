@@ -79,11 +79,10 @@ adresu.*
         ├── ThemeToggle.jsx          # przełącznik trybu jasny/ciemny
         ├── PersonSelector.jsx       # wybór osoby
         ├── BodyMap.jsx              # mapa ciała: zoom/pan + piny (dodaj/przesuń/edytuj)
-        ├── LesionDetail.jsx         # szczegóły + porównanie + kalendarz + "Zarządzanie"
+        ├── LesionDetail.jsx         # szczegóły znamienia: zakładki (Przegląd/Zdjęcia/Trend) + menu „⋯”
         ├── LesionSegmenter.jsx      # kreator pomiaru: skala → znamię (MediaPipe, geometria)
         ├── PhotoUploadForm.jsx      # upload: edycja (obrót/odbicia) + kompresja + ABCDE
-        ├── LesionsList.jsx          # lista znamion (statusy, sugerowana data kontroli)
-        ├── Reminders.jsx            # "Kontrole": terminy, przesuwanie, przypomnienia
+        ├── Reminders.jsx            # "Kontrole": JEDYNA lista znamion + terminy, filtry, przypomnienia
         ├── CalendarReminderButton.jsx  # eksport cyklicznego .ics / Google / Outlook
         ├── ConfirmDialog.jsx        # modal potwierdzenia (akcje destrukcyjne)
         ├── SignedImage.jsx          # signed URL → <img>
@@ -300,12 +299,12 @@ Postęp znajdziesz w zakładce **Actions** w repo.
    - obejrzyj trend rozmiaru (wykres) i historię ABCDE,
    - ustaw status,
    - „**Do kalendarza**" — cykliczne przypomnienie (`.ics` / Google / Outlook).
-5. **Lista znamion** — statusy do obserwacji i sugerowana data następnej
-   kontroli.
-6. **Kontrole** — lista najpilniejszych kontroli (zaległe / w ciągu 30 dni),
-   przesuwanie terminu („Przesuń o N tyg."), ustawienie „przypomnij X dni
-   wcześniej" (zapisywane w bazie) oraz eksport **cyklicznego** wydarzenia
-   („Do kalendarza": `.ics` / Google / Outlook).
+5. **Kontrole** — jedno miejsce na całą listę znamion: liczniki (zaległe /
+   w ciągu 30 dni), wyszukiwanie, filtry (status, „pokaż usunięte”,
+   sortowanie, interwał kontroli), przesuwanie terminu („Przesuń o N tyg."),
+   ustawienie „przypomnij X dni wcześniej" (zapisywane w bazie) oraz eksport
+   **cyklicznego** wydarzenia („Do kalendarza": `.ics` / Google / Outlook).
+   *(Wcześniej osobny ekran „Lista znamion” — wchłonięty w tickecie 14.)*
 
 ---
 

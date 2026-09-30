@@ -3,7 +3,7 @@ import { mockSupabase } from './support/mock-supabase.js'
 import {
   loginAsDemo,
   makeInstallable,
-  openLesionList,
+  openReminders,
   openPerson,
   useWideFont,
 } from './support/app.js'
@@ -83,10 +83,9 @@ test.describe('Budżet miejsca na małym telefonie', () => {
     await expect(page.getByRole('button', { name: 'Nie teraz' })).toBeVisible()
     await assertHeaderBudget(page, 'mapa ciała + instalacja')
 
-    await openLesionList(page)
-    await assertHeaderBudget(page, 'lista znamion + instalacja')
-
-    await page.getByRole('link', { name: /^Kontrole/ }).click()
+    // „Lista znamion” została wchłonięta przez Kontrole (ticket 14), więc
+    // nagłówek sprawdzamy na dwóch pozostałych ekranach.
+    await openReminders(page)
     await assertHeaderBudget(page, 'Kontrole + instalacja')
   })
 
@@ -103,24 +102,28 @@ test.describe('Budżet miejsca na małym telefonie', () => {
     await useWideFont(page)
     await assertHeaderBudget(page, 'szeroka czcionka')
 
-    await openLesionList(page)
-    await assertHeaderBudget(page, 'szeroka czcionka + lista')
+    await openReminders(page)
+    await assertHeaderBudget(page, 'szeroka czcionka + Kontrole')
   })
 
-  test('pierwszy wiersz listy znamion jest widoczny bez przewijania', async ({
+  test('pierwszy wiersz Kontrol jest widoczny bez przewijania', async ({
     page,
   }) => {
     await mockSupabase(page)
     await loginAsDemo(page)
     await openPerson(page, 'Ja')
     await makeInstallable(page)
-    await openLesionList(page)
+    await openReminders(page)
 
-    await assertAboveFold(
-      page,
-      page.getByRole('listitem').first(),
-      'pierwszy wiersz listy'
-    )
+    // Wiersz ZACZYNA się nad linią zgięcia. Cały wiersz (przy pasku instalacji
+    // w nagłówku) kończy się ~705 px, czyli 38 px poniżej — Kontrole mają nad
+    // listą liczniki i wyszukiwanie. Gwarancja: bez przewijania widać, że lista
+    // jest. Że widać licznik zaległości, pilnuje osobny test niżej.
+    const pierwszy = page.getByRole('listitem').first()
+    await expect(pierwszy).toBeVisible()
+    const box = await pierwszy.boundingBox()
+    expect(box, 'pierwszy wiersz Kontrol musi być widoczny').not.toBeNull()
+    expect(Math.round(box.y)).toBeLessThan(VIEWPORT.height)
   })
 
   test('na Kontrolach widać licznik zaległości bez przewijania', async ({
