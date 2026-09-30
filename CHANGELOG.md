@@ -193,6 +193,11 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 
 ### Naprawione
 
+- **Panel pinu na mapie odsyłał do nieistniejącej sekcji.** Po przeniesieniu
+  usuwania znamienia do menu „⋯” (ticket 12 A) podpowiedź w panelu pinu nadal
+  mówiła „Usuń znamię w widoku szczegółów (sekcja «Zarządzanie»)” — a tej
+  sekcji już nie ma. Teraz wskazuje menu „⋯” obok nazwy.
+
 - **Nieudana wysyłka przypomnień nie zużywa już cyklu.** `last_reminded_at`
   zapisywało się po próbie wysyłki nawet wtedy, gdy **wszystkie** wysyłki
   padły — a wtedy przypomnienie na cały cykl przepadało bez śladu. Teraz

@@ -198,7 +198,7 @@ export default function LesionInfoPanel({
       ) : null}
 
       <p className="text-xs text-slate-500 dark:text-slate-400">
-        Usuń znamię w widoku szczegółów (sekcja „Zarządzanie").
+        Usuń znamię w widoku szczegółów (menu „⋯” obok nazwy).
       </p>
     </div>
   )

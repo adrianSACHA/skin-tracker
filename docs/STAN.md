@@ -24,7 +24,7 @@ osób („Ja", „Syn").
 - `npm run e2e` → **38/38** ✓ (Playwright, zmockowany Supabase, ~20 s),
   w tym **budżet UI** na 375×667 (`e2e/ui-budget.spec.js`) oraz **zrzuty
   ekranu** (`e2e/visual/screens.spec.js`) — wzorce osobno dla Windows i CI.
-- Tracker: **12 effortów, 86 ticketów (+1 spec): 80 `resolved`, 4 otwartych
+- Tracker: **12 effortów, 87 ticketów (+1 spec): 80 `resolved`, 5 otwartych
   i 1 `wontfix` w `.scratch/backlog/`.
 
 ## Funkcje
@@ -75,6 +75,7 @@ Backlog żyje w **`.scratch/backlog/`**. Otwarte:
 | 05 | Audyt dostępności (a11y) | needs-triage |
 | 10 | Za małe cele dotykowe (piny 20 px, suwak 8 px, linki) | needs-triage |
 | 13 | Chrom aplikacji zjada ~600 px każdego ekranu | needs-triage |
+| 14 | Architektura mobilna: mniej ekranów, jasny kontekst osoby | needs-info |
 
 Zamknięte: 02 („Usunięte” nie jest już zaległe), 03 (szukanie w Kontrolach),
 07 (znacznik przy „Kontrole” odświeża się sam), 08 (nagłówek na telefonie:
