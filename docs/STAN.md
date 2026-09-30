@@ -24,14 +24,14 @@ osób („Ja", „Syn").
 - `npm run e2e` → **38/38** ✓ (Playwright, zmockowany Supabase, ~20 s),
   w tym **budżet UI** na 375×667 (`e2e/ui-budget.spec.js`) oraz **zrzuty
   ekranu** (`e2e/visual/screens.spec.js`) — wzorce osobno dla Windows i CI.
-- Tracker: **12 effortów, 87 ticketów (+1 spec): 81 `resolved`, 4 otwartych
+- Tracker: **12 effortów, 87 ticketów (+1 spec): 82 `resolved`, 3 otwartych
   i 1 `wontfix` w `.scratch/backlog/`.
 
 ## Funkcje
 
 | Obszar | Stan |
 | --- | --- |
-| **Telefon** | nagłówek ≤ 121 px (43% → 18% wysokości); nawigacja **tylko wewnątrz osoby** + klikalny wskaźnik osoby (także na telefonie); komunikaty o instalacji na dole; budżet UI pilnowany testem |
+| **Telefon** | nagłówek ≤ 121 px (43% → 18% wysokości); nawigacja **tylko wewnątrz osoby** + klikalny wskaźnik osoby (także na telefonie); komunikaty o instalacji na dole; stały chrom 276 → **199 px** (41% → 30% ekranu); budżet UI i budżet chromu pilnowane testami |
 | **Wybór osoby** | karta z liczbami (znamiona, zdjęcia, najbliższa kontrola + „zaległe” gdy minęła); zmiana nazwy i usunięcie osoby w menu „⋯” |
 | **Mapa ciała** | widoki ze słownika 17 okolic + własne nazwy; piny (dodaj / przesuń / edytuj; nowe znamię od razu proponuje pierwsze zdjęcie); zdjęcie tła per widok (aparat lub plik); kontekst okolicy w nazwie znamienia; panel pina jako bottom sheet na telefonie |
 | **Znamię** | zdjęcia z edycją (obrót / odbicia) i kompresją; pomiar z obrysu (MediaPipe, geometria); notatki ABCDE; status i eksport do kalendarza (menu „⋯”); zakładki Przegląd / Zdjęcia / Trend; porównanie przeciąganym suwakiem; wykres rozmiaru; powiększanie zdjęć (lightbox) |
@@ -73,14 +73,14 @@ Backlog żyje w **`.scratch/backlog/`**. Otwarte:
 | 01 | Eksport / kopia zapasowa danych | needs-triage |
 | 05 | Audyt dostępności (a11y) | needs-triage |
 | 10 | Za małe cele dotykowe (piny 20 px, suwak 8 px, linki) | needs-triage |
-| 13 | Chrom aplikacji zjada ~600 px każdego ekranu | needs-triage |
+
 | 14 | Architektura mobilna: mniej ekranów, jasny kontekst osoby | needs-info |
 
 Zamknięte: 02 („Usunięte” nie jest już zaległe), 03 (szukanie w Kontrolach),
 07 (znacznik przy „Kontrole” odświeża się sam), 08 (nagłówek na telefonie:
 286 → 121 px), 04 (zrzuty ekranu w e2e — patrz „Jakość”), 12 (ekran znamienia: akcje w menu
-„⋯” + zakładki). Odrzucone: 06 (`wontfix`), 09 (dolny pasek nie zmniejsza
-chromu — patrz ticket 13).
+„⋯” + zakładki), 13 (stały chrom ekranu: 276 → 199 px), 14 (architektura mobilna). Odrzucone: 06 (`wontfix`), 09 (dolny pasek nie zmniejsza
+chromu — przenosi te same piksele z góry na dół).
 
 Najważniejsze: **01** — jedyny realny sposób ochrony dorobku przed utratą
 projektu Supabase.

@@ -143,4 +143,41 @@ test.describe('Budżet miejsca na małym telefonie', () => {
       'zwinięty panel powiadomień'
     )
   })
+
+  test('stały chrom (nagłówek + stopka + paddingi) nie puchnie', async ({
+    page,
+  }) => {
+    // Chrome liczymy RAZ, bo jest identyczny na każdym ekranie — i właśnie
+    // dlatego każdy piksel tutaj kosztuje na wszystkich ekranach naraz
+    // (ticket 13).
+    //
+    // Zmierzone na 375×667: przed 121 + 107 + 48 = 276 px (41% ekranu), po
+    // odchudzeniu 113 + 54 + 32 = 199 px (30%). Budżet leży PONIŻEJ starej
+    // wartości, więc powrót do poprzedniej stopki czy paddingów od razu
+    // wywali ten test. Zapas na szerszą czcionkę w CI (stopka może złamać
+    // się na trzecią linię).
+    await mockSupabase(page)
+    await loginAsDemo(page)
+    await openPerson(page, 'Ja')
+    await makeInstallable(page)
+
+    const chrom = await page.evaluate(() => {
+      const px = (el) =>
+        el ? Math.round(el.getBoundingClientRect().height) : 0
+      const main = document.querySelector('main')
+      const styl = getComputedStyle(main)
+      return {
+        naglowek: px(document.querySelector('header')),
+        stopka: px(document.querySelector('footer')),
+        padding:
+          parseInt(styl.paddingTop, 10) + parseInt(styl.paddingBottom, 10),
+      }
+    })
+
+    console.log('POMIAR chromu: ' + JSON.stringify(chrom))
+
+    const razem = chrom.naglowek + chrom.stopka + chrom.padding
+    expect(razem, `stały chrom ekranu: ${JSON.stringify(chrom)}`)
+      .toBeLessThanOrEqual(240)
+  })
 })

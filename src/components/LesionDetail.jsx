@@ -322,7 +322,6 @@ export default function LesionDetail() {
     )
   }
 
-  const meta = statusMeta(lesion.status)
   const chrono = [...photos].reverse() // najnowsze na górze
 
   // Akcje rzadkie i nieodwracalne trzymamy w menu „⋯” — nie zajmują miejsca
@@ -770,10 +769,6 @@ export default function LesionDetail() {
         ) : null}
       </div>
 
-      <p className="text-xs text-slate-500 dark:text-slate-400">
-        Status „{meta.label}” to Twoja prywatna organizacja dokumentacji, nie
-        ocena medyczna.
-      </p>
 
       <ConfirmDialog
         open={Boolean(confirm)}

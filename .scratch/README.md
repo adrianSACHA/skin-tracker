@@ -18,7 +18,7 @@ Issues/specy żyją jako pliki markdown w `.scratch/` (patrz
 | `e2e-smoke-testy` | 5 | domknięty |
 | `backlog` | 14 (7 `resolved`) | **otwarte** — patrz `.scratch/backlog/` |
 
-**Razem 87 ticketów (+1 spec): 81 `resolved`, 4 otwartych + 1 `wontfix` w `backlog`.**
+**Razem 87 ticketów (+1 spec): 82 `resolved`, 3 otwartych + 1 `wontfix` w `backlog`.**
 
 Otwarte pozycje mają etykiety z `docs/agents/triage-labels.md`
 (`needs-triage`, `ready-for-agent`, `wontfix`), więc od razu widać, co czeka

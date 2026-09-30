@@ -134,6 +134,17 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 
 ### Zmienione
 
+- **Stały chrom ekranu odchudzony** (ticket 13). Nagłówek, stopka i paddingi
+  `main` to koszt ponoszony na **każdym** ekranie, więc każdy piksel liczy się
+  tam wielokrotnie. Zmierzone na 375×667: **276 px → 199 px** (41% → 30%
+  wysokości ekranu). Stopka: ciaśniejsza i krótsza (107 → 54 px), treść
+  zastrzeżenia **zostaje** — to zasada z ADR‑0001. Do tego paddingi `main`
+  (48 → 32) i wiersza nagłówka, oraz usunięte zdublowane zastrzeżenie o
+  statusach na karcie znamienia (stopka mówi to samo). Efekt na ekranach:
+  mapa 1021 → **944 px**, Kontrole 1382 → **1305 px**, karta znamienia
+  1048 → **923 px**. Nowy test w `e2e/ui-budget.spec.js` pilnuje chromu z
+  budżetem **≤ 240 px**, czyli poniżej stanu sprzed zmian.
+
 - **Karta znamienia: jeden pas u góry** (ticket 14, ustalenie 3). Były trzy:
   tytuł z `⋯`, rząd akcji („+ Dodaj zdjęcie”, „Do kalendarza”) i pasek
   zakładek. Teraz jest jeden: tytuł + akcja główna + `⋯`, a **status i eksport

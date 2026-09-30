@@ -76,7 +76,7 @@ export default function Layout({ children }) {
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3 lg:max-w-6xl">
+        <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-2 lg:max-w-6xl">
           <Link
             to="/"
             className="inline-flex min-w-0 items-center gap-2 font-semibold text-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-teal-300"
@@ -155,7 +155,7 @@ export default function Layout({ children }) {
 
       </header>
 
-      <main className="mx-auto w-full max-w-4xl lg:max-w-6xl flex-1 px-4 py-6">
+      <main className="mx-auto w-full max-w-4xl lg:max-w-6xl flex-1 px-4 py-4">
         {children}
       </main>
       {/* Komunikaty o instalacji trzymamy NA DOLE, poza nagłówkiem: na telefonie
@@ -211,10 +211,12 @@ export default function Layout({ children }) {
         ) : null}
 
 
-      <footer className="mx-auto w-full max-w-4xl lg:max-w-6xl px-4 py-6 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-        Narzędzie wyłącznie do dokumentacji i porównywania zdjęć w czasie. Nie
-        diagnozuje i nie ocenia zmian — decyzje medyczne zawsze podejmuj z
-        lekarzem.
+      {/* Zastrzeżenie dla CAŁEJ aplikacji w jednym miejscu (zasada z ADR-0001).
+          Bez powtórek na poszczególnych ekranach i ciaśniejsze: wcześniej
+          zajmowało 107 px na każdym ekranie (ticket 13). Treść zostaje. */}
+      <footer className="mx-auto w-full max-w-4xl px-4 py-3 text-[11px] leading-snug text-slate-500 lg:max-w-6xl dark:text-slate-400">
+        Tylko do dokumentacji i porównywania zdjęć. Nie diagnozuje ani nie
+        ocenia zmian — decyzje medyczne podejmuj z lekarzem.
       </footer>
     </div>
   )
