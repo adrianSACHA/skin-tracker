@@ -26,12 +26,15 @@ export default defineConfig({
   timeout: 30_000,
   expect: {
     timeout: 8_000,
-    // Zrzuty ekranu (e2e/visual): tolerancja na drobny szum antyaliasingu,
-    // ale nie na realna zmiane ukladu. Animacje wylaczone = determinizm.
-    // Baseline jest per-platforma (Playwright dokleja process.platform),
-    // wiec Windows i Linux maja wlasne pliki wzorcowe.
+    // Zrzuty ekranu (e2e/visual). Baseline jest per-platforma (Playwright
+    // dokleja `process.platform`), wiec Windows i Linux maja wlasne wzorce i
+    // porownanie w obrebie platformy jest praktycznie piksel w piksel.
+    //
+    // Tolerancja jest BEZWZGLEDNA i ciasna, celowo: `maxDiffPixelRatio: 0.01`
+    // przy `fullPage: true` dawal ~13 000 px zapasu na wysokiej stronie —
+    // cala zmiana naglowka miescila sie w tolerancji i test tego NIE lapal.
     toHaveScreenshot: {
-      maxDiffPixelRatio: 0.01,
+      maxDiffPixels: 200,
       animations: 'disabled',
       caret: 'hide',
     },
