@@ -739,7 +739,7 @@ export default function BodyMap() {
               type="button"
               onClick={() => startAddViewUpload(addCameraRef)}
               disabled={uploadingRef || !addViewTarget}
-              className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
+              className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-teal-700 dark:hover:bg-teal-800 dark:disabled:bg-slate-700"
             >
               {uploadingRef ? 'Wysyłanie…' : 'Zrób zdjęcie'}
             </button>
@@ -803,7 +803,7 @@ export default function BodyMap() {
             className={[
               'min-h-[44px] rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
               activeView === v.key
-                ? 'bg-teal-700 text-white dark:bg-teal-600'
+                ? 'bg-teal-700 text-white dark:bg-teal-700'
                 : 'bg-white text-slate-600 ring-1 ring-inset ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800',
             ].join(' ')}
           >
@@ -816,7 +816,7 @@ export default function BodyMap() {
           className={
             hasViews
               ? 'min-h-[44px] rounded-full border border-dashed border-slate-300 px-4 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
-              : 'min-h-[52px] rounded-lg bg-teal-700 px-5 text-base font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500'
+              : 'min-h-[52px] rounded-lg bg-teal-700 px-5 text-base font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-700 dark:hover:bg-teal-800'
           }
         >
           + Dodaj widok
@@ -848,7 +848,7 @@ export default function BodyMap() {
                 'min-h-[44px] rounded-lg px-4 font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
                 addMode
                   ? 'bg-teal-800 text-white hover:bg-teal-900 dark:bg-teal-500 dark:hover:bg-teal-400'
-                  : 'bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500',
+                  : 'bg-teal-700 text-white hover:bg-teal-800 dark:bg-teal-700 dark:hover:bg-teal-800',
                 !currentMap
                   ? 'cursor-not-allowed bg-gray-300 dark:bg-slate-700'
                   : '',
@@ -1279,7 +1279,7 @@ export default function BodyMap() {
             <button
               type="submit"
               disabled={savingPin || !pending.label.trim()}
-              className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
+              className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-700 dark:hover:bg-teal-800 dark:disabled:bg-slate-700"
             >
               {savingPin ? 'Zapisywanie…' : 'Zapisz znamię'}
             </button>
@@ -1411,7 +1411,7 @@ export default function BodyMap() {
                 type="button"
                 onClick={saveViewRename}
                 disabled={savingView}
-                className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-60 dark:bg-teal-600 dark:hover:bg-teal-500"
+                className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-60 dark:bg-teal-700 dark:hover:bg-teal-800"
               >
                 {savingView ? 'Zapisywanie…' : 'Zapisz nazwę'}
               </button>

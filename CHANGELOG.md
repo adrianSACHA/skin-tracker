@@ -233,6 +233,20 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 
 ### Naprawione
 
+- **Dostępność: audyt automatyczny (axe-core) i naprawa kontrastów.**
+  `@axe-core/playwright` wpięty w istniejący harness (`e2e/a11y.spec.js`,
+  6 testów: logowanie, wybór osoby, Kontrole z filtrami, mapa z panelem pina,
+  karta znamienia z zakładkami i menu, tryb ciemny). Znalazł trzy realne
+  problemy — wszystkie naprawione:
+  - **białe na `teal-600` w trybie ciemnym dawało 3,66:1** (wymagane 4,5) —
+    dotyczyło **wszystkich** przycisków głównych (36 miejsc w 9 plikach);
+    teraz `dark:bg-teal-700`, a hover ciemniejszy, nie jaśniejszy,
+  - kontekst okolicy w nazwie znamienia (`text-slate-400` na białym) dawał
+    2,63:1 → `text-slate-500`,
+  - plakietki podsumowania na Kontrolach dawały 4,34:1 → `text-slate-600`.
+  Audyt wyłapał też fałszywy alarm: kolory w trakcie przejścia (zakładka
+  zmieniająca tło), więc na czas skanu wyłączamy animacje.
+
 - **Testy zrzutów ekranu przepuszczały realne zmiany.** Tolerancja
   `maxDiffPixelRatio: 0.01` przy `fullPage: true` dawała ~13 000 px zapasu na
   wysokiej stronie, więc **cała zmiana nagłówka** mieściła się w tolerancji i

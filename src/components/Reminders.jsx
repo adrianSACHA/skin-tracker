@@ -440,7 +440,7 @@ export default function Reminders() {
               <button
                 type="button"
                 onClick={() => applyPush(!pushOn)}
-                className="min-h-[44px] rounded-lg bg-teal-700 px-3 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500"
+                className="min-h-[44px] rounded-lg bg-teal-700 px-3 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-700 dark:hover:bg-teal-800"
               >
                 {pushOn ? 'Wyłącz' : 'Włącz'}
               </button>
@@ -487,7 +487,7 @@ export default function Reminders() {
             'inline-flex items-center gap-2 rounded-full px-3 py-1',
             summary.overdue > 0
               ? 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200'
-              : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+              : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
           ].join(' ')}
         >
           <span
@@ -506,7 +506,7 @@ export default function Reminders() {
             'inline-flex items-center gap-2 rounded-full px-3 py-1',
             summary.soon > 0
               ? 'bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-200'
-              : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+              : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
           ].join(' ')}
         >
           <span
@@ -541,7 +541,7 @@ export default function Reminders() {
             >
               Filtry
               {selectedStatuses.length > 0 ? (
-                <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-teal-700 px-1.5 text-xs font-semibold text-white dark:bg-teal-600">
+                <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-teal-700 px-1.5 text-xs font-semibold text-white dark:bg-teal-700">
                   {selectedStatuses.length}
                 </span>
               ) : null}
@@ -657,7 +657,7 @@ export default function Reminders() {
                     <LesionName
                       label={lesion.label}
                       viewName={lesion.body_maps?.view_name}
-                      areaClassName="font-normal text-slate-400 dark:text-slate-500"
+                      areaClassName="font-normal text-slate-500 dark:text-slate-400"
                     />
                   </Link>
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
@@ -709,7 +709,7 @@ export default function Reminders() {
                   type="button"
                   onClick={() => addSession(lesion)}
                   disabled={busyId === lesion.id}
-                  className="inline-flex min-h-[44px] items-center rounded-lg bg-teal-700 px-3 text-sm font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-60 dark:bg-teal-600 dark:hover:bg-teal-500"
+                  className="inline-flex min-h-[44px] items-center rounded-lg bg-teal-700 px-3 text-sm font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 disabled:opacity-60 dark:bg-teal-700 dark:hover:bg-teal-800"
                 >
                   Dodaj zdjęcie
                 </button>

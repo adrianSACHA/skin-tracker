@@ -130,7 +130,7 @@ export default function Login() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-teal-700 py-3 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
+          className="w-full rounded-lg bg-teal-700 py-3 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-700 dark:hover:bg-teal-800 dark:disabled:bg-slate-700"
         >
           {loading ? 'Logowanie...' : 'Zaloguj'}
         </button>

@@ -260,7 +260,7 @@ export default function PersonSelector() {
                     <button
                       type="submit"
                       disabled={savingEdit || !editName.trim()}
-                      className="min-h-[44px] rounded-lg bg-teal-700 px-3 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
+                      className="min-h-[44px] rounded-lg bg-teal-700 px-3 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-teal-700 dark:hover:bg-teal-800 dark:disabled:bg-slate-700"
                     >
                       {savingEdit ? 'Zapisywanie…' : 'Zapisz'}
                     </button>
@@ -337,7 +337,7 @@ export default function PersonSelector() {
           <button
             type="submit"
             disabled={adding || !newName.trim()}
-            className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-slate-700"
+            className="min-h-[44px] rounded-lg bg-teal-700 px-4 font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-700 dark:hover:bg-teal-800 dark:disabled:bg-slate-700"
           >
             {adding ? 'Dodawanie…' : 'Dodaj'}
           </button>

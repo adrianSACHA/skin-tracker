@@ -405,7 +405,7 @@ export default function LesionDetail() {
             <LesionName
               label={lesion.label}
               viewName={lesion.body_maps?.view_name}
-              areaClassName="font-normal text-slate-400 dark:text-slate-500"
+              areaClassName="font-normal text-slate-500 dark:text-slate-400"
             />
           </h1>
           <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -426,7 +426,7 @@ export default function LesionDetail() {
             onClick={() => setShowUpload((v) => !v)}
             aria-label={showUpload ? 'Zamknij formularz zdjęcia' : 'Dodaj zdjęcie'}
             title={showUpload ? 'Zamknij formularz' : 'Dodaj zdjęcie'}
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-teal-700 px-3 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-500"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-teal-700 px-3 font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-teal-700 dark:hover:bg-teal-800"
           >
             {showUpload ? (
               <svg
@@ -495,7 +495,7 @@ export default function LesionDetail() {
               className={[
                 'min-h-[44px] flex-1 rounded-lg px-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300',
                 active
-                  ? 'bg-teal-700 text-white dark:bg-teal-600'
+                  ? 'bg-teal-700 text-white dark:bg-teal-700'
                   : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800',
               ].join(' ')}
             >
