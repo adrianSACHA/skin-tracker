@@ -24,14 +24,14 @@ osób („Ja", „Syn").
 - `npm run e2e` → **38/38** ✓ (Playwright, zmockowany Supabase, ~20 s),
   w tym **budżet UI** na 375×667 (`e2e/ui-budget.spec.js`) oraz **zrzuty
   ekranu** (`e2e/visual/screens.spec.js`) — wzorce osobno dla Windows i CI.
-- Tracker: **12 effortów, 87 ticketów (+1 spec): 83 `resolved`, 2 otwartych
+- Tracker: **13 effortów, 89 ticketów (+1 spec): 85 `resolved`, 2 otwartych
   i 1 `wontfix` w `.scratch/backlog/`.
 
 ## Funkcje
 
 | Obszar | Stan |
 | --- | --- |
-| **Telefon** | nagłówek **jednoliniowy, 61 px** (marka + zakładki + menu „≡"); nawigacja tylko wewnątrz osoby, zmiana osoby i motyw w menu; komunikaty o instalacji na dole; stały chrom 276 → **147 px** (41% → 22% ekranu); budżety UI i chromu pilnowane testami; **audyt dostępności (axe-core)** w `e2e/a11y.spec.js` |
+| **Telefon** | nagłówek **jednoliniowy, 61 px** (marka + zakładki + przycisk osoby „Ja ▾" + menu „≡"); nawigacja tylko wewnątrz osoby, zmianę osoby daje osobny przycisk, a motyw i wylogowanie siedzą w menu; tytuły ekranów nie powtarzają zakładki (`h1` `sr-only`); komunikaty o instalacji na dole; stały chrom 276 → **147 px** (41% → 22% ekranu); budżety UI i chromu pilnowane testami; **audyt dostępności (axe-core)** w `e2e/a11y.spec.js` |
 | **Wybór osoby** | karta z liczbami (znamiona, zdjęcia, najbliższa kontrola + „zaległe” gdy minęła); zmiana nazwy i usunięcie osoby w menu „⋯” |
 | **Mapa ciała** | widoki ze słownika 17 okolic + własne nazwy; piny (dodaj / przesuń / edytuj; nowe znamię od razu proponuje pierwsze zdjęcie); zdjęcie tła per widok (aparat lub plik); kontekst okolicy w nazwie znamienia; panel pina jako bottom sheet na telefonie |
 | **Znamię** | zdjęcia z edycją (obrót / odbicia) i kompresją; pomiar z obrysu (MediaPipe, geometria); notatki ABCDE; status i eksport do kalendarza (menu „⋯”); zakładki Przegląd / Zdjęcia / Trend; porównanie przeciąganym suwakiem; wykres rozmiaru; powiększanie zdjęć (lightbox) |
@@ -76,7 +76,7 @@ Backlog żyje w **`.scratch/backlog/`**. Otwarte:
 Zamknięte: 02 („Usunięte” nie jest już zaległe), 03 (szukanie w Kontrolach),
 07 (znacznik przy „Kontrole” odświeża się sam), 08 (nagłówek na telefonie:
 286 → 121 px), 04 (zrzuty ekranu w e2e — patrz „Jakość”), 12 (ekran znamienia: akcje w menu
-„⋯” + zakładki), 13 (stały chrom ekranu: 276 → 199 px), 14 (architektura mobilna), 05 (audyt dostępności — axe-core + naprawa kontrastów). Odrzucone: 06 (`wontfix`), 09 (dolny pasek nie zmniejsza
+„⋯” + zakładki), 13 (stały chrom ekranu: 276 → 199 px), 14 (architektura mobilna), 05 (audyt dostępności — axe-core + naprawa kontrastów), effort `naglowek-kontekst` (osoba poza hamburgerem + tytuły bez powtórek). Odrzucone: 06 (`wontfix`), 09 (dolny pasek nie zmniejsza
 chromu — przenosi te same piksele z góry na dół), 01 (kopia zapasowa — świadomie
 odrzucona).
 

@@ -2,7 +2,6 @@ import { expect, test } from '@playwright/test'
 import { mockSupabase } from './support/mock-supabase.js'
 import {
   loginAsDemo,
-  openMenu,
   openPerson,
   openReminders,
 } from './support/app.js'
@@ -43,10 +42,9 @@ test.describe('Znamiona „Usunięte”', () => {
 
     // Karta osoby: bez plakietki „zaległe”, z nowym najbliższym terminem
     // (2026-12-01 z ręcznej daty drugiego znamienia).
-    // Zmiana osoby jest w menu globalnym (logo przestało być odnośnikiem —
-    // prowadziło w to samo miejsce co wskaźnik osoby).
-    await openMenu(page)
-    await page.getByRole('menuitem', { name: /^Zmień osobę/ }).click()
+    // Zmiana osoby ma osobny przycisk w nagłówku („Ja ▾”) — nie jest już
+    // schowana w menu „≡”.
+    await page.getByRole('button', { name: /Osoba: Ja\. Zmień osobę/ }).click()
     await expect(
       page.getByRole('heading', { name: 'Wybierz osobę' })
     ).toBeVisible()

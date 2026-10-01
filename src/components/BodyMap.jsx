@@ -825,7 +825,10 @@ export default function BodyMap() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
+          {/* Tytuł widoczny tylko dla czytników ekranu: sekcję nazywa
+              aktywna zakładka w nagłówku, a osobę — przycisk „Ja ▾", więc
+              widoczny tytuł „Mapa ciała — Ja" tylko dublował chrom. */}
+          <h1 className="sr-only">
             Mapa ciała{person ? ` — ${person.display_name}` : ''}
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

@@ -75,20 +75,11 @@ export default function Layout({ children }) {
   }
 
   // Menu globalne (ikona „≡", nie „⋯" — „⋯" w tej aplikacji znaczy „akcje na
-  // tym obiekcie"). Zbiera wszystko, co nie jest nawigacją: zmianę osoby,
-  // motyw, instalację i wylogowanie.
+  // tym obiekcie"). Zbiera akcje niezwiązane z nawigacją: motyw, instalację
+  // i wylogowanie. Zmiana osoby ma OSOBNY przycisk („Ja ▾") obok — nie jest
+  // schowana w menu (patrz komentarz przy nagłówku).
   const { theme, toggleTheme } = useTheme()
   const menuItems = [
-    ...(person
-      ? [
-          {
-            key: 'person',
-            label: `Zmień osobę (${person.display_name})`,
-            onSelect: () => navigate('/'),
-          },
-          { key: 'sep-person', separator: true },
-        ]
-      : []),
     {
       key: 'theme',
       label: theme === 'dark' ? 'Motyw: jasny' : 'Motyw: ciemny',
@@ -110,12 +101,14 @@ export default function Layout({ children }) {
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-        {/* JEDEN wiersz: marka + zakładki + menu globalne. Wcześniej były dwa
-            wiersze (marka z kontrolkami, potem pasek zakładek), a nazwa osoby
-            dublowała odnośnik logo — oba prowadziły do wyboru osoby. */}
+        {/* JEDEN wiersz: marka + zakładki + [osoba] + menu globalne. Wcześniej
+            były dwa wiersze (marka z kontrolkami, potem pasek zakładek), a nazwa
+            osoby dublowała odnośnik logo — oba prowadziły do wyboru osoby.
+            Teraz po prawej jest osobny przycisk osoby („Ja ▾") obok czystego
+            menu „≡" — osoba to kontekst, menu to akcje, nie mieszamy ich. */}
         <div className="mx-auto flex max-w-4xl items-center gap-1 px-4 py-2 lg:max-w-6xl">
-          {/* Marka bez odnośnika: „do domu" prowadzi zakładka Mapa, a zmianę
-              osoby ma się świadomie wybrać z menu. */}
+          {/* Marka bez odnośnika: „do domu" prowadzi zakładka Mapa, a osobę
+              zmienia się osobnym przyciskiem obok menu. */}
           <span className="inline-flex flex-shrink-0 items-center gap-2 font-semibold text-teal-800 dark:text-teal-300">
             <Logo size={28} />
             <span className="hidden sm:inline">Skin Tracker</span>
@@ -144,14 +137,32 @@ export default function Layout({ children }) {
             <div className="flex-1" />
           )}
 
+          {/* Osoba jest KONTEKSTEM, nie akcją — dlatego ma osobny, widoczny
+              przycisk obok menu (także na telefonie), a nie etykietę
+              przyklejoną do „≡". Dzięki temu „≡" czyta się jak menu, a nie jak
+              „Mój profil", a jednocześnie wciąż widać, w czyjej dokumentacji
+              jesteś (ochrona z ticketu 14). Klik prowadzi do wyboru osoby. */}
+          {person && wOsobie ? (
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              aria-label={`Osoba: ${person.display_name}. Zmień osobę`}
+              title={`Osoba: ${person.display_name}. Zmień osobę`}
+              className="inline-flex min-h-[44px] max-w-[7rem] flex-shrink-0 items-center gap-1 rounded-md px-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              <span className="truncate">{person.display_name}</span>
+              <span
+                aria-hidden="true"
+                className="text-xs text-slate-500 dark:text-slate-400"
+              >
+                ▾
+              </span>
+            </button>
+          ) : null}
+
           <OverflowMenu
-            label={
-              person && wOsobie
-                ? `Menu. Osoba: ${person.display_name}`
-                : 'Menu aplikacji'
-            }
+            label="Menu aplikacji"
             items={menuItems}
-            visibleLabel={person && wOsobie ? person.display_name : ''}
             icon="≡"
             buttonClassName="inline-flex min-h-[44px] flex-shrink-0 items-center gap-1.5 rounded-md border border-slate-300 px-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
           />

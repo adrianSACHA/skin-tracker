@@ -11,7 +11,7 @@ export const REMINDERS_TAB = /^Kontrole/
 // Przycisk menu globalnego w nagłówku (ikona „≡", etykieta „Menu…").
 export const MENU_BUTTON = /^Menu/
 
-/** Otwiera menu globalne (osoba, motyw, instalacja, wylogowanie). */
+/** Otwiera menu globalne (motyw, instalacja, wylogowanie). */
 export async function openMenu(page) {
   await page.getByRole('button', { name: MENU_BUTTON }).click()
   await expect(page.getByRole('menu')).toBeVisible()

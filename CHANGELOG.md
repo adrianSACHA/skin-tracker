@@ -143,6 +143,17 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
   (lepsze cache i pobieranie równoległe; Recharts i MediaPipe i tak są ładowane
   leniwie).
 
+- **Nagłówek: osoba to kontekst, tytuł bez powtórek** (effort
+  `.scratch/naglowek-kontekst/`). Po sklejeniu nagłówka w jeden wiersz (ticket
+  14) osoba trafiła jako etykieta na przycisk menu („Ja ≡”), więc czytający
+  odbierał go jak „Mój profil”, a nie jak menu — a tytuł strony powtarzał
+  aktywną zakładkę („Mapa ciała” vs „Mapa ciała — Ja”). Teraz **„≡” to czyste
+  menu** (motyw, instalacja, wyloguj), a osoba ma **osobny przycisk „Ja ▾”**
+  obok — widoczny także na telefonie (ochrona przed edycją nie tej osoby z
+  ticketu 14), klik prowadzi do wyboru osoby. Nazwa sekcji pada tylko raz,
+  w zakładce: `h1` ekranów Mapa i Kontrole jest `sr-only` (zostaje dla
+  czytników ekranu i testów). Nagłówek dalej **61 px**, stały chrom **147 px**.
+
 - **Nagłówek to jeden wiersz: marka + zakładki + menu „≡"** (przegląd po
   ticketcie 14). Wcześniej były dwa wiersze (marka z czterema kontrolkami,
   pod nią pasek zakładek), a **nazwa osoby dublowała odnośnik logo** — oba

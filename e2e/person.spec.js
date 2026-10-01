@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { makeData, mockSupabase } from './support/mock-supabase.js'
-import { loginAsDemo, openMenu, openPerson } from './support/app.js'
+import { loginAsDemo, openPerson } from './support/app.js'
 
 test.describe('Osoby', () => {
   test('lista osób z backendu i wejście w osobę', async ({ page }) => {
@@ -23,16 +23,16 @@ test.describe('Osoby', () => {
 
     // HashRouter: adres trzyma id osoby, więc odświeżenie nie gubi kontekstu.
     await expect(page).toHaveURL(/#\/person\/person-2$/)
-    // W nagłówku widać, w czyjej dokumentacji jesteś (etykieta menu), a zmianę
-    // osoby wybiera się świadomie z menu — nie ma już drugiego odnośnika
-    // prowadzącego tam, gdzie logo.
-    await expect(
-      page.getByRole('button', { name: /Menu\. Osoba: Syn/ })
-    ).toBeVisible()
+    // W nagłówku widać, w czyjej dokumentacji jesteś — osoba to OSOBNY
+    // przycisk („Syn ▾”) obok czystego menu „≡”, a nie etykieta przyklejona do
+    // menu. Klik prowadzi do ekranu wyboru osoby.
+    const zmienOsobe = page.getByRole('button', {
+      name: /Osoba: Syn\. Zmień osobę/,
+    })
+    await expect(zmienOsobe).toBeVisible()
     await expect(page.getByRole('link', { name: 'Mapa ciała' })).toBeVisible()
 
-    await openMenu(page)
-    await page.getByRole('menuitem', { name: /^Zmień osobę/ }).click()
+    await zmienOsobe.click()
     await expect(page.getByRole('heading', { name: 'Wybierz osobę' })).toBeVisible()
 
     // Ticket 14, ustalenie 2: nawigacja jest związana z KONKRETNĄ osobą, więc

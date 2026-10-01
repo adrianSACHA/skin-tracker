@@ -14,9 +14,8 @@ import { useEffect, useRef, useState } from 'react'
 //
 // `items`: [{ key, label, onSelect, href?, checked?, danger? } | { key, separator: true }]
 //
-// `visibleLabel` pokazuje tekst obok ikony (np. nazwę osoby przy menu
-// globalnym), a `icon` pozwala odróżnić menu globalne („≡") od akcji na
-// obiekcie („⋯").
+// `visibleLabel` pokazuje tekst obok ikony (gdy trigger ma nieść też podpis),
+// a `icon` pozwala odróżnić menu globalne („≡") od akcji na obiekcie („⋯").
 export default function OverflowMenu({
   label,
   items,
