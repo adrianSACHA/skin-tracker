@@ -134,6 +134,15 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 
 ### Zmienione
 
+- **Build: vendor rozbity na chunki.** Domyślnie cały vendor (React, Supabase,
+  `sonner`, `react-zoom-pan-pinch`) wpadał do jednego pliku i Vite ostrzegał
+  („Some chunks are larger than 500 kB”). Dodane
+  `build.rollupOptions.output.manualChunks` w `vite.config.js`: główny chunk
+  **641 → 233 kB**, obok powstały `vendor-react` (181 kB) i `vendor-supabase`
+  (227 kB). Ostrzeżenie znikło, a sumaryczny rozmiar JS się nie zmienił
+  (lepsze cache i pobieranie równoległe; Recharts i MediaPipe i tak są ładowane
+  leniwie).
+
 - **Nagłówek to jeden wiersz: marka + zakładki + menu „≡"** (przegląd po
   ticketcie 14). Wcześniej były dwa wiersze (marka z czterema kontrolkami,
   pod nią pasek zakładek), a **nazwa osoby dublowała odnośnik logo** — oba

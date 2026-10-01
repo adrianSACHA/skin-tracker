@@ -9,4 +9,19 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   base: '/skin-tracker/',
   plugins: [react(), tailwindcss()],
+  build: {
+    rollupOptions: {
+      output: {
+        // Domyślnie cały vendor wpadał do jednego pliku (>500 kB), więc Vite
+        // ostrzegał. Rozbicie na osobne chunki daje mniejsze pliki (lepsze
+        // cache i równoległe pobieranie) i zdejmuje ostrzeżenie. Ciężkie,
+        // rzadko używane biblioteki (Recharts, MediaPipe) i tak ładują się
+        // leniwie — mają własne chunki.
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+        },
+      },
+    },
+  },
 })
