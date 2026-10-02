@@ -134,6 +134,13 @@ Wszystkie istotne zmiany w aplikacji Skin Tracker. Format inspirowany
 
 ### Zmienione
 
+- **`npm run e2e:fast` + konwencja uruchamiania testów.** Pełny zestaw e2e to
+  ~50 plików-testów, więc doszedł skrypt **dymny**: `navigation` + `person` +
+  `auth` + `ui-budget` (16 testów, reporter `dot`, czyli same kropki zamiast
+  50 nazw). W README opisana konwencja: w codziennej pracy uruchamiamy **tylko
+  dotknięte pliki**, żeby output był krótki; pełny `npm run e2e` zostaje na CI
+  i przed commitem. **Bez zmian w samych testach** — nic nie usunięto.
+
 - **Build: vendor rozbity na chunki.** Domyślnie cały vendor (React, Supabase,
   `sonner`, `react-zoom-pan-pinch`) wpadał do jednego pliku i Vite ostrzegał
   („Some chunks are larger than 500 kB”). Dodane

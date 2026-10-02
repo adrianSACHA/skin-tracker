@@ -211,6 +211,21 @@ Przydatne: `npm run e2e:ui` (tryb interaktywny), `npm run e2e:report` (raport
 HTML z ostatniego przebiegu). W CI oba zestawy testów uruchamia workflow
 `.github/workflows/e2e.yml` (na `push` do `main`, na PR i ręcznie).
 
+#### Szybki dym (`e2e:fast`) i konwencja uruchamiania
+
+Pełny zestaw e2e to ~50 testów. Do codziennej pracy i sesji z agentem jest
+zestaw **dymny**, pilnujący tego, co już raz się zepsuło (dostęp bez sesji,
+zła osoba, zawijanie nagłówka, routing):
+
+```bash
+npm run e2e:fast   # navigation + person + auth + ui-budget, cichy reporter (dot)
+```
+
+Konwencja: przy zmianie **uruchamiaj tylko dotknięte pliki** (np.
+`npx playwright test person.spec.js`) i dodawaj `--reporter=dot`, żeby output
+był krótki. Pełny `npm run e2e` zostaje na CI i przed commitem (zmiana wyglądu
+i tak wymaga odświeżenia zrzutów wizualnych).
+
 #### Zrzuty ekranu (regresje wyglądu)
 
 Kilka ekranów jest porównywanych pikselowo (`e2e/visual/screens.spec.js`).
