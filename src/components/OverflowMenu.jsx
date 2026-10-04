@@ -22,6 +22,7 @@ export default function OverflowMenu({
   buttonClassName = '',
   visibleLabel = '',
   icon = '⋯',
+  trigger = null,
 }) {
   const [open, setOpen] = useState(false)
   const [pos, setPos] = useState(null)
@@ -99,10 +100,14 @@ export default function OverflowMenu({
           'flex h-11 w-11 items-center justify-center rounded-lg border border-slate-300 bg-white text-xl leading-none text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
         }
       >
-        {visibleLabel ? (
-          <span className="max-w-[6rem] truncate">{visibleLabel}</span>
-        ) : null}
-        {icon}
+        {trigger || (
+          <>
+            {visibleLabel ? (
+              <span className="max-w-[6rem] truncate">{visibleLabel}</span>
+            ) : null}
+            {icon}
+          </>
+        )}
       </button>
       {open && pos ? (
         <div
@@ -116,7 +121,7 @@ export default function OverflowMenu({
               ? { bottom: pos.bottom }
               : { top: pos.top }),
           }}
-          className="z-20 overflow-y-auto overscroll-contain rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800"
+          className="menu-in z-20 overflow-y-auto overscroll-contain rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800"
         >
           {items.map((item) => {
             if (item.separator) {

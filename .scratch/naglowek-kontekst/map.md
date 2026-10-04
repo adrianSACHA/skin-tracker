@@ -6,8 +6,9 @@ Tickets: .scratch/naglowek-kontekst/issues/
 ## Destination
 
 Posprzątać nagłówek i tytuły stron tak, żeby **każdy fakt miał jedno miejsce**:
-gdzie jesteś → zakładka, czyja to dokumentacja → przycisk osoby, co tu jest →
-podtytuł. Bez powtarzania nazwy sekcji i bez osoby przyklejonej do hamburgera.
+gdzie jesteś → zakładka, czyja to dokumentacja → awatar osoby (menu konta), co
+tu jest → podtytuł. Bez powtarzania nazwy sekcji i bez osoby przyklejonej do
+hamburgera.
 
 ## Zgłoszenie właściciela (cytat)
 
@@ -36,6 +37,11 @@ Do tego nazwa osoby leciała dwa razy: jako `visibleLabel` na przycisku menu
 - **Osoba = kontekst, menu = akcje.** Osoba wychodzi z przycisku „≡" i dostaje
   osobny, widoczny przycisk (`Ja ▾`) — to wraca ustalenie 2 z ticketu 14
   (ochrona przed edycją nie tej osoby), ale poza hamburgerem.
+- **Korekta po przeglądzie (ticket 03).** Dwa kontrolki („Ja ▾" + „≡") nadal
+  czytają się jak „menu z nazwą profilu". Zamiast tego **jeden awatar z
+  inicjałem** (`J` / `S`) otwiera **menu konta** (zmiana osoby, motyw,
+  instalacja, wylogowanie), a hamburger znika na ekranie osoby. Menu pojawia się
+  z **animacją** (150 ms), z poszanowaniem `prefers-reduced-motion`.
 - **Tytuł strony nie powtarza zakładki.** `h1` zostaje dla czytników ekranu
   (`sr-only`), a sekcję nazywa aktywna zakładka.
 
@@ -58,8 +64,10 @@ Do tego nazwa osoby leciała dwa razy: jako `visibleLabel` na przycisku menu
 | -- | ---- | ----- | ---------- | ------ |
 | 01 | task | [Osoba poza hamburgerem: osobny przycisk „Ja ▾"](issues/01-osoba-poza-menu.md) | — | resolved |
 | 02 | task | [Tytuł strony bez powtarzania zakładki](issues/02-tytul-bez-powtorek.md) | — | resolved |
+| 03 | design | [Osoba jako awatar + menu konta (korekta 01)](issues/03-awatar-menu-konta.md) | — | resolved |
 
 ## Frontier
 
-Brak — oba tickety **resolved**. Zabezpieczone testami (`person`, `reminders`,
-`ui-budget`) i przegenerowanymi zrzutami (`npm run e2e:visual:update`).
+Brak — wszystkie **3** tickety **resolved**. Zabezpieczone testami (`person`,
+`reminders`, `ui-budget`) i przegenerowanymi zrzutami
+(`npm run e2e:visual:update`).

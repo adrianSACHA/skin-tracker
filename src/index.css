@@ -66,6 +66,29 @@ body {
   left: 50%;
   width: 44px;
   height: 44px;
-  transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
   border-radius: 9999px;
+}
+
+/* Menu (avatar / „≡") — delikatne pojawienie się przy otwarciu. */
+@keyframes menuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.menu-in {
+  animation: menuIn 150ms ease-out;
+  transform-origin: top right;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-in {
+    animation: none;
+  }
 }

@@ -23,16 +23,14 @@ test.describe('Osoby', () => {
 
     // HashRouter: adres trzyma id osoby, więc odświeżenie nie gubi kontekstu.
     await expect(page).toHaveURL(/#\/person\/person-2$/)
-    // W nagłówku widać, w czyjej dokumentacji jesteś — osoba to OSOBNY
-    // przycisk („Syn ▾”) obok czystego menu „≡”, a nie etykieta przyklejona do
-    // menu. Klik prowadzi do ekranu wyboru osoby.
-    const zmienOsobe = page.getByRole('button', {
-      name: /Osoba: Syn\. Zmień osobę/,
-    })
-    await expect(zmienOsobe).toBeVisible()
+    // W nagłówku widać, w czyjej dokumentacji jesteś — avatar z inicjałem
+    // („S") otwiera menu konta, którego pierwszą pozycją jest zmiana osoby.
+    const konto = page.getByRole('button', { name: /^Konto: Syn/ })
+    await expect(konto).toBeVisible()
     await expect(page.getByRole('link', { name: 'Mapa ciała' })).toBeVisible()
 
-    await zmienOsobe.click()
+    await konto.click()
+    await page.getByRole('menuitem', { name: /^Zmień osobę/ }).click()
     await expect(page.getByRole('heading', { name: 'Wybierz osobę' })).toBeVisible()
 
     // Ticket 14, ustalenie 2: nawigacja jest związana z KONKRETNĄ osobą, więc

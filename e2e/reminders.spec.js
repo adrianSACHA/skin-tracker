@@ -42,9 +42,9 @@ test.describe('Znamiona „Usunięte”', () => {
 
     // Karta osoby: bez plakietki „zaległe”, z nowym najbliższym terminem
     // (2026-12-01 z ręcznej daty drugiego znamienia).
-    // Zmiana osoby ma osobny przycisk w nagłówku („Ja ▾”) — nie jest już
-    // schowana w menu „≡”.
-    await page.getByRole('button', { name: /Osoba: Ja\. Zmień osobę/ }).click()
+    // Zmiana osoby jest pierwszą pozycją menu konta (avatar „J" w nagłówku).
+    await page.getByRole('button', { name: /^Konto: Ja/ }).click()
+    await page.getByRole('menuitem', { name: /^Zmień osobę/ }).click()
     await expect(
       page.getByRole('heading', { name: 'Wybierz osobę' })
     ).toBeVisible()

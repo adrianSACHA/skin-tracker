@@ -8,8 +8,9 @@ export { BASE_PATH }
 // Kontrole — ticket 14). Na telefonie etykiety są krótsze.
 export const REMINDERS_TAB = /^Kontrole/
 
-// Przycisk menu globalnego w nagłówku (ikona „≡", etykieta „Menu…").
-export const MENU_BUTTON = /^Menu/
+// Przycisk menu globalnego w nagłówku: „≡" (gdy nie ma wybranej osoby) albo
+// avatar osoby z etykietą „Konto: …" (wewnątrz osoby).
+export const MENU_BUTTON = /^(Menu|Konto)/
 
 /** Otwiera menu globalne (motyw, instalacja, wylogowanie). */
 export async function openMenu(page) {

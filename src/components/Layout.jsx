@@ -79,7 +79,17 @@ export default function Layout({ children }) {
   // i wylogowanie. Zmiana osoby ma OSOBNY przycisk („Ja ▾") obok — nie jest
   // schowana w menu (patrz komentarz przy nagłówku).
   const { theme, toggleTheme } = useTheme()
-  const menuItems = [
+    const menuItems = [
+    ...(person && wOsobie
+      ? [
+          {
+            key: 'person',
+            label: `Zmień osobę (${person.display_name})`,
+            onSelect: () => navigate('/'),
+          },
+          { key: 'sep-person', separator: true },
+        ]
+      : []),
     {
       key: 'theme',
       label: theme === 'dark' ? 'Motyw: jasny' : 'Motyw: ciemny',
@@ -94,9 +104,30 @@ export default function Layout({ children }) {
           },
         ]
       : []),
-    { key: 'sep-end', separator: true },
+        { key: 'sep-end', separator: true },
     { key: 'logout', label: 'Wyloguj', onSelect: handleSignOut },
   ]
+
+  // Awatar osoby: inicjał zamiast imienia (kompaktowo, a nadal widać, kto).
+  const personInitial =
+    person?.display_name?.trim().charAt(0).toUpperCase() || '?'
+  const accountTrigger =
+    person && wOsobie ? (
+      <span className="flex items-center gap-1 pl-0.5">
+        <span
+          aria-hidden="true"
+          className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-700 text-xs font-semibold text-white dark:bg-teal-600"
+        >
+          {personInitial}
+        </span>
+        <span
+          aria-hidden="true"
+          className="text-xs text-slate-500 dark:text-slate-400"
+        >
+          ▾
+        </span>
+      </span>
+    ) : null
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
@@ -137,34 +168,24 @@ export default function Layout({ children }) {
             <div className="flex-1" />
           )}
 
-          {/* Osoba jest KONTEKSTEM, nie akcją — dlatego ma osobny, widoczny
-              przycisk obok menu (także na telefonie), a nie etykietę
-              przyklejoną do „≡". Dzięki temu „≡" czyta się jak menu, a nie jak
-              „Mój profil", a jednocześnie wciąż widać, w czyjej dokumentacji
-              jesteś (ochrona z ticketu 14). Klik prowadzi do wyboru osoby. */}
-          {person && wOsobie ? (
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              aria-label={`Osoba: ${person.display_name}. Zmień osobę`}
-              title={`Osoba: ${person.display_name}. Zmień osobę`}
-              className="inline-flex min-h-[44px] max-w-[7rem] flex-shrink-0 items-center gap-1 rounded-md px-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-slate-200 dark:hover:bg-slate-800"
-            >
-              <span className="truncate">{person.display_name}</span>
-              <span
-                aria-hidden="true"
-                className="text-xs text-slate-500 dark:text-slate-400"
-              >
-                ▾
-              </span>
-            </button>
-          ) : null}
-
+                    {/* Jedno kontrolko po prawej: AWATAR osoby (inicjał) otwierający menu
+              konta — zmiana osoby, motyw, instalacja, wylogowanie. Bez osobnego
+              hamburgera i bez nazwy przyklejonej do ikony. Gdy nie ma wybranej
+              osoby (ekran wyboru/logowanie), zostaje zwykłe „≡". */}
           <OverflowMenu
-            label="Menu aplikacji"
+            label={
+              person && wOsobie
+                ? `Konto: ${person.display_name}`
+                : 'Menu aplikacji'
+            }
             items={menuItems}
+            trigger={accountTrigger}
             icon="≡"
-            buttonClassName="inline-flex min-h-[44px] flex-shrink-0 items-center gap-1.5 rounded-md border border-slate-300 px-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            buttonClassName={
+              person && wOsobie
+                ? 'inline-flex min-h-[44px] flex-shrink-0 items-center rounded-full px-1.5 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:hover:bg-slate-800'
+                : 'inline-flex min-h-[44px] flex-shrink-0 items-center gap-1.5 rounded-md border border-slate-300 px-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'
+            }
           />
         </div>
       </header>
